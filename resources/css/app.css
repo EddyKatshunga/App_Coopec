@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+
+    .label {
+        @apply block text-sm font-semibold text-gray-700 mb-1;
+    }
+
+    .input-glass {
+        @apply w-full px-4 py-3 rounded-xl
+               bg-white/70 backdrop-blur
+               border border-gray-200
+               focus:ring-2 focus:ring-blue-500;
+    }
+
+    .bento-card {
+        @apply p-6 rounded-2xl
+               bg-white/70 backdrop-blur
+               shadow-inner;
+    }
+
+    .amount {
+        @apply block mt-2 text-2xl font-mono tabular-nums;
+    }
+
+    .error {
+        @apply text-sm text-red-600 mt-1;
+    }
+
+    .input { @apply border rounded px-3 py-2 focus:ring focus:ring-blue-200; }
+    .btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
+    .label { @apply text-sm font-medium text-gray-600; }
+    .input { @apply w-full border rounded px-3 py-2 focus:ring focus:ring-blue-200; }
+    .btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
+    .btn-secondary { @apply bg-gray-200 px-4 py-2 rounded; }
+}
