@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -67,6 +68,22 @@ class User extends Authenticatable
             'id', // Clé locale sur la table users
             'id'  // Clé locale sur la table membres
         );
+    }
+
+    /**
+     * Relation avec toutes les photos
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    /**
+     * Relation avec la photo de profil
+     */
+    public function profilePhoto(): HasOne
+    {
+        return $this->hasOne(Photo::class)->where('is_profile', true);
     }
 
 }

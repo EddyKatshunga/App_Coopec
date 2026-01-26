@@ -27,6 +27,15 @@
                 Ajouter un compte Epargne
             </a>
 
+            <button
+                wire:click="$set('showAddPhotoModal', true)"
+                class="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"
+            >
+                Ajouter des photos
+            </button>
+
+
+
             <a href="{{ route('membre.index') }}"
                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
                 Retour
@@ -133,5 +142,15 @@
             </div>
         @endforelse
     </div>
+
+    {{-- ================= MODAL AJOUT PHOTOS ================= --}}
+    @if ($showAddPhotoModal)
+        <livewire:membres.add-photo
+            :user="$membre->user"
+            wire:key="add-photo-{{ $membre->user->id }}"
+            wire:on="photo-added"
+        />
+    @endif
+
 
 </div>

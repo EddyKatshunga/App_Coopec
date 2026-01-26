@@ -8,6 +8,7 @@ use App\Models\Membre;
 class ShowMembre extends Component
 {
     public Membre $membre;
+    public bool $showAddPhotoModal = false;
 
     public float $totalSoldeCDF = 0;
     public float $totalSoldeUSD = 0;

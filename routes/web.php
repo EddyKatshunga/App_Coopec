@@ -54,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/comptes', CompteList::class)->name('comptes.index');
     Route::get('/compte/{compte}', ShowCompte::class)->name('compte.show');
     Route::get('/membres/{membre}/comptes/create', AddCompte::class)->name('compte.create');
+    Route::get('comptes/{compte}/releve-pdf', [ReleveComptePdfController::class, 'download'])
+        ->name('compte.releve-pdf');
+
 
 });
 

@@ -28,34 +28,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        // Redirection par rôle
-        return redirect()->intended($this->redirectToRole($request->user()));
+        return redirect()->intended(route('dashboard'));
     }
-
-
-    protected function redirectToRole($user)
-    {
-        if ($user->hasRole('pca')) {
-            return route('admin.dashboard');
-        }
-
-        if ($user->hasRole('chef_agence')) {
-            return route('chef_agence.dashboard');
-        }
-
-        if ($user->hasRole('agent_guichet')) {
-            return route('agent.dashboard');
-        }
-
-        if ($user->hasRole('membre')) {
-            return route('membre.dashboard');
-        }
-
-        // Par défaut
-        return route('dashboard');
-    }
-
-
+    
     /**
      * Destroy an authenticated session.
      */

@@ -69,7 +69,6 @@
                 {{ number_format($totalRetraitUSD, 2) }}
             </p>
         </div>
-
     </div>
 
     {{-- ================= TRANSACTIONS ================= --}}
@@ -141,5 +140,38 @@
             </tbody>
         </table>
     </div>
+
+    {{-- ================= ZONE RELEVE ================= --}}
+    <div class="flex flex-col gap-4 mb-4">
+
+        <div class="flex items-end gap-2">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date début</label>
+                <input type="date" wire:model="dateDebut" wire:change="updatePdfPreview"
+                    class="border rounded px-2 py-1">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date fin</label>
+                <input type="date" wire:model="dateFin" wire:change="updatePdfPreview"
+                    class="border rounded px-2 py-1">
+            </div>
+            <div>
+                <button wire:click="downloadReleve"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Télécharger le relevé PDF
+                </button>
+            </div>
+        </div>
+
+        {{-- Aperçu PDF --}}
+        @if($pdfUrl)
+            <div class="border rounded overflow-hidden shadow mt-4">
+                <iframe src="{{ $pdfUrl }}" width="100%" height="600px"></iframe>
+            </div>
+        @endif
+
+    </div>
+
+    {{-- ================= FIN ZONE RELEVE ================= --}}
 
 </div>
