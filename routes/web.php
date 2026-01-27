@@ -17,8 +17,23 @@ use App\Livewire\Transactions\TransactionForm;
 use App\Livewire\Agents\AgentList;
 use App\Livewire\Agents\AgentForm;
 use App\Livewire\Comptes\ShowCompte;
+use App\Livewire\Credits\CreditCreate;
+use App\Livewire\Credits\CreditShow;
+use App\Livewire\Credits\CreditsList;
 use App\Livewire\Transactions\TransactionListing;
 use App\Livewire\Transactions\TransactionsList;
+use App\Models\Zone;
+
+Route::get('/creer-zone-kazamba', function() {
+    Zone::create([
+        'nom' => 'Kazamba',
+        'code' => 'KIK1',
+        'gerant_id' => 3,
+        'agence_id' => 1
+    ]);
+    
+    return "Zone Kazamba créée avec succès";
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('public.home');
 Route::get('/actualites', [NewsController::class, 'index'])->name('public.news');
@@ -68,6 +83,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/transactions/retrait/add', TransactionForm::class)
         ->defaults('type', 'RETRAIT')
         ->name('transaction.retrait');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/credits/index', CreditsList::class)->name('credits.index');
+    Route::get('/credit/create', CreditCreate::class)->name('credit.create');
+    Route::get('/credit/{credit}/show', CreditShow::class)->name('credit.show');
 });
 
 

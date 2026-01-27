@@ -25,4 +25,9 @@ class Agence extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function zones(): HasMany
+    {
+        return $this->hasMany(Zone::class);
+    }
 }

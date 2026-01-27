@@ -8,6 +8,9 @@
     @vite('resources/css/app.css')
 </head>
 <body>
+    <div>
+        <h1>Bienvenue, {{ Auth::user()->getRoleNames() }} {{ Auth::user()->name }}</h1>
+    </div>
     <a href="{{ route('transaction.depot') }}">Ajouter un depot</a>
     <a href="{{ route('transaction.retrait') }}">Ajouter un retrait</a>
     <a href="{{ route('membre.index') }}">Liste des membres</a>

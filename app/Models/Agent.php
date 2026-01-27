@@ -58,4 +58,9 @@ class Agent extends Model
     {
         return $this->hasMany(Transaction::class, 'agent_collecteur_id');
     }
+
+    public function remboursements(): HasMany
+    {
+        return $this->hasMany(CreditRemboursement::class, 'agent_id');
+    }
 }

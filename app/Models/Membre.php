@@ -67,4 +67,9 @@ class Membre extends Model
         return $this->hasMany(Compte::class);
     }
 
+    public function credits(): HasMany
+    {
+        return $this->hasMany(Credit::class);
+    }
+
 }

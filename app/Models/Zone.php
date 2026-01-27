@@ -23,4 +23,14 @@ class Zone extends Model
     {
         return $this->belongsTo(Agent::class, 'gerant_id');
     }
+
+    public function credits()
+    {
+        return $this->hasMany(Credit::class);
+    }
+
+    public function agence(): BelongsTo
+    {
+        return $this->belongsTo(Agence::class);
+    }
 }

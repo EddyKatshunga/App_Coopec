@@ -25,14 +25,11 @@
         @apply block mt-2 text-2xl font-mono tabular-nums;
     }
 
-    .error {
-        @apply text-sm text-red-600 mt-1;
-    }
-
     .input { @apply border rounded px-3 py-2 focus:ring focus:ring-blue-200; }
     .btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
     .label { @apply text-sm font-medium text-gray-600; }
     .input { @apply w-full border rounded px-3 py-2 focus:ring focus:ring-blue-200; }
     .btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
     .btn-secondary { @apply bg-gray-200 px-4 py-2 rounded; }
+    .error { @apply text-sm text-red-600; }
 }
