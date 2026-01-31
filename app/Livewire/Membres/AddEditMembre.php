@@ -98,6 +98,7 @@ class AddEditMembre extends Component
 
     public function render()
     {
-        return view('livewire.membres.addedit-membre');
+        return view('livewire.membres.addedit-membre')
+            ->layout('layouts.app');;
     }
 }

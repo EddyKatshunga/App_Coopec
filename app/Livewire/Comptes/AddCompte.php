@@ -56,6 +56,7 @@ class AddCompte extends Component
 
     public function render()
     {
-        return view('livewire.comptes.add-compte');
+        return view('livewire.comptes.add-compte')
+            ->layout('layouts.app');
     }
 }

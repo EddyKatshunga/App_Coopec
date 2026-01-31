@@ -232,6 +232,6 @@ class TransactionListing extends Component
                 : collect(),
 
             'comptes' => Compte::orderBy('numero')->get(),
-        ]);
+        ])->layout('layouts.app');
     }
 }

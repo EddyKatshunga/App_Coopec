@@ -31,6 +31,6 @@ class TransactionsList extends Component
 
         return view('livewire.transactions.transactions-list', [
             'transactions' => $transactions,
-        ]);
+        ])->layout('layouts.app');
     }
 }

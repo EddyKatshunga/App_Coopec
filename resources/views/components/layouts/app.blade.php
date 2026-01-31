@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mon App</title>
+    <title>COOPEC - KWILU</title>
     @vite('resources/css/app.css')
 </head>
 <body>

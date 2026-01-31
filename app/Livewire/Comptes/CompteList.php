@@ -43,6 +43,6 @@ class CompteList extends Component
         return view('livewire.comptes.compte-list', [
             'comptes' => $comptes,
             'stats'   => $stats,
-        ]);
+        ])->layout('layouts.app');
     }
 }

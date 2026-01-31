@@ -30,4 +30,9 @@ class Agence extends Model
     {
         return $this->hasMany(Zone::class);
     }
+
+    public function credits()
+    {
+        return $this->hasManyThrough(Credit::class, Zone::class);
+    }
 }

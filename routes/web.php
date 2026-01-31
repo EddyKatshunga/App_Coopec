@@ -22,27 +22,14 @@ use App\Livewire\Credits\CreditShow;
 use App\Livewire\Credits\CreditsList;
 use App\Livewire\Transactions\TransactionListing;
 use App\Livewire\Transactions\TransactionsList;
-use App\Models\Zone;
-
-Route::get('/creer-zone-kazamba', function() {
-    Zone::create([
-        'nom' => 'Kazamba',
-        'code' => 'KIK1',
-        'gerant_id' => 3,
-        'agence_id' => 1
-    ]);
-    
-    return "Zone Kazamba créée avec succès";
-});
 
 Route::get('/', [HomeController::class, 'index'])->name('public.home');
 Route::get('/actualites', [NewsController::class, 'index'])->name('public.news');
 Route::get('/contact', [ContactController::class, 'index'])->name('public.contact');
 
-// Admin
-Route::middleware(['auth', 'role:pca'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-});
+Route::middleware(['auth'])
+    ->get('/dashboard', App\Livewire\Dashboard\Dashboard::class)
+    ->name('dashboard');
 
 /*
 Route::middleware(['auth', 'permission:membre.creer'])->group(function () {
@@ -51,7 +38,8 @@ Route::middleware(['auth', 'permission:membre.creer'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/membres', ListeMembres::class)->name('membre.index');
-    Route::get('/membre/add', AddEditMembre::class)->name('membre.add');
+    Route::get('/membre/add', AddEditMembre::class)->name('profile.edit');
+    Route::get('/membre/add', AddEditMembre::class)->name('membre.create');
     Route::get('/membre/{membre}', ShowMembre::class)->name('membre.show');
     Route::get('/membre/{membre}/edit', AddEditMembre::class)->name('membre.edit');
     Route::get('/pdf/membres/{membre}/fiche', MembrePdfController::class)
@@ -78,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/transaction/index', TransactionListing::class)->name('transaction.index');
     Route::get('/transaction/list', TransactionsList::class)->name('transaction.list');
-    Route::get('/transaction/depot/add', TransactionForm::class)->name('transaction.depot');
+    Route::get('/transaction/depot/add', TransactionForm::class)->name('epargne.depot.create');
     // Retrait
     Route::get('/transactions/retrait/add', TransactionForm::class)
         ->defaults('type', 'RETRAIT')

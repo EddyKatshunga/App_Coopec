@@ -38,7 +38,8 @@ class ShowMembre extends Component
 
     public function render()
     {
-        return view('livewire.membres.show-membre');
+        return view('livewire.membres.show-membre')
+            ->layout('layouts.app');
     }
 }
 

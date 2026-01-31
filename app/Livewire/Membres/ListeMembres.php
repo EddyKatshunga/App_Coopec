@@ -51,8 +51,9 @@ class ListeMembres extends Component
             ->when($this->dateFrom, fn ($q) => $q->whereDate('date_adhesion', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('date_adhesion', '<=', $this->dateTo))
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(30);
 
-        return view('livewire.membres.liste-membres', compact('membres'));
+        return view('livewire.membres.liste-membres', compact('membres'))
+            ->layout('layouts.app');
     }
 }

@@ -10,7 +10,7 @@
     <div>
         <h1 class="text-2xl font-bold text-gray-800">Liste des membres</h1>
         <p class="text-sm text-gray-500">Recherche, filtrage et gestion des membres</p>
-        <a href="{{ route('membre.add') }}">Ajouter un nouveau membre</a>
+        <a href="{{ route('membre.create') }}">Ajouter un nouveau membre</a>
     </div>
 
     {{-- Filtres --}}

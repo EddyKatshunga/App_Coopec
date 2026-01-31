@@ -63,7 +63,7 @@
                     <tr>
                         <td>{{ $credit->id }}</td>
                         <td>{{ $credit->numero_credit }}</td>
-                        <td>{{ $credit->membre->name }}</td>
+                        <td>{{ $credit->membre->nom }}</td>
                         <td>{{ $credit->zone->nom }}</td>
                         <td>{{ $credit->date_credit->format('d/m/Y') }}</td>
                         <td>{{ number_format($credit->total, 2) }}</td>

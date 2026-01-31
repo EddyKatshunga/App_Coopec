@@ -74,6 +74,7 @@ class ShowCompte extends Component
 
     public function render()
     {
-        return view('livewire.comptes.show-compte');
+        return view('livewire.comptes.show-compte')
+            ->layout('layouts.app');
     }
 }

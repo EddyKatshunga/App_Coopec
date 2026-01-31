@@ -36,7 +36,7 @@ class CreditRemboursementService
                 throw new \InvalidArgumentException('Le montant du remboursement doit être supérieur à zéro.');
             }
 
-            /* ================= ÉTAT AVANT ================= */
+            /* ================= ÉTAT AVANT ================= */ 
 
             $totalRembourseAvant = $credit->remboursements()->sum('montant');
 

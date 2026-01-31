@@ -185,6 +185,6 @@ class TransactionForm extends Component
             'comptes' => $comptes,
             'agences' => Agence::all(),
             'agents'  => Agent::all(),
-        ]);
+        ])->layout('layouts.app');
     }
 }

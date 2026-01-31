@@ -10,56 +10,165 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1️⃣ Définir les permissions métier
+        /**
+         * ===============================
+         * 1️⃣ PERMISSIONS MÉTIER ATOMIQUES
+         * ===============================
+         */
         $permissions = [
-            // Membres
-            'membre.creer',
-            'membre.modifier',
-            'membre.supprimer',
-            'membre.consulter',
 
-            // Agents
-            'agent.creer',
-            'agent.modifier',
+            // ===== Membre (lecture + signalement) =====
+            'membre.view.profile',
+            'membre.view.epargne',
+            'membre.view.prets',
+            'membre.view.remboursements',
+            'membre.signal.problem',
+            'membre.change.password',
 
-            // Épargne
-            'epargne.depot',
-            'epargne.retrait',
-            'epargne.consulter',
+            // ===== Membres (gestion) =====
+            'membre.create',
+            'membre.update',
 
-            // Crédit
-            'credit.demande',
-            'credit.approuver',
-            'credit.rejeter',
+            // ===== Épargne =====
+            'epargne.depot.create',
+            'epargne.retrait.create',
+            'epargne.view.transactions',
+            'epargne.view.my_depots',
+            'epargne.correct',
 
-            // Administration
-            'utilisateur.gerer',
-            'roles.permissions.gerer',
+            // ===== Crédit =====
+            'credit.pret.create',
+            'credit.pret.view',
+            'credit.remboursement.create',
+            'credit.remboursement.view',
+            'credit.remboursement.correct',
+            'credit.cloturer',
+
+            // ===== Dépenses =====
+            'depense.create',
+            'depense.view',
+
+            // ===== Agents & rôles =====
+            'agent.create',
+            'agent.assign.role',
+
+            // ===== Zone épargne =====
+            'zone.create',
+            'zone.update',
+            'zone.view',
+
+            // ===== Agences =====
+            'agence.view.all',
+            'agence.manage.all',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // 2️⃣ Lier permissions ↔ rôles
-        Role::findByName('membre')->givePermissionTo([
-            'membre.consulter',
-            'epargne.consulter',
+        /**
+         * ===============================
+         * 2️⃣ CASCADE RÔLES → PERMISSIONS
+         * ===============================
+         */
+
+        // 🧑‍💼 MEMBRE
+        $membrePermissions = [
+            'membre.view.profile',
+            'membre.view.epargne',
+            'membre.view.prets',
+            'membre.view.remboursements',
+            'membre.signal.problem',
+            'membre.change.password',
+        ];
+
+        // 🧾 AGENT ÉPARGNE
+        $agentEpargnePermissions = array_merge($membrePermissions, [
+            'epargne.depot.create',
+            'epargne.view.my_depots',
+            'epargne.view.transactions',
+            'membre.create',
         ]);
 
-        Role::findByName('agent_guichet')->givePermissionTo([
-            'epargne.depot',
-            'epargne.retrait',
-            'membre.consulter',
+        // 💳 AGENT CRÉDIT
+        $agentCreditPermissions = array_merge($agentEpargnePermissions, [
+            'credit.remboursement.create',
+            'credit.pret.view',
+            'credit.remboursement.view',
         ]);
 
-        Role::findByName('agent_credit')->givePermissionTo([
-            'credit.demande',
-            'credit.approuver',
-            'credit.rejeter',
+        // 💼 CAISSIÈRE
+        $caissierePermissions = array_merge($agentCreditPermissions, [
+            'epargne.retrait.create',
         ]);
 
-        Role::findByName('administrateur')
-            ->givePermissionTo(Permission::all());
+        // 🧠 SUPERVISEUR
+        $superviseurPermissions = array_merge($caissierePermissions, [
+            'epargne.correct',
+            'credit.remboursement.correct',
+            'credit.pret.create',
+            'credit.cloturer',
+            'membre.update',
+            'depense.create',
+        ]);
+
+        // 🏢 DIRECTEUR D’AGENCE
+        $directeurAgencePermissions = array_merge($superviseurPermissions, [
+            'agent.create',
+            'agent.assign.role',
+            'zone.create',
+            'zone.update',
+            'zone.view',
+        ]);
+
+        // 🧾 OPS (opérateur de saisie)
+        $opsPermissions = [
+            'epargne.depot.create',
+            'credit.pret.create',
+            'credit.remboursement.create',
+            'membre.create',
+            'depense.create',
+        ];
+
+        // 👁️ CONSEILLER / AUDITEUR (lecture seule)
+        $auditeurPermissions = [
+            'membre.view.profile',
+            'membre.view.epargne',
+            'membre.view.prets',
+            'membre.view.remboursements',
+            'epargne.view.transactions',
+            'credit.pret.view',
+            'credit.remboursement.view',
+            'depense.view',
+            'zone.view',
+        ];
+
+        // 🌍 DIRECTRICE RÉGIONALE & PCA (FULL ACCESS)
+        $fullPermissions = Permission::all()->pluck('name')->toArray();
+
+        /**
+         * ===============================
+         * 3️⃣ ATTRIBUTION AUX RÔLES
+         * ===============================
+         */
+        $roles = [
+            'membre' => $membrePermissions,
+            'agent_epargne' => $agentEpargnePermissions,
+            'agent_credit' => $agentCreditPermissions,
+            'caissiere' => $caissierePermissions,
+            'superviseur' => $superviseurPermissions,
+            'chef_agence' => $directeurAgencePermissions,
+            'ops' => $opsPermissions,
+            'conseiller' => $auditeurPermissions,
+            'auditeur' => $auditeurPermissions,
+            'administrateur' => $fullPermissions,
+            'directrice_regionale' => $fullPermissions,
+            'pca' => $fullPermissions,
+        ];
+
+        foreach ($roles as $roleName => $permissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($permissions);
+        }
     }
 }

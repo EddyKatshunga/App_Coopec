@@ -82,6 +82,7 @@ class CreditsList extends Component
 
         $credits = $query->orderBy('date_credit', 'desc')->paginate(15);
 
-        return view('livewire.credits.credits-list', compact('credits'));
+        return view('livewire.credits.credits-list', compact('credits'))
+            ->layout('layouts.app');
     }
 }

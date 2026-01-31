@@ -51,6 +51,7 @@ class AgentList extends Component
             ->latest()
             ->paginate(10);
 
-        return view('livewire.agents.agent-list', compact('agents'));
+        return view('livewire.agents.agent-list', compact('agents'))
+            ->layout('layouts.app');
     }
 }

@@ -148,6 +148,7 @@ class CreditCreate extends Component
 
     public function render()
     {
-        return view('livewire.credits.credit-create');
+        return view('livewire.credits.credit-create')
+            ->layout('layouts.app');
     }
 }

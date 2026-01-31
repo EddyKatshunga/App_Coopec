@@ -22,9 +22,8 @@ class CreditShow extends Component
         'remboursementAdded' => 'rafraichirEtat',
     ];
 
-    public function mount(
-        Credit $credit
-    ) {
+    public function mount(Credit $credit) 
+    {
         $this->calculator = new CreditCalculatorService();
         $this->credit = $credit;
 
@@ -59,6 +58,14 @@ class CreditShow extends Component
         );
     }
 
+    // S'assurer que le service est toujours initialisé
+    public function boot(): void
+    {
+        if (!isset($this->calculator)) {
+            $this->calculator = new CreditCalculatorService();
+        }
+    }
+
     public function render()
     {
         return view('livewire.credits.credit-show', [
@@ -66,6 +73,6 @@ class CreditShow extends Component
                 ->remboursements()
                 ->orderBy('date_paiement')
                 ->get(),
-        ]);
+        ])->layout('layouts.app');
     }
 }

@@ -69,6 +69,6 @@ class AgentForm extends Component
             'membres' => Membre::with('user')->get(),
             'agences' => Agence::all(),
             'rolesDisponibles' => Role::pluck('name'),
-        ]);
+        ])->layout('layouts.app');
     }
 }
