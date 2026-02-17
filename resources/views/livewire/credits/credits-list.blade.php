@@ -1,4 +1,5 @@
 <div class="space-y-4">
+    <a href="{{ route('credit.pret.create') }}">Ajouter un credit</a>
     {{-- ================= FILTRES ================= --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 

@@ -1,5 +1,30 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
+    {{-- =========================
+        👥 MEMBRES
+    ========================== --}}
+
+    @can('membre.create')
+        <x-dashboard.action
+            title="Nouveau membre"
+            icon="user-plus"
+            route="membre.create"
+        />
+    @endcan
+
+    @can('membre.update')
+        <x-dashboard.action
+            title="Liste des membres"
+            icon="users"
+            route="membre.index"
+        />
+    @endcan
+
+
+    {{-- =========================
+        💰 ÉPARGNE
+    ========================== --}}
+
     @can('epargne.depot.create')
         <x-dashboard.action
             title="Nouveau dépôt"
@@ -8,35 +33,40 @@
         />
     @endcan
 
-    @can('epargne.retrait.create')
+    @can('epargne.view.transactions')
         <x-dashboard.action
-            title="Nouveau retrait"
-            icon="arrow-down"
-            route="epargne.retrait.create"
+            title="Transactions épargne"
+            icon="list"
+            route="epargne.transactions.index"
         />
     @endcan
 
-    @can('credit.pret.create')
+
+    {{-- =========================
+        💳 CRÉDIT
+    ========================== --}}
+
+    @can('credit.pret.view')
         <x-dashboard.action
-            title="Enregistrer un prêt"
+            title="Liste des prêts"
             icon="document"
-            route="credit.pret.create"
+            route="credit.pret.index"
         />
     @endcan
 
-    @can('credit.remboursement.create')
+    @can('credit.remboursement.view')
         <x-dashboard.action
-            title="Remboursement"
-            icon="refresh"
-            route="credit.remboursement.create"
+            title="Remboursements"
+            icon="list"
+            route="credit.remboursement.index"
         />
     @endcan
 
-    @can('membre.create')
+    @can('depense.view')
         <x-dashboard.action
-            title="Nouveau membre"
-            icon="user-plus"
-            route="membre.create"
+            title="Tableau de Bord des Depenses"
+            icon="list"
+            route="types-depense.index"
         />
     @endcan
 

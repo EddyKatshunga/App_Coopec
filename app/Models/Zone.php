@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Zone extends Model
 {
+    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [
         'nom',
         'code',
         'gerant_id',
+        'agence_id',
         'created_by',
         'updated_by',
     ];

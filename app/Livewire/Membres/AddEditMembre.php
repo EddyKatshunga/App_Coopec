@@ -25,7 +25,7 @@ class AddEditMembre extends Component
     public ?string $date_de_naissance = '';
     public ?string $qualite = 'Auxiliaire';
     public ?string $adresse = 'RDC';
-    public ?string $telephone = '667788';
+    public ?string $telephone = '9999999999';
     public ?string $activites = 'Vente divers';
     public ?string $adresse_activite = 'Kikwit';
     public ?string $date_adhesion;

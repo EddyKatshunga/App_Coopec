@@ -29,9 +29,12 @@
         </div>
     @endif
     
+    <div>
+        <h3>Enregistrer un {{ $type_transaction }}</h3>
+    </div>
     {{-- ================= HEADER : DATE + AGENCE ================= --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+        
         {{-- DATE --}}
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">

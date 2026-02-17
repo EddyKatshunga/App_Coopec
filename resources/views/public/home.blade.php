@@ -22,7 +22,7 @@
             <div class="animate-fadeIn">
                 <div class="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                     <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                    <span class="text-sm font-medium">Plus de 4 000 membres nous font confiance</span>
+                    <span class="text-sm font-medium">Plus de {{ $totalMembres }} membres nous font confiance</span>
                 </div>
                 
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">

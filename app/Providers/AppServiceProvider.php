@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Depense;
+use App\Models\Revenu;
+use App\Observers\DepenseObserver;
+use App\Observers\RevenuObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //Livewire::setLayout('layouts.app');
+        Revenu::observe(RevenuObserver::class);
+        Depense::observe(DepenseObserver::class);
     }
 }

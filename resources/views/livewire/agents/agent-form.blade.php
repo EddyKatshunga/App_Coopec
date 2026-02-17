@@ -1,6 +1,6 @@
 <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow space-y-6">
     <h2 class="text-xl font-semibold">
-        {{ $agent ? 'Modifier l’agent' : 'Promouvoir un membre en agent' }}
+        {{ $agent ? 'Modifier l\'agent' : 'Promouvoir un membre en agent' }}
     </h2>
 
     <form wire:submit.prevent="save" class="space-y-4">
@@ -36,15 +36,18 @@
         </div>
 
         <div>
-            <label class="label">Rôles</label>
-            <div class="grid grid-cols-2 gap-2">
-                @foreach($rolesDisponibles as $role)
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" wire:model="roles" value="{{ $role }}">
-                        <span>{{ ucfirst($role) }}</span>
-                    </label>
+            <label class="label">Rôle</label>
+            <select wire:model="role" class="input" required>
+                <option value="">-- Sélectionner un rôle --</option>
+                @foreach($rolesDisponibles as $roleName)
+                    <option value="{{ $roleName }}">
+                        {{ ucfirst($roleName) }}
+                    </option>
                 @endforeach
-            </div>
+            </select>
+            @error('role')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="flex justify-end gap-3">

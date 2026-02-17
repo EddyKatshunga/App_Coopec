@@ -20,8 +20,12 @@ use App\Livewire\Comptes\ShowCompte;
 use App\Livewire\Credits\CreditCreate;
 use App\Livewire\Credits\CreditShow;
 use App\Livewire\Credits\CreditsList;
+use App\Livewire\Credits\RemboursementList;
 use App\Livewire\Transactions\TransactionListing;
 use App\Livewire\Transactions\TransactionsList;
+use App\Livewire\Depenses\TypesDepenseForm;
+use App\Livewire\Depenses\TypesDepenseShow;
+use App\Livewire\Depenses\TypesDepenseList;
 
 Route::get('/', [HomeController::class, 'index'])->name('public.home');
 Route::get('/actualites', [NewsController::class, 'index'])->name('public.news');
@@ -49,8 +53,15 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/agents', AgentList::class)->name('agents.index');
-    Route::get('/agent/add', AgentForm::class)->name('agent.add');
-    Route::get('/agent/{membre}/edit', AgentForm::class)->name('agent.edit');
+    Route::get('/agent/add', AgentForm::class)->name('agent.create');
+    Route::get('/agent/{agent}/edit', AgentForm::class)->name('agent.edit');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/depenses/typesdepense', TypesDepenseList::class)->name('types-depense.index');
+    Route::get('/depenses/typesdepense/add', TypesDepenseForm::class)->name('types-depense.create');
+    Route::get('/depenses/typesdepense/{typesdepense}/edit', TypesDepenseForm::class)->name('types-depense.edit');
+    Route::get('/depenses/typesdepense/{typesdepense}/show', TypesDepenseShow::class)->name('types-depense.show');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -64,18 +75,18 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/transaction/index', TransactionListing::class)->name('transaction.index');
+    Route::get('/transaction/index', TransactionListing::class)->name('epargne.transactions.index');
     Route::get('/transaction/list', TransactionsList::class)->name('transaction.list');
     Route::get('/transaction/depot/add', TransactionForm::class)->name('epargne.depot.create');
-    // Retrait
     Route::get('/transactions/retrait/add', TransactionForm::class)
         ->defaults('type', 'RETRAIT')
-        ->name('transaction.retrait');
+        ->name('epargne.retrait.create');
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/credits/index', CreditsList::class)->name('credits.index');
-    Route::get('/credit/create', CreditCreate::class)->name('credit.create');
+    Route::get('/credit/pret/index', CreditsList::class)->name('credit.pret.index');
+    Route::get('/credit/remboursement/index', RemboursementList::class)->name('credit.remboursement.index');
+    Route::get('/membre/{membre}/credit/create', CreditCreate::class)->name('credit.pret.create');
     Route::get('/credit/{credit}/show', CreditShow::class)->name('credit.show');
 });
 

@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AffectsCoffre;
 use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class CreditRemboursement extends Model
 {
+    
+    use VerifieClotureComptable;
+    use AffectsCoffre;
     use Blameable;
 
     /* ================= MASS ASSIGNMENT ================= */
@@ -58,10 +63,26 @@ class CreditRemboursement extends Model
         return $this->belongsTo(User::class, 'agent_id');
     }
 
-    public function zone(): BelongsTo
+    public function getZoneAttribute()
     {
-        return $this->credit->zone();
+        return $this->credit?->zone;
     }
+
+    public function getAgenceAttribute()
+    {
+        return $this->credit?->zone?->agence;
+    }
+
+    public function getAgenceIdAttribute()
+    {
+        return $this->credit?->zone?->agence_id;
+    }
+
+    public function getMonnaieAttribute()
+    {
+        return $this->credit->monnaie;
+    }
+
 
     /* ================= ACCESSEURS MÉTIER ================= */
 

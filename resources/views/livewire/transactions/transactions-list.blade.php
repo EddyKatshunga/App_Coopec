@@ -23,12 +23,12 @@
 
     {{-- ================= ACTIONS ================= --}}
     <div class="flex flex-wrap gap-2 px-4 pb-3">
-        <a href="{{ route('transaction.depot') }}"
+        <a href="{{ route('epargne.depot.create') }}"
            class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition">
             ➕ Ajouter un dépôt
         </a>
 
-        <a href="{{ route('transaction.retrait') }}"
+        <a href="{{ route('epargne.retrait.create') }}"
            class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition">
             ➖ Ajouter un retrait
         </a>
@@ -61,7 +61,9 @@
 
                     {{-- Nom du membre --}}
                     <td class="px-4 py-3 font-medium text-gray-800">
-                        {{ $transaction->compte->nom }}
+                        <a href="{{ route('membre.show', $transaction->compte->membre) }}">
+                            {{ $transaction->compte->nom }}
+                        </a>
                     </td>
 
                     {{-- Compte --}}

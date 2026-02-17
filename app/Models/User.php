@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
+    use VerifieClotureComptable;
     use HasFactory, Notifiable, HasRoles;
 
     /**
@@ -84,6 +88,11 @@ class User extends Authenticatable
     public function profilePhoto(): HasOne
     {
         return $this->hasOne(Photo::class)->where('is_profile', true);
+    }
+
+    public function historiqueRole(): HasMany
+    {
+        return $this->hasMany(HistoriqueRole::class);
     }
 
 }

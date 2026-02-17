@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Membre extends Model
 {
+    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [
@@ -70,6 +72,16 @@ class Membre extends Model
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class);
+    }
+
+    public function transactions()
+    {
+        return $this->comptes->transactions();
+    }
+
+    public function alltransactions()
+    {
+        return $this->comptes->allTransactions();
     }
 
 }

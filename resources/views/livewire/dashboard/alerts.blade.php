@@ -4,7 +4,7 @@
         <x-dashboard.alert
             type="warning"
             message="Des opérations d’épargne nécessitent une correction"
-            route="epargne.corrections"
+            route="transaction.list"
         />
     @endcan
 
@@ -12,7 +12,7 @@
         <x-dashboard.alert
             type="danger"
             message="Crédits arrivés à échéance non clôturés"
-            route="credit.clotures"
+            route="credits.index"
         />
     @endcan
 

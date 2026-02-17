@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class Photo extends Model
 {
+    use VerifieClotureComptable, Blameable;
+    
     protected $fillable = [
         'user_id',
         'path',

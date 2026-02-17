@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AffectsCoffre;
 use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Credit extends Model
 {
+    use VerifieClotureComptable;
+    use AffectsCoffre;
     use Blameable;
     
     protected $fillable = [
@@ -14,6 +19,7 @@ class Credit extends Model
         'numero_credit',
         'membre_id',
         'zone_id',
+        'monnaie',
         'capital',
         'interet',
         'taux_penalite_journalier',
@@ -35,7 +41,7 @@ class Credit extends Model
     ];
 
     /* ================= RELATIONS ================= */
-    public function remboursements()
+    public function remboursements(): HasMany
     {
         return $this->hasMany(CreditRemboursement::class);
     }
@@ -48,6 +54,18 @@ class Credit extends Model
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function agence() {
+        return $this->zone->agence;
+    }
+
+    public function getAgenceIdAttribute() {
+        return $this->agence?->id;
+    }
+
+    public function isAddition(): bool {
+        return false; // Toujours une diminution
     }
 
     /* ================= ATTRIBUTS CALCULÉS ================= */

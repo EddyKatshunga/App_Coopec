@@ -15,7 +15,6 @@ class CreditCreate extends Component
     /* ================= FORM FIELDS ================= */
 
     public $date_credit;
-    public $membre_id;
     public $zone_id;
 
     public $capital;
@@ -24,17 +23,15 @@ class CreditCreate extends Component
 
     public $unite_temps = 'mois';
     public $duree;
-    
-    public $date_fin_proposee; // Date calculée automatiquement
-    public $date_fin_confirmee; // Date saisie/confirmée par l'utilisateur
+    public $date_fin; // Date saisie/confirmée par l'utilisateur
 
     public $garant_nom;
     public $garant_adresse;
     public $garant_telephone;
 
-    /* ================= DATA ================= */
+    public Membre $membre;
 
-    public $membres = [];
+    /* ================= DATA ================= */
     public $zones = [];
 
     /* ================= VALIDATION ================= */
@@ -63,53 +60,11 @@ class CreditCreate extends Component
 
     /* ================= LIFECYCLE ================= */
 
-    public function mount()
+    public function mount(Membre $membre)
     {
         $this->date_credit = now()->format('Y-m-d');
-        $this->membres = Membre::orderBy('nom')->get();
         $this->zones = Zone::orderBy('nom')->get();
-        
-        // Initialiser la date de fin proposée
-        $this->calculateDateFinProposee();
-    }
-
-    /* ================= CALCUL DATE FIN PROPOSÉE ================= */
-
-    public function calculateDateFinProposee()
-    {
-        if ($this->date_credit && $this->duree && $this->unite_temps) {
-            try {
-                $dateFin = Carbon::parse($this->date_credit)
-                    ->add((int) $this->duree, $this->unite_temps);
-                
-                $this->date_fin_proposee = $dateFin->format('Y-m-d');
-                
-                // Si l'utilisateur n'a pas encore saisi de date, pré-remplir avec la date calculée
-                if (!$this->date_fin_confirmee) {
-                    $this->date_fin_confirmee = $this->date_fin_proposee;
-                }
-            } catch (\Exception $e) {
-                $this->date_fin_proposee = null;
-            }
-        } else {
-            $this->date_fin_proposee = null;
-        }
-    }
-
-    /* ================= LISTENERS ================= */
-
-    protected $listeners = [
-        'updateDateFinProposee' => 'calculateDateFinProposee'
-    ];
-
-    /* ================= UPDATED HOOKS ================= */
-
-    public function updated($propertyName)
-    {
-        // Lorsque la date de début, la durée ou l'unité change, recalculer la date de fin proposée
-        if (in_array($propertyName, ['date_credit', 'duree', 'unite_temps'])) {
-            $this->calculateDateFinProposee();
-        }
+        $this->membre = $membre;
     }
 
     /* ================= ACTION ================= */
@@ -122,7 +77,7 @@ class CreditCreate extends Component
             'date_credit' => $this->date_credit,
             'numero_credit' => strtoupper(Str::uuid()),
 
-            'membre_id' => $this->membre_id,
+            'membre_id' => $this->membre->id,
             'zone_id' => $this->zone_id,
 
             'capital' => $this->capital,
@@ -131,14 +86,11 @@ class CreditCreate extends Component
 
             'unite_temps' => $this->unite_temps,
             'duree' => $this->duree,
-            'date_fin_prevue' => $this->date_fin_confirmee, // Utiliser la date confirmée par l'utilisateur
+            'date_fin_prevue' => $this->date_fin,
 
             'garant_nom' => $this->garant_nom,
             'garant_adresse' => $this->garant_adresse,
             'garant_telephone' => $this->garant_telephone,
-
-            'created_by' => Auth::id(),
-            'updated_by' => Auth::id(),
         ]);
 
         session()->flash('success', 'Crédit octroyé avec succès.');

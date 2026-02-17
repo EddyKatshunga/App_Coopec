@@ -27,7 +27,7 @@
                 Ajouter un compte Epargne
             </a>
 
-            <a href="{{ route('credit.create') }}"
+            <a href="{{ route('credit.pret.create', $membre) }}"
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Ajouter un crédit
             </a>

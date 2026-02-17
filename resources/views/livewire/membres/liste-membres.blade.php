@@ -79,7 +79,9 @@
                             {{ $membre->numero_identification }}
                         </td>
                         <td class="px-4 py-3 font-medium text-gray-800">
-                            {{ $membre->nom }}
+                            <a href="{{ route('membre.show', $membre) }}">
+                                 {{ $membre->nom }}
+                            </a>
                         </td>
                         <td class="px-4 py-3">
                             {{ $membre->user->email ?? '—' }}

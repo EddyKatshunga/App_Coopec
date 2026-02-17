@@ -12,15 +12,6 @@
         </div>
     </div>
 
-    {{-- Sélecteur d’agence --}}
-    <livewire:dashboard.agence-selector />
-
-    {{-- ALERTES --}}
-    <livewire:dashboard.alerts />
-
-    {{-- STATS --}}
-    <livewire:dashboard.stats />
-
     {{-- ACTIONS --}}
     <livewire:dashboard.actions />
 

@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
+use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Compte extends Model
 {
+    use VerifieClotureComptable;
     use Blameable;
     
     protected $fillable = [
@@ -19,19 +21,40 @@ class Compte extends Model
     ];
 
     protected $appends = ['nom'];
+    
+    public function getNomAttribute(): ?string
+    {
+        return $this->membre?->nom;
+    }
 
     public function membre(): BelongsTo
     {
         return $this->belongsTo(Membre::class, 'membre_id');
     }
 
-    public function transactions() : HasMany
+    public function allTransactions() : HasMany
     {
         return $this->hasMany(Transaction::class, 'compte_id');
     }
 
-    public function getNomAttribute(): ?string
+    public function transactions() : HasMany
     {
-        return $this->membre?->nom;
+        return $this->hasMany(Transaction::class, 'compte_id')
+            ->where('statut', 'VALIDE');;
     }
+
+    public function transactionsPeriode(
+        ?string $dateDebut = null, 
+        ?string $dateFin = null,
+        string $dateColumn = 'date_transaction'
+    ): HasMany {
+        $query = $this->hasMany(Transaction::class, 'compte_id')->where('statut', 'VALIDE');
+        
+        // Définir les dates par défaut
+        $dateDebut = $dateDebut ?? now()->format('Y-m-d');
+        $dateFin = $dateFin ?? $dateDebut;
+        
+        return $query->whereBetween($dateColumn, [$dateDebut, $dateFin]);
+    }
+
 }

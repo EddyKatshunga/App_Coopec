@@ -19,7 +19,7 @@
             @endforeach
         </select>
 
-        <a href="{{ route('agent.add') }}" class="btn-primary ml-auto">
+        <a href="{{ route('agent.create') }}" class="btn-primary ml-auto">
             + Nouvel agent
         </a>
     </div>

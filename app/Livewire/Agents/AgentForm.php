@@ -16,7 +16,7 @@ class AgentForm extends Component
     public $membre_id;
     public $agence_id;
     public $statut = 'actif';
-    public array $roles = [];
+    public $role = ''; // Une seule propriété pour le rôle
 
     public function mount(?Agent $agent = null)
     {
@@ -25,7 +25,8 @@ class AgentForm extends Component
             $this->membre_id = $agent->membre_id;
             $this->agence_id = $agent->agence_id;
             $this->statut = $agent->statut;
-            $this->roles = $agent->membre->user->roles->pluck('name')->toArray();
+            // Pour la modification, on prend le premier rôle
+            $this->role = $agent->membre->user->roles->pluck('name')->first() ?? '';
         }
     }
 
@@ -35,7 +36,7 @@ class AgentForm extends Component
             'membre_id' => 'required|exists:membres,id',
             'agence_id' => 'required|exists:agences,id',
             'statut' => 'required|in:actif,inactif',
-            'roles' => 'array|min:1',
+            'role' => 'required|string|exists:roles,name',
         ];
     }
 
@@ -48,14 +49,15 @@ class AgentForm extends Component
                 $this->agent->id,
                 $this->agence_id,
                 $this->statut,
-                $this->roles
+                $this->role
             );
             session()->flash('success', 'Agent modifié avec succès');
         } else {
             $service->promote(
                 $this->membre_id,
                 $this->agence_id,
-                $this->roles
+                $this->statut,
+                $this->role
             );
             session()->flash('success', 'Agent créé avec succès');
         }
@@ -66,7 +68,7 @@ class AgentForm extends Component
     public function render()
     {
         return view('livewire.agents.agent-form', [
-            'membres' => Membre::with('user')->get(),
+            'membres' => Membre::with('user')->whereDoesntHave('agent')->get(),
             'agences' => Agence::all(),
             'rolesDisponibles' => Role::pluck('name'),
         ])->layout('layouts.app');

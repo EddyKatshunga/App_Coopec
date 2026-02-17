@@ -1,6 +1,7 @@
 <div class="max-w-5xl mx-auto p-6 space-y-8">
+    <a href="{{ route('credits.index') }}">Liste des crédits</a>
     <h1 class="text-2xl font-bold text-gray-800">
-        ➕ Octroi d'un Crédit
+        ➕ Octroi d'un Crédit pour {{ $membre->nom }}
     </h1>
 
     @if (session()->has('success'))
@@ -17,19 +18,6 @@
                 <label class="label">Date crédit</label>
                 <input type="date" wire:model="date_credit" class="input">
                 @error('date_credit') <span class="error">{{ $message }}</span> @enderror
-            </div>
-
-            <div>
-                <label class="label">Membre</label>
-                <select wire:model="membre_id" class="input">
-                    <option value="">-- choisir --</option>
-                    @foreach($membres as $membre)
-                        <option value="{{ $membre->id }}">
-                            {{ $membre->nom }} {{ $membre->postnom }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('membre_id') <span class="error">{{ $message }}</span> @enderror
             </div>
 
             <div>
@@ -82,30 +70,13 @@
         {{-- ================= DATE DE FIN ================= --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="label">Date de fin proposée</label>
-                <input 
-                    type="date" 
-                    wire:model="date_fin_proposee" 
-                    class="input bg-gray-50"
-                    readonly
-                >
-                <p class="text-xs text-gray-500 mt-1">
-                    Calculée automatiquement à partir de la durée
-                </p>
-            </div>
-
-            <div>
                 <label class="label">Date de fin confirmée *</label>
                 <input 
                     type="date" 
                     wire:model="date_fin_confirmee" 
                     class="input"
-                    min="{{ date('Y-m-d') }}"
                 >
                 @error('date_fin_confirmee') <span class="error">{{ $message }}</span> @enderror
-                <p class="text-xs text-gray-500 mt-1">
-                    Saisissez ou confirmez la date de fin
-                </p>
             </div>
         </div>
 

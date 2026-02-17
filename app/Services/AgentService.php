@@ -10,14 +10,16 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class AgentService
 {
     /**
-     * Promouvoir un membre en agent
+     * Créer ou mettre à jour un agent (méthode unifiée)
      */
-    public function promote(
+    public function saveAgent(
+        ?int $agentId = null,
         int $membreId,
         int $agenceId,
-        array $roles = []
+        string $statut,
+        string $role
     ): Agent {
-        return DB::transaction(function () use ($membreId, $agenceId, $roles) {
+        return DB::transaction(function () use ($agentId, $membreId, $agenceId, $statut, $role) {
 
             $membre = Membre::with('user')->findOrFail($membreId);
 
@@ -27,59 +29,78 @@ class AgentService
                 );
             }
 
-            // Créer ou récupérer l’agent
-            $agent = Agent::firstOrCreate(
-                ['membre_id' => $membre->id],
-                [
+            // Si on a un agentId, c'est une modification
+            if ($agentId) {
+                $agent = Agent::with('membre.user')->findOrFail($agentId);
+                
+                // Vérifier que l'agent appartient bien au membre
+                if ($agent->membre_id !== $membreId) {
+                    throw new \Exception("L'agent n'appartient pas au membre spécifié.");
+                }
+                
+                $agent->update([
                     'agence_id' => $agenceId,
-                    'statut' => 'actif',
-                ]
-            );
-
-            // Mise à jour agence + statut
-            $agent->update([
-                'agence_id' => $agenceId,
-                'statut' => 'actif',
-            ]);
-
-            // Rôles Spatie (cumul autorisé)
-            if (! empty($roles)) {
-                $membre->user->syncRoles($roles);
+                    'statut' => $statut,
+                ]);
+                
+                $user = $agent->membre->user;
+            } 
+            // Sinon, c'est une création
+            else {
+                // Vérifier qu'un agent n'existe pas déjà pour ce membre
+                $existingAgent = Agent::where('membre_id', $membreId)->first();
+                
+                if ($existingAgent) {
+                    // Option 1: Lever une exception
+                    throw new \Exception("Un agent existe déjà pour ce membre.");
+                    
+                    // Option 2: Mettre à jour l'existant
+                    // $existingAgent->update([
+                    //     'agence_id' => $agenceId,
+                    //     'statut' => $statut,
+                    // ]);
+                    // $user = $membre->user;
+                    // return $existingAgent;
+                }
+                
+                $agent = Agent::create([
+                    'membre_id' => $membreId,
+                    'agence_id' => $agenceId,
+                    'statut' => $statut,
+                ]);
+                
+                $user = $membre->user;
             }
+
+            // Assigner le rôle unique
+            $user->syncRoles([$role]);
 
             return $agent;
         });
     }
 
     /**
-     * Mettre à jour un agent
+     * Promouvoir un membre en agent (création uniquement)
+     */
+    public function promote(
+        int $membreId,
+        int $agenceId,
+        string $statut,
+        string $role
+    ): Agent {
+        return $this->saveAgent(null, $membreId, $agenceId, $statut, $role);
+    }
+
+    /**
+     * Mettre à jour un agent (modification uniquement)
      */
     public function update(
         int $agentId,
         int $agenceId,
         string $statut,
-        array $roles = []
+        string $role
     ): Agent {
-        return DB::transaction(function () use ($agentId, $agenceId, $statut, $roles) {
-
-            $agent = Agent::with('membre.user')->findOrFail($agentId);
-            $user = $agent->membre->user;
-
-            $agent->update([
-                'agence_id' => $agenceId,
-                'statut' => $statut,
-            ]);
-
-            if (! empty($roles)) {
-                $user->syncRoles($roles);
-            }
-
-            // Si inactif → redevenir membre simple
-            if ($statut === 'inactif') {
-                $user->syncRoles(['membre']);
-            }
-
-            return $agent;
-        });
+        $agent = Agent::findOrFail($agentId);
+        return $this->saveAgent($agentId, $agent->membre_id, $agenceId, $statut, $role);
     }
 }
