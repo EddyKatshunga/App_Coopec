@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Models\Membre;
 use App\Models\Agent;
 use App\Models\Compte;
+use App\Models\HistoriqueRole;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class MembreService
 {
@@ -46,6 +48,17 @@ class MembreService
             ]);
 
             $user->assignRole('membre');
+
+            // Récupération de l'ID du rôle 'membre'
+            $roleMembre = Role::where('name', 'membre')->first();
+            $nouveauRoleId = $roleMembre->id;
+
+            // Enregistrement dans l'historique via la méthode statique
+            HistoriqueRole::logRoleChange(
+                userId: $user->id,
+                ancienRoleId: null,
+                nouveauRoleId: $nouveauRoleId,
+            );
 
             $membre = Membre::create([
                 'user_id' => $user->id,

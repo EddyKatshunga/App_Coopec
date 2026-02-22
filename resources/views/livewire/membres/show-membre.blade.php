@@ -12,10 +12,18 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
+
             <button wire:click="telechargerFiche"
                 class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
                 Télécharger la fiche
             </button>
+
+             @if (!$membre->agent)
+            <a href="{{ route('agent.create', $membre) }}"
+               class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                Promouvoir en Agent
+            </a>
+            @endif
 
             <a href="{{ route('membre.edit', $membre) }}"
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">

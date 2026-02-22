@@ -47,7 +47,6 @@ class TransactionForm extends Component
             'montant'              => 'required|numeric|min:0.01',
             'agence_id'            => 'required|exists:agences,id',
             'agent_collecteur_id'  => 'nullable|exists:agents,id',
-            'date_transaction'     => 'required|date|before_or_equal:today',
         ];
     }
 

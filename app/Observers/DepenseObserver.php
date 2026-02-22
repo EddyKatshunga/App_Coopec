@@ -12,7 +12,13 @@ class DepenseObserver
      */
     public function creating(Depense $Depense): void
     {
-        $agence = $Depense->agence;
+        //On récupère l'agence ici uniquement pour vérifier les soldes disponibles
+        $agence = auth()->user()->agent?->agence; 
+
+        if (!$agence) { 
+            throw new Exception("Aucune agence associée à l'utilisateur."); 
+        } 
+
         if($Depense->monnaie === 'CDF'){
             if ($agence->solde_actuel_coffre_cdf < $Depense->montant) {
                 throw new Exception("Opération impossible : Solde CDF du coffre insuffisant ----- ({$agence->solde_actuel_coffre_cdf}).");
@@ -24,23 +30,23 @@ class DepenseObserver
         }
     }
 
-    public function created(Depense $Depense): void
+    public function created(Depense $model): void
     {
-        $agence = $Depense->agence;
-        if($Depense->monnaie === 'CDF'){
-            $agence->decrement('solde_actuel_coffre_cdf', $Depense->montant);
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
         }else{
-            $agence->decrement('solde_actuel_coffre_usd', $Depense->montant);
+            $agence->decrement('solde_actuel_coffre_usd', $model->montant);
         }
     }
 
-    public function deleted(Depense $Depense): void
+    public function deleted(Depense $model): void
     {
-        $agence = $Depense->agence;
-        if($Depense->monnaie === 'CDF'){
-            $agence->increment('solde_actuel_coffre_cdf', $Depense->montant);
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->increment('solde_actuel_coffre_cdf', $model->montant);
         }else{
-            $agence->increment('solde_actuel_coffre_usd', $Depense->montant);
+            $agence->increment('solde_actuel_coffre_usd', $model->montant);
         }
     }
 }

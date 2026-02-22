@@ -22,6 +22,6 @@ class TypesDepenseList extends Component
     {
         return view('livewire.depenses.types-depense-list', [
             'typesDepenses' => TypesDepense::latest()->paginate(10),
-        ])->layout('layouts.app');;
+        ])->layout('layouts.app');
     }
 }

@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AgenceDirectionHistory extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [

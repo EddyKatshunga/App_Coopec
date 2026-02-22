@@ -19,7 +19,7 @@
             @endforeach
         </select>
 
-        <a href="{{ route('agent.create') }}" class="btn-primary ml-auto">
+        <a href="{{ route('membre.index') }}" class="btn-primary ml-auto">
             + Nouvel agent
         </a>
     </div>
@@ -30,8 +30,7 @@
             <tr>
                 <th class="p-2 text-left">Agent</th>
                 <th>Agence</th>
-                <th>Statut</th>
-                <th>Rôles</th>
+                <th>Rôle</th>
                 <th class="text-right">Actions</th>
             </tr>
         </thead>
@@ -40,22 +39,13 @@
         @foreach($agents as $agent)
             <tr class="border-t">
                 <td class="p-2">
-                    <div class="font-medium">{{ $agent->membre->nom }}</div>
+                    <div class="font-medium">{{ $agent->nom }}</div>
                     <div class="text-xs text-gray-500">
-                        {{ $agent->membre->user->email }}
+                        {{ $agent->email }}
                     </div>
                 </td>
 
                 <td>{{ $agent->agence->nom ?? '-' }}</td>
-
-                <td>
-                    <span class="px-2 py-1 rounded text-xs
-                        {{ $agent->statut === 'actif'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700' }}">
-                        {{ ucfirst($agent->statut) }}
-                    </span>
-                </td>
 
                 <td class="text-xs">
                     {{ $agent->membre->user->roles->pluck('name')->implode(', ') }}

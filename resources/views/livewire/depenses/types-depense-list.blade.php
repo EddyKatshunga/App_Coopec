@@ -33,11 +33,6 @@
 
                         <a href="{{ route('types-depense.edit', $type) }}"
                            class="text-yellow-600">Modifier</a>
-
-                        <button wire:click="delete({{ $type->id }})"
-                                class="text-red-600">
-                            Supprimer
-                        </button>
                     </td>
                 </tr>
             @endforeach

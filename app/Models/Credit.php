@@ -4,18 +4,18 @@ namespace App\Models;
 
 use App\Models\Traits\AffectsCoffre;
 use App\Models\Traits\Blameable;
-use App\Models\Traits\VerifieClotureComptable;
+use App\Models\Traits\ManageClotureComptable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Credit extends Model
 {
-    use VerifieClotureComptable;
+    use ManageClotureComptable;
     use AffectsCoffre;
     use Blameable;
     
     protected $fillable = [
-        'date_credit',
         'numero_credit',
         'membre_id',
         'zone_id',
@@ -41,6 +41,19 @@ class Credit extends Model
     ];
 
     /* ================= RELATIONS ================= */
+    public function journeeComptable(): BelongsTo
+    {
+        return $this->belongsTo(CloturesComptable::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Retourne la colonne de date spécifique à ce modèle.
+     */
+    public function getDateColumnName(): string
+    {
+        return 'date_credit';
+    }
+    
     public function remboursements(): HasMany
     {
         return $this->hasMany(CreditRemboursement::class);
@@ -51,17 +64,14 @@ class Credit extends Model
         return $this->belongsTo(Membre::class);
     }
 
-    public function zone()
+    public function zone(): BelongsTo
     {
         return $this->belongsTo(Zone::class);
     }
 
-    public function agence() {
-        return $this->zone->agence;
-    }
-
-    public function getAgenceIdAttribute() {
-        return $this->agence?->id;
+    public function agence(): BelongsTo
+    {
+        return $this->belongsTo(Agence::class);
     }
 
     public function isAddition(): bool {
@@ -119,6 +129,28 @@ class Credit extends Model
             return 'en_retard';
 
         return 'en_cours';
+    }
+
+    public static function getCreditGroupedByZone(int $agenceId, $date)
+    {
+        return self::with('zone')
+            ->selectRaw('zone_id, monnaie, COUNT(*) as nbre_operations, SUM(capital) as total_montant')
+            ->where('agence_id', $agenceId)
+            ->whereDate('date_credit', $date)
+            ->groupBy('zone_id', 'monnaie')
+            ->get()
+            ->groupBy('zone_id');
+    }
+
+    public static function getInteretGroupedByZone(int $agenceId, $date)
+    {
+        return self::with('zone')
+            ->selectRaw('zone_id, monnaie, COUNT(*) as nbre_operations, SUM(interet) as total_montant')
+            ->where('agence_id', $agenceId)
+            ->whereDate('date_credit', $date)
+            ->groupBy('zone_id', 'monnaie')
+            ->get()
+            ->groupBy('zone_id');
     }
 }
 

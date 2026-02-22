@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Agence extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [
@@ -22,8 +21,31 @@ class Agence extends Model
         'solde_actuel_coffre_cdf',
         'solde_actuel_coffre_usd',
         'solde_actuel_epargne_cdf',
-        'solde_actuel_epargne_cdf',
+        'solde_actuel_epargne_usd',
     ];
+
+    /**
+     * Retourne les règles de validation
+     * @param int|null $id ID de l'agence pour ignorer l'unique lors de l'update
+     */
+    public static function rules($id = null): array
+    {
+        return [
+            'nom'   => "required|string|max:255|unique:agences,nom,{$id}",
+            'code'  => "nullable|string|max:50|unique:agences,code,{$id}",
+            'ville' => 'nullable|string|max:255',
+            'pays'  => 'nullable|string|max:255',
+            
+            // Validation de la clé étrangère vers la table des agents
+            'chef_agence_id' => 'nullable|exists:agents,id',
+            
+            // Les soldes ne peuvent pas être négatifs (min:0)
+            'solde_actuel_coffre_cdf'  => 'nullable|numeric|min:0',
+            'solde_actuel_coffre_usd'  => 'nullable|numeric|min:0',
+            'solde_actuel_epargne_cdf' => 'nullable|numeric|min:0',
+            'solde_actuel_epargne_usd' => 'nullable|numeric|min:0',
+        ];
+    }
     
     public function agents(): HasMany
     {
@@ -73,12 +95,17 @@ class Agence extends Model
         return $this->hasMany(Zone::class);
     }
 
-    public function credits()
+    public function credits(): HasMany
     {
-        return $this->hasManyThrough(Credit::class, Zone::class);
+        return $this->hasMany(Credit::class);
     }
 
-    public function chefAgence() : BelongsTo
+    public function creditRemboursements(): HasMany
+    {
+        return $this->hasMany(CreditRemboursement::class);
+    }
+
+    public function chefAgence(): BelongsTo
     {
         return $this->belongsTo(Agent::class, 'chef_agence_id');
     }

@@ -12,7 +12,7 @@ class TypesDepenseForm extends Component
     public $nom = '';
     public $code_comptable = '';
 
-    public function mount($typesDepense = null)
+    public function mount(?TypesDepense $typesDepense = null)
     {
         if ($typesDepense && $typesDepense->exists) {
             $this->typesDepense = $typesDepense;
@@ -47,12 +47,12 @@ class TypesDepenseForm extends Component
             session()->flash('success', 'Type de dépense créé avec succès.');
         }
 
-        return redirect()->route('types-depenses.index');
+        return redirect()->route('types-depense.index');
     }
 
     public function render()
     {
         return view('livewire.depenses.types-depense-form')
-            ->layout('layouts.app');;
+            ->layout('layouts.app');
     }
 }

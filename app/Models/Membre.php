@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Membre extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [

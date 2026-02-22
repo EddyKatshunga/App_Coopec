@@ -12,10 +12,20 @@
             <strong>Code comptable :</strong>
             <div>{{ $typesDepense->code_comptable }}</div>
         </div>
+
+        <div>
+            <strong>Enregistré par :</strong>
+            <div>{{ $typesDepense->created_by }}</div>
+        </div>
+
+        <div>
+            <strong>Enregistré le :</strong>
+            <div>{{ $typesDepense->created_at }}</div>
+        </div>
     </div>
 
     <div class="mt-6">
-        <a href="{{ route('types-depenses.index') }}"
+        <a href="{{ route('types-depense.index') }}"
            class="text-blue-600">
             ← Retour à la liste
         </a>

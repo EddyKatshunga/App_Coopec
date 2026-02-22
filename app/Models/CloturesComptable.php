@@ -36,10 +36,17 @@ class CloturesComptable extends Model
         'total_remboursement_usd',
         'total_depense_cdf',
         'total_depense_usd',
-        'total_autre_entree_cdf',
-        'total_autre_entree_usd',
+        'total_revenu_cdf',
+        'total_revenu_usd',
+        'physique_coffre_usd',
+        'physique_coffre_cdf',
+        'observation_cloture',
+        'observation_cloture',
+        'total_interet_generes_cdf',
+        'total_interet_generes_usd',
 
-        // Soldes finaux
+        'statut',
+
         'solde_epargne_cdf',
         'solde_epargne_usd',
         'solde_coffre_cdf',
@@ -85,14 +92,60 @@ class CloturesComptable extends Model
         return $this->belongsTo(Agence::class);
     }
 
-    public function createur(): BelongsTo
+    /**
+     * Relation avec les revenus de la journée
+     */
+    public function revenus()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->hasMany(Revenu::class, 'journee_comptable_id');
     }
 
-    public function modificateur(): BelongsTo
+    /**
+     * Relation avec les dépenses de la journée
+     */
+    public function depenses()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->hasMany(Depense::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Relation avec les crédits décaissés dans la journée
+     */
+    public function credits()
+    {
+        return $this->hasMany(Credit::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Relation avec les remboursements de la journée
+     */
+    public function remboursements()
+    {
+        return $this->hasMany(CreditRemboursement::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Relation avec les transactions d'épargne de la journée
+     * (dépôts et retraits)
+     */
+    public function transactionsEpargne()
+    {
+        return $this->hasMany(Transaction::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Pour séparer dépôts et retraits si besoin
+     */
+    public function depots()
+    {
+        return $this->hasMany(Transaction::class, 'journee_comptable_id')
+                    ->where('type', 'depot');
+    }
+
+    public function retraits()
+    {
+        return $this->hasMany(Transaction::class, 'journee_comptable_id')
+                    ->where('type', 'retrait');
     }
 
     /* =====================================================

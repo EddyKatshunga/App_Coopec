@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Zone extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [
@@ -17,8 +16,6 @@ class Zone extends Model
         'code',
         'gerant_id',
         'agence_id',
-        'created_by',
-        'updated_by',
     ];
 
     // belongsTo: Se place dans le modèle de la table qui contient la clé étrangère.

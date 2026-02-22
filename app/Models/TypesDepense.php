@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TypesDepense extends Model
 {
-    use VerifieClotureComptable, Blameable;
+    use Blameable;
 
     protected $fillable = [
         'nom',

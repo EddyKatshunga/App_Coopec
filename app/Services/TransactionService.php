@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Agence;
 use App\Models\Compte;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,7 @@ class TransactionService
              * =====================================================
              */
             $compte = Compte::lockForUpdate()->findOrFail($data['compte_id']);
+            $agence = Agence::lockForUpdate()->findOrFail($data['agence_id']);
 
             $monnaie = $data['monnaie']; // CDF | USD
             $montant = $data['montant'];
@@ -112,7 +114,7 @@ class TransactionService
 
             /**
              * =====================================================
-             * 4. ÉCRITURE 2 — mise à jour du compte
+             * 4. ÉCRITURE 2 — mise à jour du compte Epargne du Membre
              * =====================================================
              */
             if ($monnaie === 'CDF') {
@@ -122,6 +124,21 @@ class TransactionService
             } else {
                 $compte->update([
                     'solde_usd' => $soldeApres,
+                ]);
+            }
+
+            /**
+             * =====================================================
+             * 4. ÉCRITURE 3 — mise à jour du solde Epargne de l'Agence
+             * =====================================================
+             */
+            if ($monnaie === 'CDF') {
+                $agence->update([
+                    'solde_epargne_cdf' => $soldeApres,
+                ]);
+            } else {
+                $agence->update([
+                    'solde_epargne_usd' => $soldeApres,
                 ]);
             }
 

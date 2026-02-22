@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Agence;
 use App\Models\Agent;
 use App\Models\AgenceDirectionHistory;
+use App\Models\HistoriqueRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -66,9 +67,11 @@ class AgenceService
     |--------------------------------------------------------------------------
     */
 
-    public function changerDirecteur(Agence $agence, Agent $nouveauDirecteur): void
+    public function changerDirecteur(Agence $agence, int $nouveauDirecteurId): void
     {
-        DB::transaction(function () use ($agence, $nouveauDirecteur) {
+        DB::transaction(function () use ($agence, $nouveauDirecteurId) {
+            $nouveauDirecteur = Agent::with('user')->findOrFail($nouveauDirecteurId);
+            $nouveauDirecteurUser = $nouveauDirecteur->user;
 
             // Vérifier que l'agent appartient bien à l'agence
             if ($nouveauDirecteur->agence_id !== $agence->id) {
@@ -78,7 +81,7 @@ class AgenceService
             }
 
             // Vérifier qu'il possède un user lié
-            if (!$nouveauDirecteur->user) {
+            if (!$nouveauDirecteurUser) {
                 throw new Exception("L’agent sélectionné ne possède pas de compte utilisateur.");
             }
 
@@ -100,14 +103,35 @@ class AgenceService
             | MODIFICATION DES RÔLES
             |--------------------------------------------------------------------------
             */
+            $role = \Spatie\Permission\Models\Role::findByName('superviseur');
+            $superviseurRoleId = $role->id;
+
+            $role = \Spatie\Permission\Models\Role::findByName('chef_agence');
+            $chefAgenceRoleId = $role->id;
+
+            $oldRole = $nouveauDirecteurUser->roles->first();
+            $oldRoleId = $oldRole ? $oldRole->id : null;
+
 
             // 1️⃣ Ancien directeur → superviseur
             if ($ancienDirecteur && $ancienDirecteur->user) {
                 $ancienDirecteur->user->syncRoles(['superviseur']);
+                
+                HistoriqueRole::create([
+                    'user_id'      => $ancienDirecteur->user->id,
+                    'nouveau_role' => $superviseurRoleId,
+                    'ancien_role'  => $chefAgenceRoleId,
+                ]);
             }
 
             // 2️⃣ Nouveau directeur → directeur
             $nouveauDirecteur->user->syncRoles(['chef_agence']);
+            HistoriqueRole::create([
+                'user_id'      => $nouveauDirecteur->user->id,
+                'nouveau_role' => $chefAgenceRoleId,
+                'ancien_role'  => $oldRoleId,
+            ]);
+                       
 
             /*
             |--------------------------------------------------------------------------
@@ -116,12 +140,12 @@ class AgenceService
             */
 
             $agence->update([
-                'directeur_id' => $nouveauDirecteur->id
+                'chef_agence_id' => $nouveauDirecteur->id
             ]);
 
             /*
             |--------------------------------------------------------------------------
-            | HISTORIQUE (fortement recommandé)
+            | HISTORIQUE
             |--------------------------------------------------------------------------
             */
 

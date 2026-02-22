@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Agence;
 use App\Models\Agent;
 use App\Services\AgenceService;
+use Illuminate\Support\Facades\Hash;
 
 class AgenceShow extends Component
 {
@@ -14,15 +15,18 @@ class AgenceShow extends Component
     public $showModal = false;
     public $nouveauDirecteurId = null;
     public $confirmation = false;
+    public $motDePasse = '';
+    public $motDePasseError = null;
 
     protected $rules = [
         'nouveauDirecteurId' => 'required|exists:agents,id',
-        'confirmation' => 'accepted'
+        'confirmation' => 'accepted',
+        'motDePasse' => 'required',
     ];
 
     public function mount(Agence $agence)
     {
-        $this->agence = $agence->load(['directeur.user', 'agents.user']);
+        $this->agence = $agence->load(['chefAgence']);
     }
 
     public function ouvrirModal()
@@ -40,11 +44,16 @@ class AgenceShow extends Component
     {
         $this->validate();
 
-        $agent = Agent::findOrFail($this->nouveauDirecteurId);
+        $this->reset('motDePasseError');
 
-        $service->changerDirecteur($this->agence, $agent);
+        if (!Hash::check($this->motDePasse, auth()->user()->password)) {
+            $this->motDePasseError = 'Mot de passe incorrect.';
+            return;
+        }
 
-        $this->agence->refresh()->load(['directeur.user', 'agents.user']);
+        $service->changerDirecteur($this->agence, $this->nouveauDirecteurId);
+
+        $this->agence->refresh()->load(['chefAgence.user', 'agents.user']);
 
         $this->showModal = false;
 
@@ -53,6 +62,8 @@ class AgenceShow extends Component
 
     public function render()
     {
-        return view('livewire.agence.agence-show');
+        $depenses = $this->agence->depenses;
+        return view('livewire.agence.agence-show', compact('depenses'))
+            ->layout('layouts.app');
     }
 }

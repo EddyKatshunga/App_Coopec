@@ -62,11 +62,67 @@
         />
     @endcan
 
-    @can('depense.view')
+    @can('agent.create')
         <x-dashboard.action
             title="Tableau de Bord des Depenses"
             icon="list"
             route="types-depense.index"
+        />
+    @endcan
+
+     @can('agent.create')
+        <x-dashboard.action
+            title="Tableau de Bord des Revenus"
+            icon="list"
+            route="types-revenu.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Agents"
+            icon="list"
+            route="agents.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Agences"
+            icon="list"
+            route="agences.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Permissions"
+            icon="list"
+            route="admin.permissions.matrix.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Clotures Journalières"
+            icon="list"
+            route="clotures.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Depenses"
+            icon="list"
+            route="depenses.index"
+        />
+    @endcan
+
+        @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Revenus"
+            icon="list"
+            route="revenus.index"
         />
     @endcan
 

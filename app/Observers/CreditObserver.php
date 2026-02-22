@@ -6,26 +6,30 @@ use App\Models\Credit;
 
 class CreditObserver
 {
-    /**
-     * Handle the Credit "created" event.
-     */
-    public function created(Credit $credit): void
+    public function created(Credit $model): void
     {
-        //
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
+        }else{
+            $agence->decrement('solde_actuel_coffre_usd', $model->montant);
+        }
+    }
+
+    public function deleted(Credit $model): void
+    {
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->increment('solde_actuel_coffre_cdf', $model->montant);
+        }else{
+            $agence->increment('solde_actuel_coffre_usd', $model->montant);
+        }
     }
 
     /**
      * Handle the Credit "updated" event.
      */
     public function updated(Credit $credit): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Credit "deleted" event.
-     */
-    public function deleted(Credit $credit): void
     {
         //
     }

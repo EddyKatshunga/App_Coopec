@@ -1,5 +1,5 @@
 <div class="max-w-5xl mx-auto p-6 space-y-8">
-    <a href="{{ route('credits.index') }}">Liste des crédits</a>
+    <a href="{{ route('credit.pret.create', $membre) }}">Liste des crédits</a>
     <h1 class="text-2xl font-bold text-gray-800">
         ➕ Octroi d'un Crédit pour {{ $membre->nom }}
     </h1>
@@ -101,7 +101,7 @@
 
         {{-- ================= ACTIONS ================= --}}
         <div class="flex justify-end gap-4">
-            <a href="{{ route('credits.index') }}"
+            <a href="{{ route('credit.pret.index') }}"
                class="px-4 py-2 rounded border text-gray-600">
                 Annuler
             </a>

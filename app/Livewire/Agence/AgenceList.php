@@ -23,7 +23,7 @@ class AgenceList extends Component
 
     public function render()
     {
-        $agences = Agence::with('directeur.user')
+        $agences = Agence::with('chefAgence.user')
             ->when($this->search, function ($query) {
                 $query->where('nom', 'like', '%' . $this->search . '%')
                       ->orWhere('code', 'like', '%' . $this->search . '%')
@@ -32,6 +32,7 @@ class AgenceList extends Component
             ->latest()
             ->paginate(10);
 
-        return view('livewire.agence.agence-list', compact('agences'));
+        return view('livewire.agence.agence-list', compact('agences'))
+            ->layout('layouts.app');
     }
 }

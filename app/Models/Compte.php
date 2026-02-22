@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Compte extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
     
     protected $fillable = [

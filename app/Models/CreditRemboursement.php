@@ -4,15 +4,14 @@ namespace App\Models;
 
 use App\Models\Traits\AffectsCoffre;
 use App\Models\Traits\Blameable;
-use App\Models\Traits\VerifieClotureComptable;
+use App\Models\Traits\ManageClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class CreditRemboursement extends Model
 {
-    
-    use VerifieClotureComptable;
+    use ManageClotureComptable;
     use AffectsCoffre;
     use Blameable;
 
@@ -20,7 +19,6 @@ class CreditRemboursement extends Model
 
     protected $fillable = [
         'credit_id',
-        'date_paiement',
         'montant',
 
         // ventilation financière
@@ -34,6 +32,7 @@ class CreditRemboursement extends Model
         'reference_paiement',
 
         'agent_id',
+        'zone_id',
         'mode_paiement',
     ];
 
@@ -53,6 +52,19 @@ class CreditRemboursement extends Model
 
     /* ================= RELATIONS ================= */
 
+    public function journeeComptable(): BelongsTo
+    {
+        return $this->belongsTo(CloturesComptable::class, 'journee_comptable_id');
+    }
+
+    /**
+     * Retourne la colonne de date spécifique à ce modèle.
+     */
+    public function getDateColumnName(): string
+    {
+        return 'date_paiement';
+    }
+
     public function credit(): BelongsTo
     {
         return $this->belongsTo(Credit::class);
@@ -63,19 +75,14 @@ class CreditRemboursement extends Model
         return $this->belongsTo(User::class, 'agent_id');
     }
 
-    public function getZoneAttribute()
+    public function zone(): BelongsTo
     {
-        return $this->credit?->zone;
+        return $this->belongsTo(Zone::class);
     }
 
-    public function getAgenceAttribute()
+    public function agence(): BelongsTo
     {
-        return $this->credit?->zone?->agence;
-    }
-
-    public function getAgenceIdAttribute()
-    {
-        return $this->credit?->zone?->agence_id;
+        return $this->belongsTo(Agence::class);
     }
 
     public function getMonnaieAttribute()
@@ -124,5 +131,16 @@ class CreditRemboursement extends Model
             'banque' => 'Virement bancaire',
             default  => 'Inconnu',
         };
+    }
+
+    public static function getGroupedByZone(int $agenceId, string $date)
+    {
+        return self::with('zone')
+            ->selectRaw('zone_id, monnaie, COUNT(*) as nbre_operations, SUM(montant) as total_montant')
+            ->where('agence_id', $agenceId)
+            ->whereDate('date_paiement', $date)
+            ->groupBy('zone_id', 'devise')
+            ->get()
+            ->groupBy('zone_id');
     }
 }

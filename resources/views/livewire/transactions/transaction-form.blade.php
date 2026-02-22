@@ -32,49 +32,6 @@
     <div>
         <h3>Enregistrer un {{ $type_transaction }}</h3>
     </div>
-    {{-- ================= HEADER : DATE + AGENCE ================= --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {{-- DATE --}}
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                📅 Date de la transaction
-            </label>
-            <input
-                type="date"
-                wire:model="date_transaction"
-                max="{{ now()->toDateString() }}"
-                class="w-full px-4 py-3 rounded-xl bg-white/70 backdrop-blur
-                       border border-gray-200 focus:ring-2 focus:ring-blue-500"
-            >
-            @error('date_transaction')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- AGENCE --}}
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">
-                🏢 Agence
-                <span class="text-xs text-orange-600 font-medium">
-                    (opération sensible)
-                </span>
-            </label>
-            <select
-                wire:model="agence_id"
-                class="w-full px-4 py-3 rounded-xl bg-white/70 backdrop-blur
-                       border border-gray-200 focus:ring-2 focus:ring-blue-500"
-            >
-                @foreach($agences as $agence)
-                    <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
-                @endforeach
-            </select>
-            @error('agence_id')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-    </div>
 
     {{-- ================= COMPTE (COMBOBOX RECHERCHE) ================= --}}
     <div class="relative">

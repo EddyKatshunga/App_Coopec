@@ -6,28 +6,24 @@ use App\Models\CreditRemboursement;
 
 class CreditRemboursementObserver
 {
-    /**
-     * Handle the CreditRemboursement "created" event.
-     */
-    public function created(CreditRemboursement $creditRemboursement): void
+    public function created(CreditRemboursement $model): void
     {
-        //
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->increment('solde_actuel_coffre_cdf', $model->montant);
+        }else{
+            $agence->increment('solde_actuel_coffre_usd', $model->montant);
+        }
     }
 
-    /**
-     * Handle the CreditRemboursement "updated" event.
-     */
-    public function updated(CreditRemboursement $creditRemboursement): void
+    public function deleted(CreditRemboursement $model): void
     {
-        //
-    }
-
-    /**
-     * Handle the CreditRemboursement "deleted" event.
-     */
-    public function deleted(CreditRemboursement $creditRemboursement): void
-    {
-        //
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF'){
+            $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
+        }else{
+            $agence->decrement('solde_actuel_coffre_usd', $model->montant);
+        }
     }
 
     /**

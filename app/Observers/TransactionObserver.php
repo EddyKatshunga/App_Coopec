@@ -9,25 +9,35 @@ class TransactionObserver
     /**
      * Handle the Transaction "created" event.
      */
-    public function created(Transaction $transaction): void
+    public function created(Transaction $model): void
     {
-        //
-    }
-
-    /**
-     * Handle the Transaction "updated" event.
-     */
-    public function updated(Transaction $transaction): void
-    {
-        //
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF' && $model->type === 'DEPOT'){
+            $agence->increment('solde_actuel_coffre_cdf', $model->montant);
+        }elseif($model->monnaie === 'USD' && $model->type === 'DEPOT'){
+            $agence->increment('solde_actuel_coffre_usd', $model->montant);
+        }elseif($model->monnaie === 'CDF' && $model->type === 'RETRAIT'){
+            $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
+        }elseif($model->monnaie === 'USD' && $model->type === 'RETRAIT'){
+            $agence->decrement('solde_actuel_coffre_usd', $model->montant);
+        }
     }
 
     /**
      * Handle the Transaction "deleted" event.
      */
-    public function deleted(Transaction $transaction): void
+    public function deleted(Transaction $model): void
     {
-        //
+        $agence = $model->agence;
+        if($model->monnaie === 'CDF' && $model->type === 'DEPOT'){
+            $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
+        }elseif($model->monnaie === 'USD' && $model->type === 'DEPOT'){
+            $agence->decrement('solde_actuel_coffre_usd', $model->montant);
+        }elseif($model->monnaie === 'CDF' && $model->type === 'RETRAIT'){
+            $agence->increment('solde_actuel_coffre_cdf', $model->montant);
+        }elseif($model->monnaie === 'USD' && $model->type === 'RETRAIT'){
+            $agence->increment('solde_actuel_coffre_usd', $model->montant);
+        }
     }
 
     /**

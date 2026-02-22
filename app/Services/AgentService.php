@@ -3,104 +3,104 @@
 namespace App\Services;
 
 use App\Models\Agent;
-use App\Models\Membre;
+use App\Models\User;
+use App\Models\HistoriqueRole;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Spatie\Permission\Models\Role;
 
 class AgentService
 {
     /**
-     * Créer ou mettre à jour un agent (méthode unifiée)
+     * Création d'un agent
      */
-    public function saveAgent(
-        ?int $agentId = null,
-        int $membreId,
-        int $agenceId,
-        string $statut,
-        string $role
-    ): Agent {
-        return DB::transaction(function () use ($agentId, $membreId, $agenceId, $statut, $role) {
+    public function createAgent(int $membreId, int $userId, int $agenceId, string $roleName, int $roleId): Agent
+    {
+        return DB::transaction(function () use ($membreId, $userId, $agenceId, $roleName, $roleId) {
+            
+            // 1. Insertion dans le modèle Agent
+            $agent = Agent::create([
+                'membre_id' => $membreId,
+                'user_id'   => $userId,
+                'agence_id' => $agenceId,
+            ]);
 
-            $membre = Membre::with('user')->findOrFail($membreId);
+            $user = User::findOrFail($userId);
 
-            if (! $membre->user) {
-                throw new ModelNotFoundException(
-                    "Le membre n'a pas de compte utilisateur."
-                );
-            }
+            // 2. Récupérer l'ancien rôle (le premier car un seul autorisé)
+            $oldRole = $user->roles->first();
+            $oldRoleId = $oldRole ? $oldRole->id : null;
 
-            // Si on a un agentId, c'est une modification
-            if ($agentId) {
-                $agent = Agent::with('membre.user')->findOrFail($agentId);
-                
-                // Vérifier que l'agent appartient bien au membre
-                if ($agent->membre_id !== $membreId) {
-                    throw new \Exception("L'agent n'appartient pas au membre spécifié.");
-                }
-                
-                $agent->update([
-                    'agence_id' => $agenceId,
-                    'statut' => $statut,
-                ]);
-                
-                $user = $agent->membre->user;
-            } 
-            // Sinon, c'est une création
-            else {
-                // Vérifier qu'un agent n'existe pas déjà pour ce membre
-                $existingAgent = Agent::where('membre_id', $membreId)->first();
-                
-                if ($existingAgent) {
-                    // Option 1: Lever une exception
-                    throw new \Exception("Un agent existe déjà pour ce membre.");
-                    
-                    // Option 2: Mettre à jour l'existant
-                    // $existingAgent->update([
-                    //     'agence_id' => $agenceId,
-                    //     'statut' => $statut,
-                    // ]);
-                    // $user = $membre->user;
-                    // return $existingAgent;
-                }
-                
-                $agent = Agent::create([
-                    'membre_id' => $membreId,
-                    'agence_id' => $agenceId,
-                    'statut' => $statut,
-                ]);
-                
-                $user = $membre->user;
-            }
+            // 3. Assigner le nouveau rôle (écrase les anciens via syncRoles)
+            $user->syncRoles([$roleName]);
 
-            // Assigner le rôle unique
-            $user->syncRoles([$role]);
+            // 4. Insérer dans HistoriqueRole
+            HistoriqueRole::create([
+                'user_id'      => $userId,
+                'nouveau_role' => $roleId,
+                'ancien_role'  => $oldRoleId,
+            ]);
 
             return $agent;
         });
     }
 
-    /**
-     * Promouvoir un membre en agent (création uniquement)
-     */
-    public function promote(
-        int $membreId,
-        int $agenceId,
-        string $statut,
-        string $role
-    ): Agent {
-        return $this->saveAgent(null, $membreId, $agenceId, $statut, $role);
-    }
+    public function changerRole(int $userId, string $oldRole, string $newRole): void
+    {
+        $user = User::findOrFail($userId);
+        $user->syncRoles([$oldRole]);
 
+        $oldRole = \Spatie\Permission\Models\Role::findByName($oldRole);
+        $oldRoleId = $oldRole->id;
+
+        $newRole = \Spatie\Permission\Models\Role::findByName($newRole);
+        $newRoleId = $newRole->id;
+
+        HistoriqueRole::create([
+            'user_id'      => $user->id,
+            'nouveau_role' => $newRoleId,
+            'ancien_role'  => $oldRoleId,
+        ]);
+    }
     /**
-     * Mettre à jour un agent (modification uniquement)
+     * Modification d'un agent
      */
-    public function update(
-        int $agentId,
-        int $agenceId,
-        string $statut,
-        string $role
-    ): Agent {
-        $agent = Agent::findOrFail($agentId);
-        return $this->saveAgent($agentId, $agent->membre_id, $agenceId, $statut, $role);
+    public function updateAgent(int $agentId, int $agenceId, string $roleName, int $roleId): Agent
+    {
+        return DB::transaction(function () use ($agentId, $agenceId, $roleName, $roleId) {
+            
+            $agent = Agent::with('user')->findOrFail($agentId);
+            $user = $agent->user;
+
+            // --- Logique de restriction sur l'agence ---
+            // On récupère le rôle actuel avant modification
+            $currentRoleName = $user->getRoleNames()->first();
+
+            if (in_array($currentRoleName, ['chef_agence', 'agent_credit'])) {
+                // Si le rôle actuel est sensible, on vérifie si l'agence tente d'être changée
+                throw new \Exception("Impossible de modifier l'agence pour un agent ayant le rôle : " . $currentRoleName);
+            }
+
+            // Mise à jour de l'agence
+            $agent->update([
+                'agence_id' => $agenceId,
+            ]);
+
+            // --- Gestion du rôle et de l'historique ---
+            $oldRole = $user->roles->first();
+            $oldRoleId = $oldRole ? $oldRole->id : null;
+
+            // On ne procède à la mise à jour que si le rôle a changé
+            if ($oldRoleId !== $roleId) {
+                $user->syncRoles([$roleName]);
+
+                HistoriqueRole::create([
+                    'user_id'      => $user->id,
+                    'nouveau_role' => $roleId,
+                    'ancien_role'  => $oldRoleId,
+                ]);
+            }
+
+            return $agent;
+        });
     }
 }

@@ -17,7 +17,6 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use VerifieClotureComptable;
     use HasFactory, Notifiable, HasRoles;
 
     /**
@@ -62,16 +61,14 @@ class User extends Authenticatable
         return $this->hasOne(Membre::class);
     }
 
-    public function agent(): HasOneThrough
+    public function agent(): HasOne
     {
-        return $this->hasOneThrough(
-            Agent::class, //Le modèle cible
-            Membre::class, // Le modèle intermédiaire
-            'user_id', // Clé étrangère sur la table membres
-            'membre_id', // Clé étrangère sur la table agents
-            'id', // Clé locale sur la table users
-            'id'  // Clé locale sur la table membres
-        );
+        return $this->hasOne(Agent::class);
+    }
+
+    public function getAgenceIdAttribute()
+    {
+        return $this->agent?->agence_id;
     }
 
     /**

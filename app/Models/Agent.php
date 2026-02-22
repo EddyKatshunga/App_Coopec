@@ -11,19 +11,22 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Agent extends Model
 {
-    use VerifieClotureComptable;
     use Blameable;
 
     protected $fillable = [
         'membre_id',
+        'user_id',
         'agence_id',
     ];
-
-    protected $appends = ['nom'];
 
     public function getNomAttribute(): ?string
     {
         return $this->user?->name;
+    }
+
+    public function getEmailAttribute(): ?string
+    {
+        return $this->user?->email;
     }
 
     public function membre() : BelongsTo
@@ -31,9 +34,9 @@ class Agent extends Model
         return $this->belongsTo(Membre::class);
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->membre->user();
+        return $this->belongsTo(User::class);
     }
 
     public function membresAmenes(): HasMany

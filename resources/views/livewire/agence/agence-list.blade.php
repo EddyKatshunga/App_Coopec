@@ -11,7 +11,7 @@
             </p>
         </div>
 
-        <a href="{{ route('agences.create') }}"
+        <a href="{{ route('agence.create') }}"
            class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700
                   text-white font-semibold rounded-xl shadow-lg
                   transition duration-200">
@@ -38,9 +38,11 @@
                     <tr class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         <th class="px-6 py-4">Agence</th>
                         <th class="px-6 py-4">Localisation</th>
-                        <th class="px-6 py-4">Directeur</th>
-                        <th class="px-6 py-4">Solde Coffre</th>
-                        <th class="px-6 py-4">Solde Épargne</th>
+                        <th class="px-6 py-4">Chef d'Agence</th>
+                        <th class="px-6 py-4">Total General CDF</th>
+                        <th class="px-6 py-4">Total General USD</th>
+                        <th class="px-6 py-4">Total Épargne CDF</th>
+                        <th class="px-6 py-4">Total Épargne USD</th>
                         <th class="px-6 py-4">Statut</th>
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
@@ -51,7 +53,7 @@
                     @forelse($agences as $agence)
 
                         @php
-                            $nonFinalisee = is_null($agence->directeur_id)
+                            $nonFinalisee = is_null($agence->chef_agence_id)
                                 || $agence->solde_actuel_coffre < 0;
                         @endphp
 
@@ -72,11 +74,11 @@
                                 {{ $agence->ville }}, {{ $agence->pays }}
                             </td>
 
-                            {{-- Directeur --}}
+                            {{-- Chef_Agence --}}
                             <td class="px-6 py-5">
-                                @if($agence->directeur)
+                                @if($agence->chefAgence)
                                     <div class="text-sm font-medium text-gray-800">
-                                        {{ $agence->directeur->user->name ?? '—' }}
+                                        {{ $agence->chefAgence->user->name ?? '—' }}
                                     </div>
                                 @else
                                     <span class="inline-flex items-center px-3 py-1 text-xs font-semibold
@@ -86,15 +88,26 @@
                                 @endif
                             </td>
 
-                            {{-- Solde Coffre --}}
+                            {{-- Solde Coffre CDF--}}
                             <td class="px-6 py-5 text-sm font-semibold
-                                       {{ $agence->solde_actuel_coffre < 0 ? 'text-red-600' : 'text-gray-800' }}">
-                                {{ number_format($agence->solde_actuel_coffre, 2, ',', ' ') }} CDF
+                                       {{ $agence->solde_actuel_coffre_cdf < 0 ? 'text-red-600' : 'text-gray-800' }}">
+                                {{ number_format($agence->solde_actuel_coffre_cdf, 2, ',', ' ') }} CDF
                             </td>
 
-                            {{-- Solde Épargne --}}
+                            {{-- Solde Coffre USD --}}
+                            <td class="px-6 py-5 text-sm font-semibold
+                                       {{ $agence->solde_actuel_coffre_usd < 0 ? 'text-red-600' : 'text-gray-800' }}">
+                                {{ number_format($agence->solde_actuel_coffre_usd, 2, ',', ' ') }} USD
+                            </td>
+
+                            {{-- Solde Épargne CDF --}}
                             <td class="px-6 py-5 text-sm text-gray-800">
-                                {{ number_format($agence->solde_actuel_epargne, 2, ',', ' ') }} CDF
+                                {{ number_format($agence->solde_actuel_epargne_cdf, 2, ',', ' ') }} CDF
+                            </td>
+
+                            {{-- Solde Épargne USD --}}
+                            <td class="px-6 py-5 text-sm text-gray-800">
+                                {{ number_format($agence->solde_actuel_epargne_usd, 2, ',', ' ') }} USD
                             </td>
 
                             {{-- Statut --}}
@@ -115,12 +128,12 @@
                             {{-- Actions --}}
                             <td class="px-6 py-5 text-right space-x-2">
 
-                                <a href="{{ route('agences.show', $agence) }}"
+                                <a href="{{ route('agence.show', $agence) }}"
                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                     Voir
                                 </a>
 
-                                <a href="{{ route('agences.edit', $agence) }}"
+                                <a href="{{ route('agence.edit', $agence) }}"
                                    class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                     Modifier
                                 </a>
