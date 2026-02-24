@@ -148,7 +148,7 @@
 
         {{-- ACTIONS --}}
         <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-inner border border-gray-100">
-            <a href="{{ route('credit.pret.index') }}" class="text-sm font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">
+            <a href="{{ route('credit.pret.index') }}" wire:navigate class="text-sm font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">
                 ❌ Annuler
             </a>
             <button type="submit" 

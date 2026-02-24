@@ -7,7 +7,9 @@ use App\Models\Membre;
 use App\Services\MembreService;
 use App\Http\Requests\StoreMembreRequest;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AddEditMembre extends Component
 {
     public ?Membre $membre = null;
@@ -98,7 +100,6 @@ class AddEditMembre extends Component
 
     public function render()
     {
-        return view('livewire.membres.addedit-membre')
-            ->layout('layouts.app');;
+        return view('livewire.membres.addedit-membre');
     }
 }

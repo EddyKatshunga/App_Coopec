@@ -7,7 +7,9 @@ use App\Models\Agence;
 use App\Models\Agent;
 use App\Services\AgenceService;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AgenceShow extends Component
 {
     public Agence $agence;
@@ -63,7 +65,6 @@ class AgenceShow extends Component
     public function render()
     {
         $depenses = $this->agence->depenses;
-        return view('livewire.agence.agence-show', compact('depenses'))
-            ->layout('layouts.app');
+        return view('livewire.agence.agence-show', compact('depenses'));
     }
 }

@@ -5,7 +5,9 @@ namespace App\Livewire\Depenses;
 use App\Models\Depense;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class DepenseList extends Component
 {
     use WithPagination;
@@ -30,6 +32,6 @@ class DepenseList extends Component
 
         return view('livewire.depenses.depense-list', [
             'depenses' => $depenses
-        ])->layout('layouts.app');
+        ]);
     }
 }

@@ -19,7 +19,7 @@
             @endforeach
         </select>
 
-        <a href="{{ route('membre.index') }}" class="btn-primary ml-auto">
+        <a href="{{ route('membre.index') }}" class="btn-primary ml-auto" wire:navigate>
             + Nouvel agent
         </a>
     </div>
@@ -52,7 +52,7 @@
                 </td>
 
                 <td class="text-right space-x-2">
-                    <a href="{{ route('agent.show', $agent) }}"
+                    <a href="{{ route('agent.show', $agent) }}" wire:navigate
                        class="text-green-600 hover:underline">
                         Voir le profil
                     </a>

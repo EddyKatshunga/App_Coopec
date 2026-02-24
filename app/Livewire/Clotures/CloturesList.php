@@ -6,7 +6,9 @@ use Livewire\Component;
 use App\Models\CloturesComptable;
 use App\Services\ClotureService;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CloturesList extends Component
 {
     use WithPagination;
@@ -41,6 +43,6 @@ class CloturesList extends Component
         return view('livewire.clotures.clotures-list', [
             'clotures' => $clotures,
             'journeeOuverte' => $journeeOuverte,
-        ])->layout('layouts.app');
+        ]);
     }
 }

@@ -8,7 +8,9 @@ use App\Models\CreditRemboursement;
 use App\Models\User;
 use App\Services\CreditRemboursementService;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class RemboursementForm extends Component
 {
     public Credit $credit;
@@ -63,6 +65,6 @@ class RemboursementForm extends Component
     {
         return view('livewire.remboursements.remboursement-form', [
             'agents' => Agent::where('agence_id', auth()->user()->agence_id)->get() // Idéalement filtrer par agence
-        ])->layout('layouts.app');
+        ]);
     }
 }

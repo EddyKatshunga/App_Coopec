@@ -6,13 +6,15 @@ use Livewire\Component;
 use App\Models\Membre;
 use App\Services\CreditService;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CreditCreate extends Component
 {
     /* ================= FORM FIELDS ================= */
     public $date_credit;
     public $zone_id;
-    public $agent_id;
+    public $agent_id; //L'agent ayant validé le crédit
     public $capital;
     public $interet;
     public $taux_penalite_journalier;
@@ -52,14 +54,14 @@ class CreditCreate extends Component
 
     public function mount(Membre $membre)
     {
-        $this->date_credit = now()->format('Y-m-d');
+        $this->date_credit = auth()->user()->journee_ouverte->date_cloture;
         $this->membre = $membre;
         
         // Chargement des données initiales
         $agence = Auth::user()->agence;
         $this->zones = $agence->zones()->orderBy('nom')->get();
         $this->agents = $agence->agents()->orderBy('nom')->get();
-        $this->agent_id = auth()->user()->id();
+        $this->agent_id = auth()->user()->agent?->id;
     }
 
     public function save(CreditService $creditService)
@@ -80,7 +82,6 @@ class CreditCreate extends Component
 
     public function render()
     {
-        return view('livewire.credits.credit-create')
-            ->layout('layouts.app');
+        return view('livewire.credits.credit-create');
     }
 }

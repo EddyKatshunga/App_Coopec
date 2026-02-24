@@ -1,6 +1,6 @@
 <div class="max-w-3xl mx-auto py-8 px-4">
     <div class="flex justify-between items-center mb-6 no-print">
-        <a href="{{ route('credits.show', $remboursement->credit_id) }}" class="text-gray-500 hover:text-gray-700 text-sm">
+        <a href="{{ route('credits.show', $remboursement->credit_id) }}" wire:navigate class="text-gray-500 hover:text-gray-700 text-sm">
             &larr; Retour au crédit
         </a>
         <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm shadow flex items-center">

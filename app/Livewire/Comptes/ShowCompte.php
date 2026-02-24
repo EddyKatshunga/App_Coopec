@@ -7,7 +7,9 @@ use App\Models\Compte;
 use Carbon\Carbon;
 use App\Services\CompteReleveService;
 use App\Pdf\Generators\ReleveComptePdf;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class ShowCompte extends Component
 {
     public Compte $compte;
@@ -74,7 +76,6 @@ class ShowCompte extends Component
 
     public function render()
     {
-        return view('livewire.comptes.show-compte')
-            ->layout('layouts.app');
+        return view('livewire.comptes.show-compte');
     }
 }

@@ -37,7 +37,7 @@
                         {{ number_format($r->reste_du_apres, 2, ',', ' ') }}
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <a href="{{ route('remboursements.show', $r->id) }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                        <a href="{{ route('remboursements.show', $r->id) }}" wire:navigate class="text-blue-600 hover:text-blue-900 text-sm font-medium">
                             Détails
                         </a>
                     </td>

@@ -9,7 +9,9 @@ use App\Models\Agence;
 use App\Services\AgentService;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AgentForm extends Component
 {
     public ?Agent $agent = null;
@@ -105,6 +107,6 @@ class AgentForm extends Component
         return view('livewire.agents.agent-form', [
             'agences' => Agence::all(),
             'rolesDisponibles' => Role::whereIn('name', $this->allowedRoles)->get(),
-        ])->layout('layouts.app');
+        ]);
     }
 }

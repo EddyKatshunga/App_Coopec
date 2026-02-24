@@ -10,10 +10,10 @@
     <div>
         <h1 class="text-2xl font-bold text-gray-800">Liste des membres</h1>
         <p class="text-sm text-gray-500">Recherche, filtrage et gestion des membres</p>
-        <a href="{{ route('membre.create') }}" class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
+        <a href="{{ route('membre.create') }}" wire:navigate class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
             Ajouter un nouveau membre
         </a>
-        <a href="{{ route('membres.pdf.index') }}" class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
+        <a href="{{ route('membres.pdf.index') }}" wire:navigate class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
             Télécharger la liste des membres
         </a>
     </div>
@@ -84,7 +84,7 @@
                             {{ $membre->numero_identification }}
                         </td>
                         <td class="px-4 py-3 font-medium text-gray-800">
-                            <a href="{{ route('membre.show', $membre) }}">
+                            <a href="{{ route('membre.show', $membre) }}" wire:navigate>
                                  {{ $membre->nom }}
                             </a>
                         </td>
@@ -112,11 +112,11 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-right space-x-2">
-                            <a href="{{ route('membre.show', $membre) }}"
+                            <a href="{{ route('membre.show', $membre) }}" wire:navigate
                                class="text-blue-600 hover:underline">
                                 Voir
                             </a>
-                            <a href="{{ route('membre.edit', $membre) }}"
+                            <a href="{{ route('membre.edit', $membre) }}" wire:navigate
                                class="text-gray-600 hover:underline">
                                 Modifier
                             </a>

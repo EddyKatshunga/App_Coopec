@@ -5,7 +5,9 @@ namespace App\Livewire\Depenses;
 use App\Models\TypesDepense;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class TypesDepenseList extends Component
 {
     use WithPagination;
@@ -22,6 +24,6 @@ class TypesDepenseList extends Component
     {
         return view('livewire.depenses.types-depense-list', [
             'typesDepenses' => TypesDepense::latest()->paginate(10),
-        ])->layout('layouts.app');
+        ]);
     }
 }

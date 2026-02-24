@@ -6,7 +6,9 @@ use App\Models\Photo;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class PhotoList extends Component
 {
     use WithPagination;
@@ -35,6 +37,6 @@ class PhotoList extends Component
     {
         return view('livewire.photos.photo-list', [
             'photos' => Photo::where('user_id', $this->user->id)->latest()->paginate(12)
-        ])->layout('layouts.app');
+        ]);
     }
 }

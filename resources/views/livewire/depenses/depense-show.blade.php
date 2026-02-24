@@ -28,6 +28,6 @@
     </div>
 
     <div class="mt-8">
-        <a href="{{ route('depenses.index') }}" class="text-gray-600 hover:underline">← Retour à la liste</a>
+        <a href="{{ route('depenses.index') }}" class="text-gray-600 hover:underline" wire:navigate>← Retour à la liste</a>
     </div>
 </div>

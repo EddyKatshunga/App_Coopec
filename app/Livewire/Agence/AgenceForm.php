@@ -6,7 +6,9 @@ use Livewire\Component;
 use App\Models\Agence;
 use App\Models\Agent; // N'oubliez pas l'import pour le select
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AgenceForm extends Component
 {
     public ?Agence $agence = null;
@@ -66,6 +68,6 @@ class AgenceForm extends Component
     {
         return view('livewire.agence.agence-form', [
             'agents' => Agent::orderBy('nom')->get() // Pour le menu déroulant
-        ])->layout('layouts.app');
+        ]);
     }
 }

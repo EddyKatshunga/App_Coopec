@@ -8,7 +8,9 @@ use App\Models\Transaction;
 use App\Models\Agence;
 use App\Models\Compte;
 use Carbon\Carbon;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class TransactionListing extends Component
 {
     /* =======================
@@ -232,6 +234,6 @@ class TransactionListing extends Component
                 : collect(),
 
             'comptes' => Compte::orderBy('numero')->get(),
-        ])->layout('layouts.app');
+        ]);
     }
 }

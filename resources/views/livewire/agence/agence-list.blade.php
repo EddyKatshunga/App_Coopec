@@ -11,7 +11,7 @@
             </p>
         </div>
 
-        <a href="{{ route('agence.create') }}"
+        <a href="{{ route('agence.create') }}" wire:navigate
            class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700
                   text-white font-semibold rounded-xl shadow-lg
                   transition duration-200">
@@ -128,12 +128,12 @@
                             {{-- Actions --}}
                             <td class="px-6 py-5 text-right space-x-2">
 
-                                <a href="{{ route('agence.show', $agence) }}"
+                                <a href="{{ route('agence.show', $agence) }}" wire:navigate
                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                     Voir
                                 </a>
 
-                                <a href="{{ route('agence.edit', $agence) }}"
+                                <a href="{{ route('agence.edit', $agence) }}" wire:navigate
                                    class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                     Modifier
                                 </a>

@@ -21,6 +21,11 @@
         {{ $slot }}
     </main>
 
+    {{-- ===== FOOTER GLOBAL ===== --}}
+    @auth
+        @include('layouts.footer')
+    @endauth
+
     @livewireScripts
 </body>
 </html>

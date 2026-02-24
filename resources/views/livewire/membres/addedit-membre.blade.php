@@ -225,7 +225,7 @@
         {{-- ================= ACTIONS ================= --}}
         <div class="flex justify-end gap-4 border-t pt-6">
 
-            <a href="{{ route('membre.index') }}"
+            <a href="{{ route('membre.index') }}" wire:navigate
                class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">
                 Annuler
             </a>

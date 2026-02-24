@@ -43,7 +43,7 @@
 
             {{-- Actions --}}
             <div class="flex justify-end gap-3">
-                <a href="{{ route('membre.show', $membre_id) }}"
+                <a href="{{ route('membre.show', $membre_id) }}" wire:navigate
                    class="px-4 py-2 border rounded-lg text-gray-700">
                     Annuler
                 </a>

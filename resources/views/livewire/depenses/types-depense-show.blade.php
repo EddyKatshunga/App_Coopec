@@ -25,7 +25,7 @@
     </div>
 
     <div class="mt-6">
-        <a href="{{ route('types-depense.index') }}"
+        <a href="{{ route('types-depense.index') }}" wire:navigate
            class="text-blue-600">
             ← Retour à la liste
         </a>

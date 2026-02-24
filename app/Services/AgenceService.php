@@ -96,7 +96,7 @@ class AgenceService
                 ]);
             }
 
-            $ancienDirecteur = $agence->directeur;
+            $ancienDirecteur = $agence->chefAgence;
 
             /*
             |--------------------------------------------------------------------------
@@ -109,7 +109,7 @@ class AgenceService
             $role = \Spatie\Permission\Models\Role::findByName('chef_agence');
             $chefAgenceRoleId = $role->id;
 
-            $oldRole = $nouveauDirecteurUser->roles->first();
+            $oldRole = $nouveauDirecteurUser->roles->first(); //Probablement Superviseur ou Agent_Epargne
             $oldRoleId = $oldRole ? $oldRole->id : null;
 
 
@@ -174,34 +174,6 @@ class AgenceService
         DB::transaction(function () use ($agence, $montant) {
 
             $agence->increment('solde_actuel_coffre', $montant);
-
-            // Ici tu peux enregistrer un mouvement comptable si nécessaire
-        });
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | RETRAIT DE FONDS DU COFFRE
-    |--------------------------------------------------------------------------
-    */
-
-    public function retirerFondsCoffre(Agence $agence, float $montant): void
-    {
-        if ($montant <= 0) {
-            throw ValidationException::withMessages([
-                'montant' => 'Le montant doit être supérieur à zéro.'
-            ]);
-        }
-
-        if ($agence->solde_actuel_coffre < $montant) {
-            throw ValidationException::withMessages([
-                'montant' => 'Solde insuffisant dans le coffre.'
-            ]);
-        }
-
-        DB::transaction(function () use ($agence, $montant) {
-
-            $agence->decrement('solde_actuel_coffre', $montant);
 
             // Ici tu peux enregistrer un mouvement comptable si nécessaire
         });

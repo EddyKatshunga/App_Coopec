@@ -99,6 +99,7 @@ class MembreService
             $numero_compte = $data['numero_identification'] . '-00';
             Compte::create([
                 'membre_id' => $membre->id,
+                'user_id' => $membre->user->id,
                 'numero_compte' => $numero_compte,
             ]);
 

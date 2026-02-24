@@ -103,11 +103,11 @@
 
                     {{-- Actions --}}
                     <div class="flex gap-2 pt-2">
-                        <a href="{{ route('credit.show', $credit) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold text-center hover:bg-gray-100 transition">
+                        <a href="{{ route('credit.show', $credit) }}" wire:navigate class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold text-center hover:bg-gray-100 transition">
                             👁️ Voir plus
                         </a>
                         @if($credit->reste_du > 0)
-                            <a href="{{ route('remboursement.create', $credit) }}" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold text-center hover:bg-blue-700 shadow-sm shadow-blue-200 transition">
+                            <a href="{{ route('remboursement.create', $credit) }}" wire:navigate class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold text-center hover:bg-blue-700 shadow-sm shadow-blue-200 transition">
                                 💸 Rembourser
                             </a>
                         @endif

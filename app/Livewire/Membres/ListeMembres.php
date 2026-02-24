@@ -5,7 +5,9 @@ namespace App\Livewire\Membres;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Membre;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class ListeMembres extends Component
 {
     use WithPagination;
@@ -53,7 +55,6 @@ class ListeMembres extends Component
             ->orderByDesc('created_at')
             ->paginate(30);
 
-        return view('livewire.membres.liste-membres', compact('membres'))
-            ->layout('layouts.app');
+        return view('livewire.membres.liste-membres', compact('membres'));
     }
 }

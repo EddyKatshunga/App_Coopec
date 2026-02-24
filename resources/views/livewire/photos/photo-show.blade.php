@@ -2,7 +2,7 @@
     <div class="bg-black rounded-lg overflow-hidden shadow-2xl">
         <div class="p-2 flex justify-between items-center bg-gray-900 text-white text-sm">
             <span>{{ $photo->original_name }}</span>
-            <a href="{{ route('photos.index', $photo->user_id) }}" class="hover:text-gray-400">Fermer ✕</a>
+            <a href="{{ route('photos.index', $photo->user_id) }}" class="hover:text-gray-400" wire:navigate>Fermer ✕</a>
         </div>
         
         <img src="{{ $photo->url }}" class="w-full max-h-[70vh] object-contain mx-auto">

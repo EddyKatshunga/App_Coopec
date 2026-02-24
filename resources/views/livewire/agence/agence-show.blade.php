@@ -3,23 +3,29 @@
     {{-- Header --}}
     <div class="flex justify-between items-start mb-8">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">
-                {{ $agence->nom }}
-            </h2>
-            <p class="text-sm text-gray-500 mt-1">
-                Code: {{ $agence->code }} • {{ $agence->ville }}, {{ $agence->pays }}
-            </p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $agence->nom }}</h2>
+            </div>
+
+        <div class="flex space-x-3">
+            {{-- NOUVEAU BOUTON : Ouvrir la journée --}}
+            <a href="{{ route('clotures.ouvrir', $agence) }}" wire:navigate
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow transition flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Ouvrir la journée
+            </a>
+
+            <a href="{{ route('agences.zones.create', $agence) }}" wire:navigate
+            class="text-gray-600 hover:text-gray-900 font-medium self-center">
+                Ajouter une zone Epargne
+            </a>
+
+            <a href="{{ route('agences.index') }}" wire:navigate
+                class="text-gray-600 hover:text-gray-900 font-medium">
+                ← Retour
+            </a>
         </div>
-
-        <a href="{{ route('agences.zones.create', $agence) }}"
-           class="text-gray-600 hover:text-gray-900 font-medium">
-            Ajouter une zone Epargne
-        </a>
-
-        <a href="{{ route('agences.index') }}"
-           class="text-gray-600 hover:text-gray-900 font-medium">
-            ← Retour
-        </a>
     </div>
 
     {{-- Cartes Soldes CDF --}}

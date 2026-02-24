@@ -2,7 +2,7 @@
 
     <div class="flex justify-between mb-4">
         <h2 class="text-xl font-bold">Liste des types de révenus</h2>
-        <a href="{{ route('types-revenu.create') }}"
+        <a href="{{ route('types-revenu.create') }}" wire:navigate
            class="bg-green-600 text-white px-4 py-2 rounded">
             Nouveau
         </a>
@@ -28,10 +28,10 @@
                     <td class="p-2 border">{{ $type->nom }}</td>
                     <td class="p-2 border">{{ $type->code_comptable }}</td>
                     <td class="p-2 border flex gap-2">
-                        <a href="{{ route('types-revenu.show', $type) }}"
+                        <a href="{{ route('types-revenu.show', $type) }}" wire:navigate
                            class="text-blue-600">Voir</a>
 
-                        <a href="{{ route('types-revenu.edit', $type) }}"
+                        <a href="{{ route('types-revenu.edit', $type) }}" wire:navigate
                            class="text-yellow-600">Modifier</a>
                     </td>
                 </tr>

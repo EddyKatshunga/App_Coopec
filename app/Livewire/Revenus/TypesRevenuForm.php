@@ -3,8 +3,10 @@
 namespace App\Livewire\Revenus;
 
 use App\Models\TypesRevenu;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.app')]
 class TypesRevenuForm extends Component
 {
         public ?TypesRevenu $typesRevenu = null;
@@ -52,7 +54,6 @@ class TypesRevenuForm extends Component
 
     public function render()
     {
-        return view('livewire.revenus.types-revenu-form')
-            ->layout('layouts.app');
+        return view('livewire.revenus.types-revenu-form');
     }
 }

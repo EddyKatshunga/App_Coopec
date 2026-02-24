@@ -1,6 +1,7 @@
 <?php
 namespace App\Livewire\Clotures;
 
+use App\Models\Agence;
 use Livewire\Component;
 use App\Models\CloturesComptable;
 use App\Models\Transaction;
@@ -9,7 +10,9 @@ use App\Models\CreditRemboursement;
 use App\Models\Revenu;
 use App\Models\Depense;
 use App\Services\ClotureService;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CloturesForm extends Component
 {
     public ?CloturesComptable $cloture = null;
@@ -33,28 +36,27 @@ class CloturesForm extends Component
         'observation_cloture' => 'required_if:ecart_constate,true|string|max:1000|nullable',
     ];
 
-    public function mount(?CloturesComptable $cloture = null)
+    public function mount(?CloturesComptable $cloture, ?Agence $agence)
     {
-        // Si un ID est passé, le modèle existe, c'est donc une CLÔTURE
-        if ($cloture && $cloture->exists) {
-            $this->cloture = $cloture;
-            $this->isOuverture = false;
-            
-            $this->physique_coffre_usd = $cloture->solde_coffre_usd ?? 0;
-            $this->physique_coffre_cdf = $cloture->solde_coffre_cdf ?? 0;
-        } 
-        // Sinon, c'est une OUVERTURE
-        else {
+        // CAS 1 : C'est une OUVERTURE (via l'agence)
+        if ($agence) {
             $this->isOuverture = true;
-            $agenceId = auth()->user()->agence_id;
             
-            // On récupère la dernière clôture juste pour afficher les reports à l'écran
-            $derniere = CloturesComptable::where('agence_id', $agenceId)
+            // On récupère la dernière clôture de cette agence précise
+            $derniere = CloturesComptable::where('agence_id', $agence->id)
                 ->orderBy('date_cloture', 'desc')
                 ->first();
                 
             $this->reportVeilleUsd = $derniere->solde_coffre_usd ?? 0;
             $this->reportVeilleCdf = $derniere->solde_coffre_cdf ?? 0;
+        } 
+        // CAS 2 : C'est une CLÔTURE (via un modèle Cloture existant)
+        elseif ($cloture && $cloture->exists) {
+            $this->cloture = $cloture;
+            $this->isOuverture = false;
+            
+            $this->physique_coffre_usd = $cloture->solde_coffre_usd ?? 0;
+            $this->physique_coffre_cdf = $cloture->solde_coffre_cdf ?? 0;
         }
     }
 
@@ -127,7 +129,6 @@ class CloturesForm extends Component
 
     public function render()
     {
-        return view('livewire.clotures.clotures-form')
-            ->layout('layouts.app');
+        return view('livewire.clotures.clotures-form');
     }
 }

@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Galerie de {{ $user->name }}</h2>
-        <a href="{{ route('photos.create', $user->id) }}" class="bg-blue-600 text-white px-4 py-2 rounded">Ajouter une Photo</a>
+        <a href="{{ route('photos.create', $user->id) }}" class="bg-blue-600 text-white px-4 py-2 rounded" wire:navigate>Ajouter une Photo</a>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -14,9 +14,9 @@
                 @endif
 
                 <div class="mt-2 flex justify-between">
-                    <a href="{{ route('photos.show', $photo->id) }}" class="text-xs text-gray-500 hover:text-blue-600">Voir</a>
+                    <a href="{{ route('photos.show', $photo->id) }}" class="text-xs text-gray-500 hover:text-blue-600" wire:navigate>Voir</a>
                     <div class="flex space-x-2">
-                         <a href="{{ route('photos.edit', [$user->id, $photo->id]) }}" class="text-xs text-amber-600">Éditer</a>
+                         <a href="{{ route('photos.edit', [$user->id, $photo->id]) }}" class="text-xs text-amber-600" wire:navigate>Éditer</a>
                          <button wire:click="delete({{ $photo->id }})" wire:confirm="Supprimer ?" class="text-xs text-red-600">Suppr.</button>
                     </div>
                 </div>

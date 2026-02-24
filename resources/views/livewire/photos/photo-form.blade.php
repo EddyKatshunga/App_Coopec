@@ -54,7 +54,7 @@
             </div>
 
             <div class="flex justify-end pt-4 border-t space-x-3">
-                <a href="{{ route('photos.index', ['user' => $user->id]) }}" 
+                <a href="{{ route('photos.index', ['user' => $user->id]) }}" wire:navigate
                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition">
                     Annuler
                 </a>

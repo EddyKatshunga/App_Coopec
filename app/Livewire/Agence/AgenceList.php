@@ -5,7 +5,9 @@ namespace App\Livewire\Agence;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Agence;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AgenceList extends Component
 {
     use WithPagination;
@@ -32,7 +34,6 @@ class AgenceList extends Component
             ->latest()
             ->paginate(10);
 
-        return view('livewire.agence.agence-list', compact('agences'))
-            ->layout('layouts.app');
+        return view('livewire.agence.agence-list', compact('agences'));
     }
 }

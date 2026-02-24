@@ -50,7 +50,7 @@
             </div>
 
             <div class="flex justify-end space-x-3 border-t pt-6">
-                <a href="{{ route('revenus.index') }}" class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50">Annuler</a>
+                <a href="{{ route('revenus.index') }}" class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50" wire:navigate>Annuler</a>
                 <button type="submit" wire:loading.attr="disabled" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center">
                     <span wire:loading wire:target="save" class="mr-2 animate-spin text-white">...</span>
                     Confirmer l'Entrée

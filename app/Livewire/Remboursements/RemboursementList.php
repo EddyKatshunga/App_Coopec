@@ -6,7 +6,9 @@ use App\Models\CreditRemboursement;
 use App\Models\Credit;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class RemboursementList extends Component
 {
     use WithPagination;

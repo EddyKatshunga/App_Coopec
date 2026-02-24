@@ -5,7 +5,9 @@ namespace App\Livewire\Comptes;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Compte;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CompteList extends Component
 {
     use WithPagination;
@@ -50,6 +52,6 @@ class CompteList extends Component
         return view('livewire.comptes.compte-list', [
             'comptes' => $comptes,
             'stats'   => $stats,
-        ])->layout('layouts.app');
+        ]);
     }
 }

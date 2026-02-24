@@ -4,7 +4,9 @@ namespace App\Livewire\Membres;
 
 use Livewire\Component;
 use App\Models\Membre;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class ShowMembre extends Component
 {
     public Membre $membre;
@@ -38,8 +40,7 @@ class ShowMembre extends Component
 
     public function render()
     {
-        return view('livewire.membres.show-membre')
-            ->layout('layouts.app');
+        return view('livewire.membres.show-membre');
     }
 }
 

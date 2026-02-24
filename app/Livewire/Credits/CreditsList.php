@@ -8,7 +8,9 @@ use App\Models\Credit;
 use App\Models\Zone;
 use App\Models\User;
 use Carbon\Carbon;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CreditsList extends Component
 {
     use WithPagination;
@@ -58,7 +60,6 @@ class CreditsList extends Component
         
         $credits = $query->orderBy('date_credit', 'desc')->paginate(12);
 
-        return view('livewire.credits.credits-list', compact('credits'))
-            ->layout('layouts.app');
+        return view('livewire.credits.credits-list', compact('credits'));
     }
 }

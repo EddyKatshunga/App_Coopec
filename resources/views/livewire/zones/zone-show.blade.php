@@ -19,7 +19,7 @@
             </div>
 
         <div class="px-6 py-4 bg-gray-50 border-t flex justify-between">
-            <a href="{{ route('agences.zones.index', $zone->agence_id) }}" class="text-indigo-600 hover:underline">← Liste des zones</a>
+            <a href="{{ route('agences.zones.index', $zone->agence_id) }}" class="text-indigo-600 hover:underline" wire:navigate>← Liste des zones</a>
             <span class="text-gray-400 text-xs italic">Dernière modification par : {{ $zone->updated_by ?? 'Système' }}</span>
         </div>
     </div>

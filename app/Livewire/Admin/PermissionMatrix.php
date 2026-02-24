@@ -5,7 +5,9 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class PermissionMatrix extends Component
 {
     public $newRoleName = '';
@@ -70,6 +72,6 @@ class PermissionMatrix extends Component
         return view('livewire.admin.permission-matrix', [
             'roles' => Role::all(),
             'permissions' => Permission::all(),
-        ])->layout('layouts.app');
+        ]);
     }
 }

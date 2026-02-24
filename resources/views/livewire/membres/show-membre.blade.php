@@ -19,35 +19,35 @@
             </button>
 
              @if (!$membre->agent)
-            <a href="{{ route('agent.create', $membre) }}"
+            <a href="{{ route('agent.create', $membre) }}" wire:navigate
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Promouvoir en Agent
             </a>
             @endif
 
-            <a href="{{ route('membre.edit', $membre) }}"
+            <a href="{{ route('membre.edit', $membre) }}" wire:navigate
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Modifier
             </a>
 
-            <a href="{{ route('compte.create', $membre) }}"
+            <a href="{{ route('compte.create', $membre) }}" wire:navigate
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Ajouter un compte Epargne
             </a>
 
-            <a href="{{ route('credit.pret.create', $membre) }}"
+            <a href="{{ route('credit.pret.create', $membre) }}" wire:navigate
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Ajouter un crédit
             </a>
 
-             <a href="{{ route('photos.create', $membre->user) }}"
+             <a href="{{ route('photos.create', $membre->user) }}" wire:navigate
                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 Ajouter une photo
             </a>
 
 
 
-            <a href="{{ route('membre.index') }}"
+            <a href="{{ route('membre.index') }}" wire:navigate
                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
                 Retour
             </a>
@@ -141,7 +141,7 @@
                     </div>
                 </div>
 
-                <a href="{{ route('compte.show', $compte) }}"
+                <a href="{{ route('compte.show', $compte) }}" wire:navigate
                    class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Voir plus
                 </a>

@@ -145,7 +145,7 @@
             {{-- Boutons --}}
             <div class="border-t pt-8 flex items-center justify-between">
 
-                <a href="{{ route('agences.index') }}"
+                <a href="{{ route('agences.index') }}" wire:navigate
                    class="text-gray-600 hover:text-gray-800 font-medium transition">
                     Annuler
                 </a>

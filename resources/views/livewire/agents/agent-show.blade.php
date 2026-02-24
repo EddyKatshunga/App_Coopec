@@ -13,6 +13,12 @@
                     <span class="px-2 py-1 bg-blue-900 text-white text-xs rounded font-bold uppercase">
                         Agent @ {{ $agent->agence->name }}
                     </span>
+
+                    <a href="{{ route('agent.edit', $agent) }}" wire:navigate
+                        class="px-4 py-2 border rounded-lg text-gray-700">
+                        Modifier
+                    </a>
+                    
                     @if($agent->zone_dirige)
                         <span class="px-2 py-1 bg-green-500 text-white text-xs rounded font-bold uppercase">
                             Gérant Zone : {{ $agent->zone_dirige->name }}

@@ -6,9 +6,12 @@ use App\Models\Zone;
 use App\Models\Agence;
 use App\Models\Agent;
 use App\Services\AgentService;
+use App\Services\ZoneService;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class ZoneForm extends Component
 {
     public Agence $agence;
@@ -46,38 +49,41 @@ class ZoneForm extends Component
         ];
     }
 
-    public function save()
+    // Livewire injecte automatiquement le service si passé en paramètre de la méthode
+    public function save(ZoneService $zoneService)
     {
         $validated = $this->validate();
 
-        if ($this->zone) {
-            // Mode Édition
-            $this->zone->update($validated);
-            session()->flash('message', 'Zone mise à jour avec succès.');
-        } else {
-            // Mode Création
-            $validated['agence_id'] = $this->agence->id;
-            Zone::create($validated);
+        try {
+            if (!$this->zone) {
+                $validated['agence_id'] = $this->agence->id;
+            }
 
-            session()->flash('message', 'Zone créée avec succès.');
+            $zoneService->saveZone($validated, $this->zone);
+
+            session()->flash('message', $this->zone ? 'Zone mise à jour.' : 'Zone créée.');
+            return redirect()->route('agences.zones.index', $this->agence->id);
+            
+        } catch (\Exception $e) {
+            session()->flash('error', "Une erreur est survenue : " . $e->getMessage());
         }
-
-        return redirect()->route('agences.zones.index', $this->agence->id);
     }
 
     public function render()
     {
-        $eligibleGerants = Agent::where('agence_id', $this->agence->id)
-            // On exclut l'agent déjà gérant de la zone actuelle si on est en mode édition
-            ->whereDoesntHave('zone_dirige', function($query) {
-                if ($this->zone) {
-                    $query->where('id', '!=', $this->zone->id);
-                }
-            })
-            ->get();
+        $eligibleGerants = Agent::where('agence_id', $this->agence->id) // 1. Même agence
+                            // 2. N'est PAS Chef de Zone (sauf éventuellement pour la zone en cours d'édition)
+                            ->whereDoesntHave('zone_dirige', function($query) {
+                                if ($this->zone) {
+                                    $query->where('id', '!=', $this->zone->id);
+                                }
+                            })
+                            // 3. N'est PAS Chef d'Agence (on enchaîne avec un AND implicite)
+                            ->whereDoesntHave('agence_dirige') 
+                            ->get();
 
         return view('livewire.zones.zone-form', [
             'gerants' => $eligibleGerants
-        ])->layout('layouts.app');
+        ]);
     }
 }

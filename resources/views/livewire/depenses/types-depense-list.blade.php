@@ -2,7 +2,7 @@
 
     <div class="flex justify-between mb-4">
         <h2 class="text-xl font-bold">Liste des types de dépenses</h2>
-        <a href="{{ route('types-depense.create') }}"
+        <a href="{{ route('types-depense.create') }}" wire:navigate
            class="bg-green-600 text-white px-4 py-2 rounded">
             Nouveau
         </a>

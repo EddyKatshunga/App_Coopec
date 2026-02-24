@@ -28,7 +28,7 @@
     </div>
 
     <div class="mt-10 flex justify-between">
-        <a href="{{ route('revenus.index') }}" class="text-green-600 font-bold hover:underline">← Retour à la liste</a>
+        <a href="{{ route('revenus.index') }}" class="text-green-600 font-bold hover:underline" wire:navigate>← Retour à la liste</a>
         <button onclick="window.print()" class="text-gray-400 hover:text-black">Imprimer</button>
     </div>
 </div>

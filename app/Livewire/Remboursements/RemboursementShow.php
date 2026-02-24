@@ -4,7 +4,9 @@ namespace App\Livewire\Remboursements;
 
 use App\Models\CreditRemboursement;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class RemboursementShow extends Component
 {
     public CreditRemboursement $remboursement;
@@ -16,7 +18,6 @@ class RemboursementShow extends Component
 
     public function render()
     {
-        return view('livewire.remboursements.remboursement-show')
-            ->layout('layouts.app');
+        return view('livewire.remboursements.remboursement-show');
     }
 }

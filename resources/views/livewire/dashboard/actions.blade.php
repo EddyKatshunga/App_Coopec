@@ -1,14 +1,10 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-    {{-- =========================
-        👥 MEMBRES
-    ========================== --}}
-
-    @can('membre.create')
+    @can('epargne.depot.create')
         <x-dashboard.action
-            title="Nouveau membre"
-            icon="user-plus"
-            route="membre.create"
+            title="Ajouter un Dépot"
+            icon="list"
+            route="comptes.index"
         />
     @endcan
 
@@ -102,9 +98,17 @@
 
     @can('agent.create')
         <x-dashboard.action
-            title="Gestion des Comptes Epargnes"
+            title="Historique des Roles"
             icon="list"
-            route="comptes.index"
+            route="historiquesroles.index"
+        />
+    @endcan
+
+    @can('membre.create')
+        <x-dashboard.action
+            title="Nouveau membre"
+            icon="user-plus"
+            route="membre.create"
         />
     @endcan
 

@@ -6,7 +6,9 @@ use Livewire\Component;
 use App\Models\Compte;
 use App\Models\Agent;
 use App\Services\TransactionService;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class TransactionForm extends Component
 {
     public Compte $compte;
@@ -69,6 +71,6 @@ class TransactionForm extends Component
         return view('livewire.transactions.transaction-form', [
             // On s'assure de récupérer les agents de la même agence
             'agents' => Agent::where('agence_id', auth()->user()->agence_id)->get(),
-        ])->layout('layouts.app');
+        ]);
     }
 }

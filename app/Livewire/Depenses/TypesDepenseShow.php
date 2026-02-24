@@ -4,7 +4,9 @@ namespace App\Livewire\Depenses;
 
 use App\Models\TypesDepense;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class TypesDepenseShow extends Component
 {
     public TypesDepense $typesDepense;
@@ -16,7 +18,6 @@ class TypesDepenseShow extends Component
 
     public function render()
     {
-        return view('livewire.depenses.types-depense-show')
-            ->layout('layouts.app');;
+        return view('livewire.depenses.types-depense-show');
     }
 }

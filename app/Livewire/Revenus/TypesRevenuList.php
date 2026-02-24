@@ -5,7 +5,9 @@ namespace App\Livewire\Revenus;
 use App\Models\TypesRevenu;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class TypesRevenuList extends Component
 {
     use WithPagination;
@@ -22,7 +24,7 @@ class TypesRevenuList extends Component
     {
         return view('livewire.revenus.types-revenu-list', [
             'typesRevenus' => TypesRevenu::latest()->paginate(10),
-        ])->layout('layouts.app');
+        ]);
     }
     
 }

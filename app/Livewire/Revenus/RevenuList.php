@@ -5,7 +5,9 @@ namespace App\Livewire\Revenus;
 use App\Models\Revenu;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class RevenuList extends Component
 {
     use WithPagination;
@@ -26,6 +28,6 @@ class RevenuList extends Component
                 ->where('libelle', 'like', '%' . $this->search . '%')
                 ->latest()
                 ->paginate(10)
-        ])->layout('layouts.app');
+        ]);
     }
 }

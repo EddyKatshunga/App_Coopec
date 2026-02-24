@@ -54,7 +54,7 @@
             </div>
 
             <div class="flex justify-end pt-4 border-t space-x-3">
-                <a href="{{ route('agences.zones.index', $agence->id) }}" 
+                <a href="{{ route('agences.zones.index', $agence->id) }}" wire:navigate
                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md transition">
                     Annuler
                 </a>

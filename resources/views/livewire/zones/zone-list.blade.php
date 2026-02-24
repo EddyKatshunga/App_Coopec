@@ -26,7 +26,7 @@
                         {{ $zone->gerant->nom ?? 'Aucun gérant assigné' }}
                     </td>
                     <td class="p-3 border text-center space-x-3">
-                        <a href="{{ route('agences.zones.show', $zone->id) }}" class="text-indigo-600 hover:underline">Détails</a>
+                        <a href="{{ route('agences.zones.show', $zone->id) }}" class="text-indigo-600 hover:underline" wire:navigate>Détails</a>
                     </td>
                 </tr>
             @endforeach

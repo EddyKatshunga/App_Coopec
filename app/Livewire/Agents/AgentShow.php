@@ -4,7 +4,9 @@ namespace App\Livewire\Agents;
 
 use App\Models\Agent;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AgentShow extends Component
 {
     public Agent $agent;
@@ -28,7 +30,6 @@ class AgentShow extends Component
 
     public function render()
     {
-        return view('livewire.agents.agent-show')
-            ->layout('layouts.app');
+        return view('livewire.agents.agent-show');
     }
 }

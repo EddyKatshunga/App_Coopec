@@ -36,6 +36,7 @@ use App\Livewire\Clotures\CloturesShow;
 use App\Livewire\Depenses\DepenseForm;
 use App\Livewire\Depenses\DepenseList;
 use App\Livewire\Depenses\DepenseShow;
+use App\Livewire\Historiques\HistoriqueRoleDashboard;
 use App\Livewire\Revenus\RevenuForm;
 use App\Livewire\Revenus\RevenuList;
 use App\Livewire\Revenus\RevenuShow;
@@ -49,6 +50,8 @@ use App\Livewire\Photos\{PhotoList, PhotoForm, PhotoShow};
 use App\Livewire\Remboursements\RemboursementForm;
 use App\Livewire\Remboursements\RemboursementList;
 use App\Livewire\Remboursements\RemboursementShow;
+use App\Livewire\Transactions\TransactionShow;
+use App\Models\HistoriqueRole;
 
 Route::prefix('admin')->group(function () {
     Route::get('/permissions-matrix', PermissionMatrix::class)->name('admin.permissions.matrix.index');
@@ -74,8 +77,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/clotures/ouvrir', CloturesForm::class)->name('clotures.ouvrir');
-    Route::get('/clotures/{cloture}/valider', CloturesForm::class)->name('clotures.valider');
+    Route::get('/clotures/ouverture/{agence}', CloturesForm::class)->name('clotures.ouvrir');
+    Route::get('/clotures/edit/{cloture}', CloturesForm::class)->name('clotures.valider');
     Route::get('/clotures/{cloture}/show', CloturesShow::class)->name('clotures.show');
     Route::get('/clotures', CloturesList::class)->name('clotures.index');
 });
@@ -150,8 +153,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/transaction/index', TransactionListing::class)->name('epargne.transactions.index');
+    Route::get('/transaction/index', TransactionSList::class)->name('epargne.transactions.index');
     Route::get('/transaction/list', TransactionsList::class)->name('transaction.list');
+    Route::get('/transaction/{transaction}/show', TransactionShow::class)->name('transaction.show');
     Route::get('/compte/{compte}/transaction/depot/create', TransactionForm::class)
         ->name('epargne.depot.create'); // Le type sera 'DEPOT' par défaut dans le mount
     Route::get('/compte/{compte}/transaction/retrait/create', TransactionForm::class)
@@ -169,6 +173,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/credit/{credit}/remboursement/create', RemboursementForm::class)->name('remboursement.create');
     Route::get('/remboursement/{remboursement}/show', RemboursementShow::class)->name('remboursement.show');
     Route::get('/remboursements', RemboursementList::class)->name('remboursements.index');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/historiquesroles', HistoriqueRoleDashboard::class)->name('historiquesroles.index');
 });
 
 

@@ -6,7 +6,9 @@ use Livewire\Component;
 use App\Models\Credit;
 use App\Services\CreditCalculatorService;
 use Carbon\Carbon;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class CreditShow extends Component
 {
     public Credit $credit;
@@ -73,6 +75,6 @@ class CreditShow extends Component
                 ->remboursements()
                 ->orderBy('date_paiement')
                 ->get(),
-        ])->layout('layouts.app');
+        ]);
     }
 }

@@ -6,7 +6,9 @@ use App\Models\Depense;
 use App\Models\TypesDepense;
 use App\Models\Agent;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class DepenseForm extends Component
 {
     public $montant, $monnaie = 'USD', $libelle, $reference, $description, $types_depense_id, $beneficiaire_id;
@@ -35,6 +37,6 @@ class DepenseForm extends Component
         return view('livewire.depenses.depense-form', [
             'types' => TypesDepense::all(),
             'agents' => Agent::all()
-        ])->layout('layouts.app');
+        ]);
     }
 }

@@ -15,7 +15,7 @@
         </div>
 
         <div class="flex gap-2">
-            <a href="{{ route('membre.show', $compte->membre) }}"
+            <a href="{{ route('membre.show', $compte->membre) }}" wire:navigate
                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">
                 Retour au membre
             </a>

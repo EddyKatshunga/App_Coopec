@@ -4,7 +4,7 @@
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">📊 Comptes Épargnes</h1>
-            <p class="text-gray-500 text-sm">Gestion des membres et balances de la coopérative</p>
+            <p class="text-gray-500 text-sm">Sélectionner un compte pour ajouter un Dépot ou un Retrait</p>
         </div>
     </div>
 
@@ -46,12 +46,41 @@
                 <div class="p-5">
                     <div class="flex justify-between items-start">
                         <div class="flex items-center gap-3">
+                            {{-- Photo --}}
                             <div class="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold flex-shrink-0">
-                                {{ strtoupper(substr($compte->user->name ?? '?', 0, 1)) }}
+                            @if($compte->user->photo_path)
+                                <img src="{{ $compte->user->photo_path }}" alt="Photo" class="h-10 w-10 rounded-full object-cover">
+                            @else
+                                @php
+                                    $sexe = $compte->user->membre?->sexe;
+                                    $isHomme = $sexe === 'M';
+                                    $isFemme = $sexe === 'F';
+                                    
+                                    $bgColor = $isHomme ? 'bg-blue-100' : ($isFemme ? 'bg-pink-100' : 'bg-gradient-to-br from-indigo-100 to-purple-100');
+                                    $textColor = $isHomme ? 'text-blue-600' : ($isFemme ? 'text-pink-600' : 'text-indigo-600');
+                                @endphp
+                                
+                                <div class="h-10 w-10 rounded-full {{ $bgColor }} flex items-center justify-center">
+                                    <svg class="h-6 w-6 {{ $textColor }}" fill="currentColor" viewBox="0 0 20 20">
+                                        @if($isHomme)
+                                            <!-- Icône homme avec détails -->
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                            <path d="M15 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 11-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L16.586 5H15a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                        @elseif($isFemme)
+                                            <!-- Icône femme avec détails -->
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                            <path d="M5 5a1 1 0 011-1h2a1 1 0 010 2H7v1a1 1 0 01-2 0V5z" clip-rule="evenodd"/>
+                                        @else
+                                            <!-- Icône neutre -->
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                        @endif
+                                    </svg>
+                                </div>
+                            @endif
                             </div>
                             <div class="min-w-0">
-                                <h3 class="font-bold text-gray-900 leading-tight truncate">{{ $compte->user->name ?? '—' }}</h3>
-                                <p class="text-xs font-mono text-gray-500">{{ $compte->numero_compte }}</p>
+                                <h3 class="font-bold text-gray-900 leading-tight truncate">{{ $compte->numero_compte }}</h3>
+                                <p class="text-xs font-mono text-gray-500">{{ $compte->user->name ?? '—' }}</p>
                             </div>
                         </div>
                         
@@ -92,9 +121,11 @@
                     </div>
 
                     <div class="flex items-center justify-between pt-2 gap-2">
-                        <a href="{{ route('compte.show', $compte) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg text-[10px] font-bold text-center hover:bg-gray-50 transition uppercase">Voir</a>
-                        <a href="{{ route('epargne.depot.create', $compte) }}" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-green-700 transition uppercase">Dépôt</a>
-                        <a href="{{ route('epargne.retrait.create', $compte) }}" class="flex-1 bg-amber-500 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-amber-600 transition uppercase">Retrait</a>
+                        <a href="{{ route('compte.show', $compte) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg text-[10px] font-bold text-center hover:bg-gray-50 transition uppercase" wire:navigate>Voir</a>
+                        <a href="{{ route('epargne.depot.create', $compte) }}" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-green-700 transition uppercase" wire:navigate>Dépôt</a>
+                        @can('epargne.retrait.create')
+                        <a href="{{ route('epargne.retrait.create', $compte) }}" class="flex-1 bg-amber-500 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-amber-600 transition uppercase" wire:navigate>Retrait</a>
+                        @endcan
                     </div>
                 </div>
             </div>

@@ -76,7 +76,7 @@
             </div>
 
             <div class="flex justify-end space-x-3 border-t pt-6">
-                <a href="{{ route('depenses.index') }}" 
+                <a href="{{ route('depenses.index') }}" wire:navigate
                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                     Annuler
                 </a>

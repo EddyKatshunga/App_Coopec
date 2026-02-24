@@ -7,7 +7,9 @@ use App\Models\Compte;
 use App\Models\Membre;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')]
 class AddCompte extends Component
 {
     public $membre_id;
@@ -54,7 +56,6 @@ class AddCompte extends Component
 
     public function render()
     {
-        return view('livewire.comptes.add-compte')
-            ->layout('layouts.app');
+        return view('livewire.comptes.add-compte');
     }
 }
