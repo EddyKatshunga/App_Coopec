@@ -19,7 +19,12 @@
             <div class="flex flex-col items-end">
                 <span class="text-xs font-bold text-gray-400 uppercase">Date</span>
                 <span class="font-mono text-gray-700">
-                    {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}
+                    @if (auth()->user()->journee_ouverte)
+                        {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}
+                    @else
+                        Opération Impossible, pas de date disponible
+                    @endif
+                    
                 </span>
             </div>
         </div>
@@ -49,7 +54,7 @@
             {{-- SECTION MONTANT & DEVISE --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Montant à transférer</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Montant</label>
                     <div class="relative">
                         <input
                             type="number"
@@ -58,6 +63,7 @@
                             class="w-full px-5 py-4 text-2xl font-black rounded-2xl bg-gray-50 border-2 {{ $errors->has('montant') ? 'border-red-500 bg-red-50' : 'border-transparent' }} focus:bg-white focus:border-blue-600 focus:ring-0 transition-all"
                             placeholder="0,00"
                         >
+                        <span class="text-lg font-bold text-gray-400">{{ money_to_words($montant, $monnaie) }}</span>
                         <div class="absolute inset-y-0 right-0 pr-6 flex items-center pointer-events-none">
                             <span class="text-lg font-bold text-gray-400">{{ $monnaie }}</span>
                         </div>

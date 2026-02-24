@@ -3,6 +3,11 @@
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-800">Enregistrer une nouvelle dépense</h2>
             <p class="text-sm text-gray-600">Les fonds seront déduits du coffre dès la validation.</p>
+             @if (auth()->user()->journee_ouverte)
+                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+            @else
+                <h5>Opération Impossible, pas de date disponible</h5>
+            @endif
         </div>
 
         <form wire:submit.prevent="save" class="p-6 space-y-6">

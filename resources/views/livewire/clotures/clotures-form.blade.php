@@ -136,8 +136,8 @@
                                 <p class="text-sm opacity-80 italic">Calculé selon les flux enregistrés</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-2xl font-mono font-black">${{ number_format($cloture->solde_coffre_usd ?? 0, 2, ',', ' ') }}</p>
-                                <p class="text-2xl font-mono font-black">{{ number_format($cloture->solde_coffre_cdf ?? 0, 0, ',', ' ') }} FC</p>
+                                <p class="text-2xl font-mono font-black">${{ number_format($cloture->agence->solde_actuel_coffre_usd ?? 0, 2, ',', ' ') }}</p>
+                                <p class="text-2xl font-mono font-black">{{ number_format($cloture->agence->solde_actuel_coffre_cdf ?? 0, 0, ',', ' ') }} FC</p>
                             </div>
                         </div>
 

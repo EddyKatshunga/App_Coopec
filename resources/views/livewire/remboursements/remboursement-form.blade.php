@@ -29,7 +29,11 @@
         <div class="bg-blue-700 px-6 py-4">
             <h3 class="text-white font-bold text-lg">Nouveau Remboursement - {{ $credit->user->name }}</h3>
             <p class="text-blue-100 text-sm italic">Crédit Ref: {{ $credit->numero_credit }}</p>
-            <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ Carbon\Carbon::parse($date_credit)->format('d/m/Y') }}</h3>
+            @if (auth()->user()->journee_ouverte)
+                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+            @else
+                <h5>Opération Impossible, pas de date disponible</h5>
+            @endif
         </div>
 
         <form wire:submit.prevent="save" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">

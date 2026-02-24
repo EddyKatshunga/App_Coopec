@@ -39,40 +39,6 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 text-white p-6 rounded-lg shadow-sm">
-        <h3 class="text-xl font-bold mb-6 text-center border-b border-gray-600 pb-2">Rapprochement de Caisse (Théorique vs Physique)</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 divide-x divide-gray-600">
-            <div class="px-4">
-                <h4 class="text-center text-blue-300 font-bold mb-4 uppercase tracking-widest">Devise USD</h4>
-                <div class="flex justify-between mb-2"><span>Solde Théorique (Système)</span> <span class="font-mono text-lg">${{ number_format($cloture->solde_coffre_usd, 2) }}</span></div>
-                <div class="flex justify-between mb-2"><span>Solde Physique (Compté)</span> <span class="font-mono text-lg text-yellow-400">${{ number_format($cloture->physique_coffre_usd, 2) }}</span></div>
-                
-                @php $ecartUsd = $cloture->physique_coffre_usd - $cloture->solde_coffre_usd; @endphp
-                <div class="flex justify-between mt-4 pt-4 border-t border-gray-600">
-                    <span>Écart</span> 
-                    <span class="font-mono font-bold text-lg {{ $ecartUsd == 0 ? 'text-green-400' : 'text-red-400' }}">
-                        ${{ number_format($ecartUsd, 2) }}
-                    </span>
-                </div>
-            </div>
-
-            <div class="px-4">
-                <h4 class="text-center text-blue-300 font-bold mb-4 uppercase tracking-widest">Devise CDF</h4>
-                <div class="flex justify-between mb-2"><span>Solde Théorique (Système)</span> <span class="font-mono text-lg">{{ number_format($cloture->solde_coffre_cdf, 2) }} FC</span></div>
-                <div class="flex justify-between mb-2"><span>Solde Physique (Compté)</span> <span class="font-mono text-lg text-yellow-400">{{ number_format($cloture->physique_coffre_cdf, 2) }} FC</span></div>
-                
-                @php $ecartCdf = $cloture->physique_coffre_cdf - $cloture->solde_coffre_cdf; @endphp
-                <div class="flex justify-between mt-4 pt-4 border-t border-gray-600">
-                    <span>Écart</span> 
-                    <span class="font-mono font-bold text-lg {{ $ecartCdf == 0 ? 'text-green-400' : 'text-red-400' }}">
-                        {{ number_format($ecartCdf, 2) }} FC
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
     @if($cloture->observation_cloture)
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
         <h4 class="text-yellow-800 font-bold">Observation du caissier :</h4>

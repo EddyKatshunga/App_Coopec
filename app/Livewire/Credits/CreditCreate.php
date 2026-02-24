@@ -54,7 +54,7 @@ class CreditCreate extends Component
 
     public function mount(Membre $membre)
     {
-        $this->date_credit = auth()->user()->journee_ouverte->date_cloture;
+        $this->date_credit = auth()->user()->journee_ouverte?->date_cloture;
         $this->membre = $membre;
         
         // Chargement des données initiales

@@ -14,7 +14,11 @@
             ➕ Octroi d'un Crédit pour <span class="text-blue-600">{{ $membre->nom }}</span>
         </h1>
         <div class="text-sm font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-600 border border-gray-200">
-            📅 Date d'opération : {{ Carbon\Carbon::parse($date_credit)->format('d/m/Y') }}
+             @if (auth()->user()->journee_ouverte)
+                📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}
+            @else
+                Opération Impossible, pas de date disponible
+            @endif
         </div>
     </div>
 

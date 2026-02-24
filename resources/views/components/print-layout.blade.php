@@ -1,3 +1,5 @@
+{{-- ressources/views/components/print-layout.blade.php --}}
+
 @props([
     'title' => 'DOCUMENT OFFICIEL', 
     'reference' => '', 
@@ -59,7 +61,7 @@
             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-12 w-auto object-contain">
             <div class="border-l-2 border-gray-200 pl-3">
                 <h1 class="text-xl font-black uppercase tracking-tighter leading-none">{{ config('app.name') }}</h1>
-                <p class="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5">Institution de Microfinance</p>
+                <p class="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5">{{ config('settings.nom_entreprise') }}</p>
                 <p class="text-[8px] text-gray-400 font-medium">Agrément N° : 123/XYZ/2024</p>
             </div>
         </div>
@@ -82,13 +84,13 @@
         <div class="grid grid-cols-3 gap-2 text-[7px] text-gray-500 uppercase font-semibold">
             <div>
                 <p class="text-gray-900 mb-0.5">Siège Social</p>
-                <p>123 Avenue de l'Innovation</p>
-                <p>Kinshasa, RDC</p>
+                <p>AV. LUMUMBA N°141</p>
+                <p>Kikwit, RDC</p>
             </div>
             <div class="text-center border-x border-gray-100">
                 <p class="text-gray-900 mb-0.5">Contact</p>
                 <p>+243 000 000 000</p>
-                <p>contact@votre-banque.com</p>
+                <p>contact@sysco.com</p>
             </div>
             <div class="text-right">
                 <p class="text-gray-900 mb-0.5">Digital</p>

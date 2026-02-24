@@ -2,6 +2,11 @@
     <div class="bg-white shadow-md rounded-lg overflow-hidden border-t-4 border-green-500">
         <div class="px-6 py-4 bg-gray-50 border-b">
             <h2 class="text-xl font-bold text-gray-800">Enregistrer une Entrée de Fonds</h2>
+             @if (auth()->user()->journee_ouverte)
+                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+            @else
+                <h5>Opération Impossible, pas de date disponible</h5>
+            @endif
         </div>
 
         <form wire:submit.prevent="save" class="p-6 space-y-6">

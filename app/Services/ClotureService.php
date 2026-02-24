@@ -15,9 +15,10 @@ class ClotureService
     public function ouvrirJournee(int $agenceId): CloturesComptable
     {
         return DB::transaction(function () use ($agenceId) {
-            if(!$agenceId){
+            if (!$agenceId) {
                 throw new Exception("L'Agence est Obligatoire.");
             }
+
             $dejaOuverte = CloturesComptable::where('agence_id', $agenceId)
                 ->where('statut', 'ouverte')
                 ->exists();
@@ -27,12 +28,12 @@ class ClotureService
             }
 
             $derniere = CloturesComptable::where('agence_id', $agenceId)
-                ->orderBy('date_cloture', 'desc')
+                ->orderBy('id', 'desc')
                 ->first();
 
             return CloturesComptable::create([
                 'agence_id'         => $agenceId,
-                'date_cloture'      => Carbon::create(2025, 12, 15), //production: now()->format('Y-m-d')
+                'date_cloture'      => Carbon::create(2025, 12, 15), // production: now()->format('Y-m-d')
                 'statut'            => 'ouverte',
                 'report_coffre_usd' => $derniere->solde_coffre_usd ?? 0,
                 'report_coffre_cdf' => $derniere->solde_coffre_cdf ?? 0,
@@ -51,86 +52,59 @@ class ClotureService
             throw new Exception("Cette journée est déjà clôturée.");
         }
 
+        // 1. Calculer tous les totaux en mémoire
         $this->calculerTotaux($cloture);
 
-        return $cloture->update([
-            'physique_coffre_usd' => $donneesPhysiques['usd'],
-            'physique_coffre_cdf' => $donneesPhysiques['cdf'],
-            'observation_cloture' => $donneesPhysiques['observation'] ?? null,
-            'statut'              => 'cloturee',
-        ]);
+        // 2. Assigner les données de clôture finale
+        $cloture->physique_coffre_usd = $donneesPhysiques['usd'] ?? 0;
+        $cloture->physique_coffre_cdf = $donneesPhysiques['cdf'] ?? 0;
+        $cloture->observation_cloture = $donneesPhysiques['observation'] ?? null;
+        $cloture->statut = 'cloturee';
+
+        // 3. Sauvegarde finale unique (Persiste toutes les modifs du fill + les modifs ci-dessus)
+        return $cloture->save();
     }
 
     /**
-     * Recalcule tous les totaux en utilisant les relations Eloquent
-     * pour garantir le respect des clés étrangères, des soft deletes et des statuts.
+     * Recalcule tous les totaux
      */
     private function calculerTotaux(CloturesComptable $cloture): void
     {
-        // Revenus
-        $revenuUsd = $cloture->revenus()->where('monnaie', 'USD')->sum('montant');
-        $revenuCdf = $cloture->revenus()->where('monnaie', 'CDF')->sum('montant');
+        // On récupère les sommes avec un fallback à 0 pour éviter les erreurs de calcul
+        $data = [
+            'total_revenu_usd'        => $cloture->revenus()->where('monnaie', 'USD')->sum('montant') ?? 0,
+            'total_revenu_cdf'        => $cloture->revenus()->where('monnaie', 'CDF')->sum('montant') ?? 0,
+            'total_depense_usd'       => $cloture->depenses()->where('monnaie', 'USD')->sum('montant') ?? 0,
+            'total_depense_cdf'       => $cloture->depenses()->where('monnaie', 'CDF')->sum('montant') ?? 0,
+            'total_credit_usd'        => $cloture->credits()->where('monnaie', 'USD')->sum('capital') ?? 0,
+            'total_credit_cdf'        => $cloture->credits()->where('monnaie', 'CDF')->sum('capital') ?? 0,
+            'total_interet_generes_usd' => $cloture->credits()->where('monnaie', 'USD')->sum('interet') ?? 0,
+            'total_interet_generes_cdf' => $cloture->credits()->where('monnaie', 'CDF')->sum('interet') ?? 0,
+            'total_remboursement_usd' => $cloture->remboursements()->where('monnaie', 'USD')->sum('montant') ?? 0,
+            'total_remboursement_cdf' => $cloture->remboursements()->where('monnaie', 'CDF')->sum('montant') ?? 0,
+            'total_depot_usd'         => $cloture->depots()->where('monnaie', 'USD')->sum('montant') ?? 0,
+            'total_depot_cdf'         => $cloture->depots()->where('monnaie', 'CDF')->sum('montant') ?? 0,
+            'total_retrait_usd'       => $cloture->retraits()->where('monnaie', 'USD')->sum('montant') ?? 0,
+            'total_retrait_cdf'       => $cloture->retraits()->where('monnaie', 'CDF')->sum('montant') ?? 0,
+        ];
 
-        // Dépenses
-        $depenseUsd = $cloture->depenses()->where('monnaie', 'USD')->sum('montant');
-        $depenseCdf = $cloture->depenses()->where('monnaie', 'CDF')->sum('montant');
+        // Remplissage de l'objet
+        $cloture->fill($data);
 
-        // Crédits octroyés (Sorties)
-        $creditUsd = $cloture->credits()->where('monnaie', 'USD')->sum('montant');
-        $creditCdf = $cloture->credits()->where('monnaie', 'CDF')->sum('montant');
-
-        // Remboursements de crédits (Entrées)
-        $remboursementUsd = $cloture->remboursements()->where('monnaie', 'USD')->sum('montant');
-        $remboursementCdf = $cloture->remboursements()->where('monnaie', 'CDF')->sum('montant');
-
-        // Dépôts d'épargne (Entrées)
-        $depotUsd = $cloture->depots()->where('monnaie', 'USD')->sum('montant');
-        $depotCdf = $cloture->depots()->where('monnaie', 'CDF')->sum('montant');
-
-        // Retraits d'épargne (Sorties)
-        $retraitUsd = $cloture->retraits()->where('monnaie', 'USD')->sum('montant');
-        $retraitCdf = $cloture->retraits()->where('monnaie', 'CDF')->sum('montant');
-
-
-        // 2. Mise à jour des champs de la clôture
-        $cloture->fill([
-            'total_revenu_usd'        => $revenuUsd,
-            'total_revenu_cdf'        => $revenuCdf,
-            'total_depense_usd'       => $depenseUsd,
-            'total_depense_cdf'       => $depenseCdf,
-            'total_depot_usd'         => $depotUsd,
-            'total_depot_cdf'         => $depotCdf,
-            'total_retrait_usd'       => $retraitUsd,
-            'total_retrait_cdf'       => $retraitCdf,
-            'total_credit_usd'        => $creditUsd,
-            'total_credit_cdf'        => $creditCdf,
-            'total_remboursement_usd' => $remboursementUsd,
-            'total_remboursement_cdf' => $remboursementCdf,
-        ]);
-
-        // 3. Calcul des soldes finaux (Théoriques en caisse)
+        // Calcul des soldes (Théoriques en caisse)
         $cloture->solde_coffre_usd = $this->calculerSoldeFinal($cloture, 'usd');
         $cloture->solde_coffre_cdf = $this->calculerSoldeFinal($cloture, 'cdf');
         
-        // 4. Calcul du solde épargne (Stock global de l'épargne) : Report + Dépôts - Retraits
-        $cloture->solde_epargne_usd = $cloture->report_epargne_usd + $depotUsd - $retraitUsd;
-        $cloture->solde_epargne_cdf = $cloture->report_epargne_cdf + $depotCdf - $retraitCdf;
-
-        // 5. Sauvegarde en base de données
-        $cloture->save();
+        // Calcul du solde épargne global
+        $cloture->solde_epargne_usd = ($cloture->report_epargne_usd ?? 0) + $data['total_depot_usd'] - $data['total_retrait_usd'];
+        $cloture->solde_epargne_cdf = ($cloture->report_epargne_cdf ?? 0) + $data['total_depot_cdf'] - $data['total_retrait_cdf'];
     }
 
     private function calculerSoldeFinal(CloturesComptable $cloture, string $devise): float
     {
-        $report = ($devise === 'usd') ? $cloture->report_coffre_usd : $cloture->report_coffre_cdf;
-        
-        $entrees = $cloture->{"total_depot_$devise"} 
-                 + $cloture->{"total_remboursement_$devise"} 
-                 + $cloture->{"total_revenu_$devise"};
-
-        $sorties = $cloture->{"total_retrait_$devise"} 
-                 + $cloture->{"total_credit_$devise"} 
-                 + $cloture->{"total_depense_$devise"};
+        $report  = (float) ($devise === 'usd' ? $cloture->report_coffre_usd : $cloture->report_coffre_cdf);
+        $entrees = (float) ($cloture->{"total_depot_$devise"} + $cloture->{"total_remboursement_$devise"} + $cloture->{"total_revenu_$devise"});
+        $sorties = (float) ($cloture->{"total_retrait_$devise"} + $cloture->{"total_credit_$devise"} + $cloture->{"total_depense_$devise"});
 
         return ($report + $entrees) - $sorties;
     }

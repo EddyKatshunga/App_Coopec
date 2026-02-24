@@ -13,9 +13,6 @@
         <a href="{{ route('membre.create') }}" wire:navigate class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
             Ajouter un nouveau membre
         </a>
-        <a href="{{ route('membres.pdf.index') }}" wire:navigate class="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900">
-            Télécharger la liste des membres
-        </a>
     </div>
 
     {{-- Filtres --}}

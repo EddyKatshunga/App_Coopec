@@ -36,22 +36,25 @@ class CloturesForm extends Component
         'observation_cloture' => 'required_if:ecart_constate,true|string|max:1000|nullable',
     ];
 
-    public function mount(?CloturesComptable $cloture, ?Agence $agence)
+    public function mount($cloture = null, $agence = null)
     {
-        // CAS 1 : C'est une OUVERTURE (via l'agence)
+        // 1. Logique pour l'OUVERTURE (On reçoit une Agence ou un ID d'agence)
         if ($agence) {
+            // Si c'est un ID qui est passé au lieu de l'objet
+            $agenceModel = ($agence instanceof Agence) ? $agence : Agence::findOrFail($agence);
+            
             $this->isOuverture = true;
             
-            // On récupère la dernière clôture de cette agence précise
-            $derniere = CloturesComptable::where('agence_id', $agence->id)
+            // On récupère la dernière clôture pour les reports
+            $derniere = CloturesComptable::where('agence_id', $agenceModel->id)
                 ->orderBy('date_cloture', 'desc')
                 ->first();
                 
             $this->reportVeilleUsd = $derniere->solde_coffre_usd ?? 0;
             $this->reportVeilleCdf = $derniere->solde_coffre_cdf ?? 0;
         } 
-        // CAS 2 : C'est une CLÔTURE (via un modèle Cloture existant)
-        elseif ($cloture && $cloture->exists) {
+        // 2. Logique pour la CLÔTURE (On reçoit une Cloture existante)
+        elseif ($cloture && $cloture instanceof CloturesComptable && $cloture->exists) {
             $this->cloture = $cloture;
             $this->isOuverture = false;
             
