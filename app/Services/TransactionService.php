@@ -14,135 +14,61 @@ class TransactionService
      * Créer une transaction financière (DEPOT ou RETRAIT)
      */
 
-    private function verifierDateCloture(string $date, int $agenceId): void
-    {
-        $derniereTransaction = Transaction::where('agence_id', $agenceId)
-            ->orderByDesc('date_transaction')
-            ->first();
+    /**
+     * Créer une transaction financière (DEPOT ou RETRAIT)
+     */
+    public function enregistrerTransactionEpargne(
+        int $compte_id, 
+        string $type_transaction,
+        string $monnaie,
+        float $montant,
+        ?int $agent_collecteur_id // Rendu nullable pour plus de souplesse
+    ): Transaction {
+        // Utilisation de DB::transaction pour garantir l'intégrité des données
+        return DB::transaction(function () use (
+            $compte_id, 
+            $type_transaction, 
+            $monnaie, 
+            $montant, 
+            $agent_collecteur_id
+        ) {
+            // 1. Verrouillage du compte pour éviter les conditions de concurrence (Race conditions)
+            $compte = Compte::lockForUpdate()->findOrFail($compte_id);
 
-        if ($derniereTransaction && $date < $derniereTransaction->date_transaction) {
-            throw ValidationException::withMessages([
-                'date_transaction' =>
-                    "Impossible d’enregistrer une opération antérieure au "
-                    . \Carbon\Carbon::parse($derniereTransaction->date_transaction)->format('d/m/Y')
-            ]);
-        }
-    }
-
-    public function effectuerOperation(array $data): Transaction
-    {
-        return DB::transaction(function () use ($data) {
-
-            /**
-             * =====================================================
-             * 1. LECTURE — récupération du compte
-             * =====================================================
-             */
-            $compte = Compte::lockForUpdate()->findOrFail($data['compte_id']);
-            $agence = Agence::lockForUpdate()->findOrFail($data['agence_id']);
-
-            $monnaie = $data['monnaie']; // CDF | USD
-            $montant = $data['montant'];
-
+            // 2. Vérification de sécurité sur le montant
             if ($montant <= 0) {
                 throw ValidationException::withMessages([
                     'montant' => 'Le montant doit être strictement positif.',
                 ]);
             }
 
-            $derniereTransaction = Transaction::where('agence_id', $data['agence_id'])
-                ->orderByDesc('date_transaction')
-                ->first();
-
-            if ($derniereTransaction && $data['date_transaction'] < $derniereTransaction->date_transaction) {
+            // On utilise le solde actuel du compte verrouillé pour plus de sécurité
+            $solde_actuel_reel = ($monnaie === 'CDF') ? $compte->solde_cdf : $compte->solde_usd;
+            
+            if ($type_transaction === 'RETRAIT' && $solde_actuel_reel < $montant) {
                 throw ValidationException::withMessages([
-                    'date_transaction' => 'Une transaction plus récente existe déjà pour cette agence (' . $derniereTransaction->date_transaction->format('d/m/Y') . ').',
+                    'montant' => 'Opération annulée : Solde insuffisant sur le compte.',
                 ]);
             }
 
+            $solde_apres = ($type_transaction === 'DEPOT') 
+                ? $solde_actuel_reel + $montant 
+                : $solde_actuel_reel - $montant;
 
-            // Solde actuel selon la monnaie
-            $soldeAvant = match ($monnaie) {
-                'CDF' => $compte->solde_cdf,
-                'USD' => $compte->solde_usd,
-                default => throw ValidationException::withMessages([
-                    'monnaie' => 'Monnaie invalide.',
-                ]),
-            };
-
-            /**
-             * =====================================================
-             * 2. CALCUL — solde après opération
-             * =====================================================
-             */
-            $typeOp = $data['type_transaction']; // DEPOT | RETRAIT
-
-            if ($typeOp === 'RETRAIT' && $soldeAvant < $montant) {
-                throw ValidationException::withMessages([
-                    'montant' => 'Solde insuffisant pour effectuer ce retrait.',
-                ]);
-            }
-
-            $soldeApres = match ($typeOp) {
-                'DEPOT'   => $soldeAvant + $montant,
-                'RETRAIT' => $soldeAvant - $montant,
-                default  => throw ValidationException::withMessages([
-                    'type_op' => 'Type d’opération invalide.',
-                ]),
-            };
-
-            /**
-             * =====================================================
-             * 3. ÉCRITURE 1 — insertion transaction
-             * =====================================================
-             */
-            $transaction = Transaction::create([
-                'compte_id'              => $compte->id,
-                'agence_id'              => $data['agence_id'],
-                'agent_collecteur_id'    => $data['agent_collecteur_id'] ?? null,
-
-                'date_transaction'       => $data['date_transaction'],
-                'type_transaction'       => $typeOp,
-                'montant'                => $montant,
-                'monnaie'                => $monnaie,
-
-                'solde_avant'            => $soldeAvant,
-                'solde_apres'            => $soldeApres,
-
-                'statut'                 => 'VALIDE',
+            // Insertion de la transaction
+            return Transaction::create([
+                'compte_id'           => $compte->id,
+                'agence_id'           => auth()->user()->agence_id,
+                'agent_collecteur_id' => $agent_collecteur_id,
+                'user_id'             => auth()->id(), // L'utilisateur qui saisit l'opération
+                'date_transaction'    => now(),
+                'type_transaction'    => $type_transaction,
+                'montant'             => $montant,
+                'monnaie'             => $monnaie,
+                'solde_avant'         => $solde_actuel_reel,
+                'solde_apres'         => $solde_apres,
+                'statut'              => 'VALIDE',
             ]);
-
-            /**
-             * =====================================================
-             * 4. ÉCRITURE 2 — mise à jour du compte Epargne du Membre
-             * =====================================================
-             */
-            if ($monnaie === 'CDF') {
-                $compte->update([
-                    'solde_cdf' => $soldeApres,
-                ]);
-            } else {
-                $compte->update([
-                    'solde_usd' => $soldeApres,
-                ]);
-            }
-
-            /**
-             * =====================================================
-             * 4. ÉCRITURE 3 — mise à jour du solde Epargne de l'Agence
-             * =====================================================
-             */
-            if ($monnaie === 'CDF') {
-                $agence->update([
-                    'solde_epargne_cdf' => $soldeApres,
-                ]);
-            } else {
-                $agence->update([
-                    'solde_epargne_usd' => $soldeApres,
-                ]);
-            }
-
-            return $transaction;
         });
     }
 

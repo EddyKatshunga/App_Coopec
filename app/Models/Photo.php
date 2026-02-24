@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Photo extends Model
 {
-    use VerifieClotureComptable, Blameable;
+    use Blameable;
     
     protected $fillable = [
         'user_id',

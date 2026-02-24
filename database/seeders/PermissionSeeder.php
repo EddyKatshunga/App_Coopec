@@ -11,55 +11,56 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         /**
-         * ===============================
+         * ============================================================
          * 1️⃣ PERMISSIONS MÉTIER ATOMIQUES
-         * ===============================
+         * ============================================================
          */
         $permissions = [
-
-            // ===== Membre (lecture + signalement) =====
-            'membre.view.profile',
-            'membre.view.epargne',
-            'membre.view.prets',
+            // ----- Membre (Le socle commun à tous les utilisateurs) -----
+            'membre.view.profile',      // Accès à ses propres informations
+            'membre.view.epargne',     // Consulter ses soldes
+            'membre.view.prets',       // Consulter l'état de ses crédits
             'membre.view.remboursements',
-            'membre.signal.problem',
-            'membre.change.password',
+            'membre.signal.problem',    // Signaler une anomalie au support
+            'membre.change.password',   // Sécurité personnelle
 
-            // ===== Membres (gestion) =====
-            'membre.create',
-            'membre.update',
+            // ----- Gestion Administrative des Membres -----
+            'membre.create',           // Recrutement de nouveaux clients
+            'membre.update',           // Mise à jour des dossiers clients
 
-            // ===== Épargne =====
-            'epargne.depot.create',
-            'epargne.retrait.create',
+            // ----- Épargne (Mouvements de fonds) -----
+            'epargne.depot.create',    // Enregistrement d'un dépôt (Agent/OPS)
+            'epargne.retrait.create',  // Décaissement d'espèces (Caisse uniquement)
             'epargne.view.transactions',
-            'epargne.view.my_depots',
-            'epargne.correct',
+            'epargne.view.my_depots',  // Suivi de collecte pour les agents
+            'epargne.correct',         // Annulation/Extourne (Haut risque)
 
-            // ===== Crédit =====
-            'credit.pret.create',
+            // ----- Crédit (Cycle de vie du prêt) -----
+            'credit.pret.create',      // Montage du dossier
             'credit.pret.view',
+            'credit.pret.valider',     // Approbation technique/comptable
+            'credit.pret.decaisser',   // Sortie physique des fonds (Caisse)
             'credit.remboursement.create',
             'credit.remboursement.view',
             'credit.remboursement.correct',
-            'credit.cloturer',
+            'credit.cloturer',         // Clôture administrative du prêt
 
-            // ===== Dépenses =====
-            'depense.create',
+            // ----- Comptabilité & Finances -----
+            'depense.create',          // Enregistrement d'une charge
             'depense.view',
+            'depense.valider',         // Accord pour le paiement de la charge
+            'compta.cloture.view',     // Lecture des journaux de clôture
+            'compta.rapports.view',    // Bilans et rapports financiers
+            'compta.audit.logs',       // Surveillance des actions utilisateurs
 
-            // ===== Agents & rôles =====
-            'agent.create',
-            'agent.assign.role',
-
-            // ===== Zone épargne =====
+            // ----- Structure & Agences -----
+            'agent.create',            // Création de comptes employés
+            'agent.assign.role',       // Modification des privilèges
             'zone.create',
             'zone.update',
             'zone.view',
-
-            // ===== Agences =====
-            'agence.view.all',
-            'agence.manage.all',
+            'agence.view.all',         // Vision multi-agences
+            'agence.manage.all',       // Paramètres globaux du système
         ];
 
         foreach ($permissions as $permission) {
@@ -67,108 +68,95 @@ class PermissionSeeder extends Seeder
         }
 
         /**
-         * ===============================
-         * 2️⃣ CASCADE RÔLES → PERMISSIONS
-         * ===============================
+         * ============================================================
+         * 2️⃣ CONSTRUCTION DES CASCADES (HIÉRARCHIE)
+         * ============================================================
          */
 
-        // 🧑‍💼 MEMBRE
+        // 🟢 LE SOCLE : MEMBRE (Tout utilisateur est au moins un membre)
         $membrePermissions = [
-            'membre.view.profile',
-            'membre.view.epargne',
-            'membre.view.prets',
-            'membre.view.remboursements',
-            'membre.signal.problem',
-            'membre.change.password',
+            'membre.view.profile', 'membre.view.epargne', 'membre.view.prets',
+            'membre.view.remboursements', 'membre.signal.problem', 'membre.change.password',
         ];
 
-        // 🧾 AGENT ÉPARGNE
+        // 👁️ AUDITEUR / CONSEILLER (Lecture seule étendue + Droits membre)
+        $auditeurPermissions = array_merge($membrePermissions, [
+            'epargne.view.transactions', 'credit.pret.view', 'credit.remboursement.view',
+            'depense.view', 'zone.view', 'agence.view.all', 'compta.cloture.view',
+            'compta.rapports.view',
+        ]);
+
+        // ⌨️ OPS (Opérateur de Saisie + Droits membre)
+        // Focus sur la saisie rapide sans pouvoir de validation.
+        $opsPermissions = array_merge($membrePermissions, [
+            'epargne.depot.create', 'credit.pret.create', 'credit.remboursement.create',
+            'membre.create', 'depense.create',
+        ]);
+
+        // 🧾 AGENT ÉPARGNE (Terrain)
         $agentEpargnePermissions = array_merge($membrePermissions, [
-            'epargne.depot.create',
-            'epargne.view.my_depots',
-            'epargne.view.transactions',
-            'membre.create',
+            'epargne.depot.create', 'epargne.view.my_depots', 'epargne.view.transactions', 
+            'membre.create', 'zone.view',
         ]);
 
-        // 💳 AGENT CRÉDIT
+        // 💳 AGENT CRÉDIT (Analyse)
         $agentCreditPermissions = array_merge($agentEpargnePermissions, [
-            'credit.remboursement.create',
-            'credit.pret.view',
-            'credit.remboursement.view',
+            'credit.pret.create', 'credit.pret.view', 'credit.remboursement.view',
         ]);
 
-        // 💼 CAISSIÈRE
-        $caissierePermissions = array_merge($agentCreditPermissions, [
-            'epargne.retrait.create',
+        // 💰 CAISSIÈRE (Manipulation Cash)
+        // Note : Elle ne valide pas le crédit, elle décaisse ce qui est validé.
+        $caissierePermissions = array_merge($membrePermissions, [
+            'epargne.depot.create', 'epargne.retrait.create', 'epargne.view.transactions',
+            'credit.remboursement.create', 'credit.pret.decaisser', 'depense.view',
         ]);
 
-        // 🧠 SUPERVISEUR
-        $superviseurPermissions = array_merge($caissierePermissions, [
-            'epargne.correct',
-            'credit.remboursement.correct',
-            'credit.pret.create',
-            'credit.cloturer',
-            'membre.update',
-            'depense.create',
+        // 📊 COMPTABLE (Le Verrou du système + Droits membre)
+        // Il peut tout voir et doit valider les flux avant décaissement.
+        $comptablePermissions = array_merge($auditeurPermissions, [
+            'depense.create', 'depense.valider', 'credit.pret.valider', 
+            'compta.audit.logs', 'membre.update',
         ]);
 
-        // 🏢 DIRECTEUR D’AGENCE
-        $directeurAgencePermissions = array_merge($superviseurPermissions, [
-            'agent.create',
-            'agent.assign.role',
-            'zone.create',
-            'zone.update',
-            'zone.view',
+        // 🧠 SUPERVISEUR (Opérationnel local)
+        $superviseurPermissions = array_merge($caissierePermissions, $agentCreditPermissions, [
+            'epargne.correct', 'credit.remboursement.correct', 'membre.update', 
+            'depense.create', 'credit.cloturer',
         ]);
 
-        // 🧾 OPS (opérateur de saisie)
-        $opsPermissions = [
-            'epargne.depot.create',
-            'credit.pret.create',
-            'credit.remboursement.create',
-            'membre.create',
-            'depense.create',
-        ];
+        // 🏢 CHEF D’AGENCE (Autorité locale maximale)
+        $chefAgencePermissions = array_merge($superviseurPermissions, [
+            'agent.create', 'agent.assign.role', 'zone.create', 'zone.update',
+            'credit.pret.valider',
+        ]);
 
-        // 👁️ CONSEILLER / AUDITEUR (lecture seule)
-        $auditeurPermissions = [
-            'membre.view.profile',
-            'membre.view.epargne',
-            'membre.view.prets',
-            'membre.view.remboursements',
-            'epargne.view.transactions',
-            'credit.pret.view',
-            'credit.remboursement.view',
-            'depense.view',
-            'zone.view',
-        ];
-
-        // 🌍 DIRECTRICE RÉGIONALE & PCA (FULL ACCESS)
+        // 🌍 ACCÈS TOTAL
         $fullPermissions = Permission::all()->pluck('name')->toArray();
 
         /**
-         * ===============================
-         * 3️⃣ ATTRIBUTION AUX RÔLES
-         * ===============================
+         * ============================================================
+         * 3️⃣ CRÉATION ET SYNCHRONISATION DES RÔLES
+         * ============================================================
          */
-        $roles = [
-            'membre' => $membrePermissions,
-            'agent_epargne' => $agentEpargnePermissions,
-            'agent_credit' => $agentCreditPermissions,
-            'caissiere' => $caissierePermissions,
-            'superviseur' => $superviseurPermissions,
-            'chef_agence' => $directeurAgencePermissions,
-            'ops' => $opsPermissions,
-            'conseiller' => $auditeurPermissions,
-            'auditeur' => $auditeurPermissions,
-            'administrateur' => $fullPermissions,
+        $rolesConfig = [
+            'membre'               => $membrePermissions,
+            'ops'                  => $opsPermissions,
+            'auditeur'             => $auditeurPermissions,
+            'conseiller'           => $auditeurPermissions,
+            'comptable'            => $comptablePermissions,
+            'agent_epargne'        => $agentEpargnePermissions,
+            'agent_credit'         => $agentCreditPermissions,
+            'caissiere'            => $caissierePermissions,
+            'superviseur'          => $superviseurPermissions,
+            'chef_agence'          => $chefAgencePermissions,
+            'administrateur'       => $fullPermissions,
             'directrice_regionale' => $fullPermissions,
-            'pca' => $fullPermissions,
+            'pca'                  => $fullPermissions,
         ];
 
-        foreach ($roles as $roleName => $permissions) {
+        foreach ($rolesConfig as $roleName => $perms) {
             $role = Role::firstOrCreate(['name' => $roleName]);
-            $role->syncPermissions($permissions);
+            $role->syncPermissions($perms);
         }
     }
 }

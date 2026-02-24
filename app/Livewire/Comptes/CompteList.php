@@ -25,13 +25,20 @@ class CompteList extends Component
 
     public function render()
     {
-        $comptes = Compte::with(['membre.user'])
-            ->when($this->search, function ($query) {
-                $query->where('numero_compte', 'like', '%' . $this->search . '%')
-                      ->orWhere('intitule', 'like', '%' . $this->search . '%');
-            })
-            ->latest()
-            ->paginate(10);
+        $comptes = Compte::with(['user'])
+                    ->when($this->search, function ($query) {
+                        // On groupe les conditions OR dans une sous-requête
+                        $query->where(function ($subQuery) {
+                            $subQuery->where('numero_compte', 'like', '%' . $this->search . '%')
+                                    ->orWhere('intitule', 'like', '%' . $this->search . '%')
+                                    // On cherche dans la relation 'user'
+                                    ->orWhereHas('user', function ($userQuery) {
+                                        $userQuery->where('name', 'like', '%' . $this->search . '%');
+                                    });
+                        });
+                    })
+                    ->latest()
+                    ->paginate(100);
 
         $stats = [
             'total_comptes' => Compte::count(),

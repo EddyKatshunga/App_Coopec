@@ -73,6 +73,16 @@ class Membre extends Model
         return $this->hasMany(Credit::class);
     }
 
+    public function getNombreCreditsAttribute()
+    {
+        return $this->credits()->count();
+    }
+
+    public function creditEnCours()
+    {
+        return $this->credits()->where('statut', 'en_cours')->orWhere('statut', 'en_retard')->first();
+    }
+
     public function transactions()
     {
         return $this->comptes->transactions();

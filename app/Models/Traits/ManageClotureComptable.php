@@ -36,15 +36,13 @@ trait ManageClotureComptable
      */
     protected function assignJourneeEtDate(): void
     {
-        $agenceId = $this->getAgenceIdForJournee();
+        $agenceId = auth()->user()->agence_id;
         if (!$agenceId) {
             throw new Exception("Impossible de déterminer l'agence pour cette transaction.");
         }
 
         // Récupérer la journée ouverte pour l'agence de cette opération
-        $journee = CloturesComptable::where('agence_id', $agenceId)
-            ->where('statut', 'ouverte')
-            ->first();
+        $journee = auth()->user()->journee_ouverte;
 
         if (!$journee) {
             throw new Exception("Aucune journée comptable ouverte pour aujourd'hui. Veuillez contacter le directeur.");
@@ -95,15 +93,6 @@ trait ManageClotureComptable
                 "Action impossible : la journée comptable du {$this->journeeComptable->date_cloture} est soit vérouillée, soit clôturée. Veuillez contactez le Chef d'Agence."
             );
         }
-    }
-
-    /**
-     * Retourne l'ID de l'agence à utiliser pour la recherche de la journée.
-     * À surcharger si le modèle ne possède pas directement 'agence_id'.
-     */
-    protected function getAgenceIdForJournee(): ?int
-    {
-        return auth()->user()->agent->agence_id ?? null;
     }
 
     /**

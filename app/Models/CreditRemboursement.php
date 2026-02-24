@@ -20,17 +20,15 @@ class CreditRemboursement extends Model
     protected $fillable = [
         'credit_id',
         'montant',
-
         // ventilation financière
         'montant_penalite_payee',
         'montant_interet_payee',
         'montant_capital_payee',
-
         // snapshot comptable
         'report_avant',
         'reste_du_apres',
+        'mode_paiement',
         'reference_paiement',
-
         'agent_id',
         'zone_id',
         'mode_paiement',
@@ -85,7 +83,7 @@ class CreditRemboursement extends Model
         return $this->belongsTo(Agence::class);
     }
 
-    public function getMonnaieAttribute()
+    public function getMonnaieCreditAttribute()
     {
         return $this->credit->monnaie;
     }
@@ -133,13 +131,13 @@ class CreditRemboursement extends Model
         };
     }
 
-    public static function getGroupedByZone(int $agenceId, string $date)
+    public static function getGroupedByZone(int $agenceId, $date)
     {
         return self::with('zone')
             ->selectRaw('zone_id, monnaie, COUNT(*) as nbre_operations, SUM(montant) as total_montant')
             ->where('agence_id', $agenceId)
             ->whereDate('date_paiement', $date)
-            ->groupBy('zone_id', 'devise')
+            ->groupBy('zone_id', 'monnaie')
             ->get()
             ->groupBy('zone_id');
     }

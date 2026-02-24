@@ -30,7 +30,6 @@ class AddCompte extends Component
         DB::transaction(function () {
 
             $membre = Membre::findOrFail($this->membre_id);
-
             // Nombre de comptes existants pour ce membre
             $count = Compte::where('membre_id', $membre->id)->count();
 
@@ -40,12 +39,11 @@ class AddCompte extends Component
 
             Compte::create([
                 'membre_id'     => $membre->id,
+                'user_id' => $membre->user->id,
                 'intitule'      => $this->intitule,
                 'numero_compte' => $numero_compte,
                 'solde_cdf'     => 0,
                 'solde_usd'     => 0,
-                'created_by'    => Auth::id(),
-                'updated_by'    => Auth::id(),
             ]);
         });
 

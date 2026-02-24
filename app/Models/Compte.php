@@ -14,16 +14,15 @@ class Compte extends Model
     
     protected $fillable = [
         'membre_id',
+        'user_id',
         'numero_compte',
         'solde_cdf',
         'solde_usd',
     ];
 
-    protected $appends = ['nom'];
-    
-    public function getNomAttribute(): ?string
+    public function user(): BelongsTo
     {
-        return $this->membre?->nom;
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function membre(): BelongsTo

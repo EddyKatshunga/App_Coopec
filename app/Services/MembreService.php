@@ -14,6 +14,28 @@ use Spatie\Permission\Models\Role;
 
 class MembreService
 {
+    /**
+     * Récupère les données pour la liste globale des membres (PDF).
+     *
+     * @return array
+     */
+    public function getMembreData(): array
+    {
+        // On récupère tous les membres avec leurs relations pour éviter les requêtes N+1
+        $membres = Membre::with(['user', 'agent', 'comptes'])
+            ->orderBy('numero_identification', 'asc')
+            ->get();
+
+        return [
+            'membres'      => $membres,
+            'total_count'  => $membres->count(),
+            'generated_at' => now()->format('d/m/Y H:i'),
+            // Optionnel : Calcul des soldes totaux cumulés pour tous les membres
+            'global_cdf'   => $membres->sum(fn($m) => $m->comptes->sum('solde_cdf')),
+            'global_usd'   => $membres->sum(fn($m) => $m->comptes->sum('solde_usd')),
+        ];
+    }
+
     public function getFicheData(Membre $membre): array
     {
         $membre->load([

@@ -40,12 +40,10 @@
                 Ajouter un crédit
             </a>
 
-            <button
-                wire:click="$set('showAddPhotoModal', true)"
-                class="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700"
-            >
-                Ajouter des photos
-            </button>
+             <a href="{{ route('photos.create', $membre->user) }}"
+               class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                Ajouter une photo
+            </a>
 
 
 

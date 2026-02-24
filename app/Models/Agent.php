@@ -41,12 +41,17 @@ class Agent extends Model
 
     public function membresAmenes(): HasMany
     {
-        return $this->hasMany(Membre::class);
+        return $this->hasMany(Membre::class, 'agent_parrain_id');
     }
 
     public function depensesExecutees(): HasMany
     {
         return $this->hasMany(Depense::class, 'beneficiaire_id');
+    }
+
+    public function credits(): HasMany //Les crédits validés par l'agent
+    {
+        return $this->hasMany(Credit::class);
     }
 
     // hasOne: Se place dans le modèle de la table qui ne contient pas la clé étrangère 

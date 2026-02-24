@@ -22,11 +22,11 @@ class TransactionsList extends Component
     public function render()
     {
         $transactions = Transaction::with([
-                'compte.membre',
+                'compte.user',
                 'agent_collecteur'
             ])
             ->where('agence_id', $this->agenceId)
-            ->orderBy('date_transaction', 'asc') // 👈 chronologie comptable
+            ->orderBy('created_at', 'asc') // 👈 chronologie comptable
             ->paginate(20);
 
         return view('livewire.transactions.transactions-list', [

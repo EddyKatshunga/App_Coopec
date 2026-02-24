@@ -20,19 +20,6 @@
         />
     @endcan
 
-
-    {{-- =========================
-        💰 ÉPARGNE
-    ========================== --}}
-
-    @can('epargne.depot.create')
-        <x-dashboard.action
-            title="Nouveau dépôt"
-            icon="cash"
-            route="epargne.depot.create"
-        />
-    @endcan
-
     @can('epargne.view.transactions')
         <x-dashboard.action
             title="Transactions épargne"
@@ -41,24 +28,11 @@
         />
     @endcan
 
-
-    {{-- =========================
-        💳 CRÉDIT
-    ========================== --}}
-
     @can('credit.pret.view')
         <x-dashboard.action
             title="Liste des prêts"
             icon="document"
             route="credit.pret.index"
-        />
-    @endcan
-
-    @can('credit.remboursement.view')
-        <x-dashboard.action
-            title="Remboursements"
-            icon="list"
-            route="credit.remboursement.index"
         />
     @endcan
 
@@ -118,11 +92,19 @@
         />
     @endcan
 
-        @can('agent.create')
+    @can('agent.create')
         <x-dashboard.action
             title="Gestion des Revenus"
             icon="list"
             route="revenus.index"
+        />
+    @endcan
+
+    @can('agent.create')
+        <x-dashboard.action
+            title="Gestion des Comptes Epargnes"
+            icon="list"
+            route="comptes.index"
         />
     @endcan
 

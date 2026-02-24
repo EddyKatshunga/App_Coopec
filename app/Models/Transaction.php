@@ -7,6 +7,7 @@ use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
 
 class Transaction extends Model
 {
@@ -54,18 +55,30 @@ class Transaction extends Model
     }
 
     public function isAddition(): bool {
-        return $this->type === 'DEPOT';
+        return $this->type_transaction === 'DEPOT';
     }
 
-    public static function getGroupedByAgent(string $type, int $agenceId, $date)
+    public static function getDepotsGroupedByAgent(int $agenceId, $date)
     {
         return self::with('agent_collecteur')
             ->selectRaw('agent_collecteur_id, monnaie, COUNT(*) as nbre_operations, SUM(montant) as total_montant')
-            ->where('type', $type) // 'depot' ou 'retrait'
+            ->where('type_transaction', 'DEPOT')
             ->where('agence_id', $agenceId)
             ->whereDate('date_transaction', $date)
-            ->groupBy('agent_collecteur_id', 'devise')
+            ->groupBy('agent_collecteur_id', 'monnaie')
             ->get()
             ->groupBy('agent_collecteur_id'); // Permet de regrouper CDF et USD sous le même agent
+    }
+
+    public static function getRetraitsGroupedByAgent(int $agenceId, $date)
+    {
+        return self::with('creator')
+            ->selectRaw('created_by, monnaie, COUNT(*) as nbre_operations, SUM(montant) as total_montant')
+            ->where('type_transaction', 'RETRAIT')
+            ->where('agence_id', $agenceId)
+            ->whereDate('date_transaction', $date)
+            ->groupBy('created_by', 'monnaie')
+            ->get()
+            ->groupBy('created_by'); // Permet de regrouper CDF et USD sous le même agent
     }
 }

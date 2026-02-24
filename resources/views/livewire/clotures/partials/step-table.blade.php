@@ -32,7 +32,8 @@
                             
                             // Récupération du nom (ex: $group->first()->agentCollecteur->nom)
                             // On utilise un accesseur dynamique basé sur le nom de la relation passée en paramètre
-                            $entityName = $group->first()->{$relationName}->nom ?? 'Inconnu'; 
+                            $entityName = $group->first()->{$relationName}->nom ?? $group->first()->{$relationName}->name ??
+                                            $group->first()->{$relationName}->user->name ?? 'Inconnu';
                         @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $entityName }}</td>

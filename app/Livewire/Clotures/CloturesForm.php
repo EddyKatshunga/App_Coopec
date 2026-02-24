@@ -107,10 +107,10 @@ class CloturesForm extends Component
 
     // --- COMPUTED PROPERTIES (Uniquement appelées si on est en clôture) ---
     public function getDepotsProperty() {
-        return $this->isOuverture ? [] : Transaction::getGroupedByAgent('depot', $this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : Transaction::getDepotsGroupedByAgent($this->cloture->agence_id, $this->cloture->date_cloture);
     }
     public function getRetraitsProperty() {
-        return $this->isOuverture ? [] : Transaction::getGroupedByAgent('retrait', $this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : Transaction::getRetraitsGroupedByAgent($this->cloture->agence_id, $this->cloture->date_cloture);
     }
     public function getCreditsProperty() {
         return $this->isOuverture ? [] : Credit::getCreditGroupedByZone($this->cloture->agence_id, $this->cloture->date_cloture, 'date_deblocage');

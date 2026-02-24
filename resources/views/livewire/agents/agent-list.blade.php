@@ -52,20 +52,10 @@
                 </td>
 
                 <td class="text-right space-x-2">
-                    <a href="{{ route('agent.edit', $agent) }}"
-                       class="text-blue-600 hover:underline">
-                        Voir
-                    </a>
-
-                    <a href="{{ route('agent.edit', $agent) }}"
+                    <a href="{{ route('agent.show', $agent) }}"
                        class="text-green-600 hover:underline">
-                        Modifier
+                        Voir le profil
                     </a>
-
-                    <button wire:click="toggleStatut({{ $agent->id }})"
-                            class="text-orange-600 hover:underline">
-                        {{ $agent->statut === 'actif' ? 'Désactiver' : 'Activer' }}
-                    </button>
                 </td>
             </tr>
         @endforeach

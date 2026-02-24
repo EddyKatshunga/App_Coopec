@@ -18,20 +18,24 @@ class Credit extends Model
     protected $fillable = [
         'numero_credit',
         'membre_id',
+        'user_id',
+        'agent_id', //Agent ayant validé le crédit
         'zone_id',
         'monnaie',
         'capital',
         'interet',
+        'total_remboursement',
         'taux_penalite_journalier',
         'unite_temps',
-        'duree',
+        'duree', //Echeance
         'date_fin_prevue',
         'garant_nom',
         'garant_adresse',
         'garant_telephone',
         'negocie',
         'note_negociation',
-        'date_cloture_forcee'
+        'date_cloture_forcee',
+        'observation',
     ];
 
     protected $casts = [
@@ -59,9 +63,14 @@ class Credit extends Model
         return $this->hasMany(CreditRemboursement::class);
     }
 
-    public function membre()
+    public function membre(): BelongsTo
     {
         return $this->belongsTo(Membre::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function zone(): BelongsTo
@@ -74,6 +83,11 @@ class Credit extends Model
         return $this->belongsTo(Agence::class);
     }
 
+    public function agent(): BelongsTo //L'agent ayant validé le crédit
+    {
+        return $this->belongsTo(Agent::class);
+    }
+
     public function isAddition(): bool {
         return false; // Toujours une diminution
     }
@@ -83,6 +97,11 @@ class Credit extends Model
     public function getTotalAttribute()
     {
         return $this->capital + $this->interet;
+    }
+
+    public function getMontantEcheanceAttribute() //Le montant à payer par échéance
+    {
+        return ($this->capital + $this->interet) / $this->duree;
     }
 
     public function getTotalRembourseAttribute()
@@ -97,7 +116,7 @@ class Credit extends Model
 
     public function getJoursRetardAttribute()
     {
-        $debut = $this->date_fin_prevue->addDays(10);
+        $debut = $this->date_fin_prevue->addDays(10); //Mise en démeure
         return now()->greaterThan($debut)
             ? $debut->diffInDays(now())
             : 0;
@@ -121,9 +140,6 @@ class Credit extends Model
 
         if ($this->reste_du <= 0 && now()->gt($this->date_fin_prevue))
             return 'termine_en_retard';
-
-        if ($this->jours_retard > 0 && $this->total_rembourse >= $this->total)
-            return 'retard_penalite';
 
         if ($this->jours_retard > 0)
             return 'en_retard';

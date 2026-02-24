@@ -23,7 +23,7 @@
     </div>
 
     {{-- Cartes Soldes CDF --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
 
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <p class="text-sm text-gray-500">TOTAL GENERAL ACTUEL CDF</p>

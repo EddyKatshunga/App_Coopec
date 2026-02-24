@@ -28,9 +28,12 @@ class CreditRemboursementService
     public function enregistrer(Credit $credit, array $data): CreditRemboursement
     {
         return DB::transaction(function () use ($credit, $data) {
-
-            $datePaiement = Carbon::parse($data['date_paiement']);
             $montant = (float) $data['montant'];
+            $zone = $credit->zone;
+
+            if (!$zone) {
+                throw new \InvalidArgumentException('Le crédit n\'a pas de zone.');
+            }
 
             if ($montant <= 0) {
                 throw new \InvalidArgumentException('Le montant du remboursement doit être supérieur à zéro.');
@@ -41,7 +44,7 @@ class CreditRemboursementService
             $totalRembourseAvant = $credit->remboursements()->sum('montant');
 
             $penaliteAvant = $this->calculator
-                ->calculerPenalite($credit, $datePaiement);
+                ->calculerPenalite($credit, auth()->user()->journee_ouverte->date_cloture);
 
             $totalDuAvant = ($credit->capital + $credit->interet)
                 + $penaliteAvant
@@ -72,21 +75,19 @@ class CreditRemboursementService
 
             return CreditRemboursement::create([
                 'credit_id' => $credit->id,
-                'date_paiement' => $datePaiement,
-
                 'montant' => $montant,
-
                 // ventilation
                 'montant_penalite_payee' => $repartition['penalite_payee'],
                 'montant_interet_payee'  => $repartition['interet_payee'],
                 'montant_capital_payee'  => $repartition['capital_payee'],
-
                 // snapshots comptables
                 'report_avant' => round($totalRembourseAvant, 2),
                 'reste_du_apres' => round($totalDuApres, 2),
-
                 'agent_id' => $data['agent_id'],
                 'mode_paiement' => $data['mode_paiement'],
+                'reference_paiement' => $data['reference_paiement'],
+                'zone_id' => $zone->id,
+                'agence_id' => $zone->agence_id,
             ]);
         });
     }

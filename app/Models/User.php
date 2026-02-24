@@ -61,14 +61,42 @@ class User extends Authenticatable
         return $this->hasOne(Membre::class);
     }
 
+    public function getNumeroIdentificationAttribute()
+    {
+        return $this->membre?->numero_identification;
+    }
+
+    public function comptes(): HasMany
+    {
+        return $this->hasMany(Compte::class);
+    }
+
+    public function credits(): HasMany
+    {
+        return $this->hasMany(Credit::class);
+    }
+
     public function agent(): HasOne
     {
         return $this->hasOne(Agent::class);
     }
 
+    public function getAgenceAttribute() {
+        return $this->agent?->agence;
+    }
+
     public function getAgenceIdAttribute()
     {
-        return $this->agent?->agence_id;
+        return $this->agence?->id;
+    }
+
+    public function getJourneeOuverteAttribute() {
+        $agence = $this->agence;
+        if (!$agence) return null;
+        
+        return \App\Models\CloturesComptable::where('agence_id', $agence->id)
+            ->where('statut', 'ouverte')
+            ->first();
     }
 
     /**
@@ -87,9 +115,28 @@ class User extends Authenticatable
         return $this->hasOne(Photo::class)->where('is_profile', true);
     }
 
+    public function getPhotoPathAttribute()
+    {
+        // 1. On tente de récupérer la photo de profil
+        if ($this->profilePhoto) {
+            return $this->profilePhoto->url;
+        }
+        return $this->photos()->first()?->url;
+    }
+
     public function historiqueRole(): HasMany
     {
         return $this->hasMany(HistoriqueRole::class);
+    }
+
+    /**
+     * Accesseur pour récupérer le nom du premier rôle attribué.
+     * * @return string|null
+     */
+    public function getRoleAttribute(): ?string
+    {
+        // On récupère le premier rôle de la collection Spatie
+        return $this->roles->first()?->name;
     }
 
 }

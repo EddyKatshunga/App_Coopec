@@ -30,7 +30,6 @@ class CreditsList extends Component
     public function mount()
     {
         $this->zones = Zone::orderBy('nom')->get();
-        $this->membres = User::where('role', 'membre')->orderBy('name')->get();
     }
 
     public function updating($property)
@@ -40,47 +39,24 @@ class CreditsList extends Component
 
     public function render()
     {
-        $query = Credit::query()->with('remboursements', 'membre', 'zone');
+        $query = Credit::query()->with(['user', 'zone']);
 
-        /* ================= FILTRE RECHERCHE ================= */
         if ($this->search) {
-            $query->where('numero_credit', 'like', "%{$this->search}%")
-                  ->orWhereHas('membre', function ($q) {
-                      $q->where('name', 'like', "%{$this->search}%");
-                  });
-        }
-
-        /* ================= FILTRE ZONE ================= */
-        if ($this->zone_id) {
-            $query->where('zone_id', $this->zone_id);
-        }
-
-        /* ================= FILTRE MEMBRE ================= */
-        if ($this->membre_id) {
-            $query->where('membre_id', $this->membre_id);
-        }
-
-        /* ================= FILTRE STATUT ================= */
-        if ($this->statut) {
-            $query->get()->filter(function ($credit) {
-                return $credit->statut === $this->statut;
+            $query->where(function($q) {
+                $q->where('numero_credit', 'like', "%{$this->search}%")
+                ->orWhereHas('user', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"));
             });
         }
 
-        /* ================= FILTRE NÉGOCIÉ ================= */
-        if (!is_null($this->negocie)) {
-            $query->where('negocie', $this->negocie);
-        }
-
-        /* ================= FILTRE DATE ================= */
-        if ($this->date_debut) {
-            $query->whereDate('date_credit', '>=', Carbon::parse($this->date_debut));
-        }
-        if ($this->date_fin) {
-            $query->whereDate('date_credit', '<=', Carbon::parse($this->date_fin));
-        }
-
-        $credits = $query->orderBy('date_credit', 'desc')->paginate(15);
+        if ($this->zone_id) $query->where('zone_id', $this->zone_id);
+        if ($this->membre_id) $query->where('membre_id', $this->membre_id);
+        if (!is_null($this->negocie)) $query->where('negocie', $this->negocie);
+        
+        // Dates
+        if ($this->date_debut) $query->whereDate('date_credit', '>=', $this->date_debut);
+        if ($this->date_fin) $query->whereDate('date_credit', '<=', $this->date_fin);
+        
+        $credits = $query->orderBy('date_credit', 'desc')->paginate(12);
 
         return view('livewire.credits.credits-list', compact('credits'))
             ->layout('layouts.app');

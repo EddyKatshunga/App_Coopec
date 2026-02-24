@@ -56,11 +56,6 @@
         </div>
     </div>
 
-    {{-- ================= BOUTON AJOUTER REMBOURSEMENT ================= --}}
-    <div>
-        @livewire('credits.credit-add-remboursement', ['credit' => $credit])
-    </div>
-
     {{-- ================= TIMELINE REMBOURSEMENTS ================= --}}
     <div class="bg-white shadow rounded p-6">
         <h2 class="text-lg font-semibold mb-4">

@@ -116,7 +116,7 @@ class TransactionListing extends Component
             ])
             ->where('agence_id', $this->agence_id)
             ->whereDate('date_transaction', $date)
-            ->orderBy('date_transaction')
+            ->orderBy('date_transaction', 'asc')
             ->orderBy('created_at')
             ->get();
 

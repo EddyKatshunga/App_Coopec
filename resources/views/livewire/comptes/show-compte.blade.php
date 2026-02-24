@@ -84,8 +84,8 @@
                     <th class="px-3 py-2 border">Type</th>
                     <th class="px-3 py-2 border">Montant</th>
                     <th class="px-3 py-2 border">Monnaie</th>
-                    <th class="px-3 py-2 border">Solde avant</th>
-                    <th class="px-3 py-2 border">Solde après</th>
+                    <th class="px-3 py-2 border">Report</th>
+                    <th class="px-3 py-2 border">Solde</th>
                     <th class="px-3 py-2 border">Statut</th>
                 </tr>
             </thead>
@@ -115,7 +115,7 @@
                         </td>
 
                         <td class="px-3 py-2 border">
-                            {{ number_format($transaction->solde_après, 0, ',', ' ') }}
+                            {{ number_format($transaction->solde_apres, 0, ',', ' ') }}
                         </td>
 
                         <td class="px-3 py-2 border">
@@ -162,14 +162,6 @@
                 </button>
             </div>
         </div>
-
-        {{-- Aperçu PDF --}}
-        @if($pdfUrl)
-            <div class="border rounded overflow-hidden shadow mt-4">
-                <iframe src="{{ $pdfUrl }}" width="100%" height="600px"></iframe>
-            </div>
-        @endif
-
     </div>
 
     {{-- ================= FIN ZONE RELEVE ================= --}}

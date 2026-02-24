@@ -9,6 +9,10 @@ class CreditRemboursementObserver
     public function created(CreditRemboursement $model): void
     {
         $agence = $model->agence;
+
+        $credit = $model->credit;
+        $credit->increment('total_remboursement', $model->montant);
+
         if($model->monnaie === 'CDF'){
             $agence->increment('solde_actuel_coffre_cdf', $model->montant);
         }else{
@@ -19,6 +23,10 @@ class CreditRemboursementObserver
     public function deleted(CreditRemboursement $model): void
     {
         $agence = $model->agence;
+
+        $credit = $model->credit;
+        $credit->decrement('total_remboursement', $model->montant);
+
         if($model->monnaie === 'CDF'){
             $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
         }else{

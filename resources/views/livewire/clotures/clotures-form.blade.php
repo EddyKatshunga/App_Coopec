@@ -65,7 +65,7 @@
                     @include('livewire.clotures.partials.step-table', [
                         'title' => 'Dépôts Épargne', 
                         'data' => $this->depots, 
-                        'relationName' => 'agentCollecteur', 
+                        'relationName' => 'agent_collecteur', 
                         'relationLabel' => 'Agent Collecteur'
                     ])
                 @endif
@@ -74,8 +74,8 @@
                     @include('livewire.clotures.partials.step-table', [
                         'title' => 'Retraits Épargne', 
                         'data' => $this->retraits, 
-                        'relationName' => 'agentCollecteur', 
-                        'relationLabel' => 'Agent Collecteur'
+                        'relationName' => 'creator', 
+                        'relationLabel' => 'Effectué par'
                     ])
                 @endif
 
