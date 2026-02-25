@@ -26,6 +26,7 @@ class ShowCompte extends Component
 
     public function mount(Compte $compte)
     {
+        $this->authorize('view', $compte);
         $this->compte = $compte->load(['membre', 'transactions' => fn($q) => $q->orderBy('date_transaction')]);
 
         $this->calculerStatistiques();

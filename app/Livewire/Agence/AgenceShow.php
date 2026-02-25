@@ -28,6 +28,7 @@ class AgenceShow extends Component
 
     public function mount(Agence $agence)
     {
+        $this->authorize('view', $agence);
         $this->agence = $agence->load(['chefAgence']);
     }
 

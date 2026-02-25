@@ -73,4 +73,17 @@ class MoneyService
             default => $currency,
         };
     }
+
+    /**
+     * Formate uniquement le nombre (ex: 1 250,50) 
+     * sans la devise.
+     */
+    public function formatNumber(float|int|null|string $amount): string
+    {
+        if ($amount === null || $amount === '') {
+            return "0,00";
+        }
+
+        return $this->numberFormatter->format($amount);
+    }
 }

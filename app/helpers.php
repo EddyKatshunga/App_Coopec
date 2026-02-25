@@ -15,3 +15,13 @@ if (! function_exists('money_format_bank')) {
         return app(MoneyService::class)->formatWithWords($amount, $currency);
     }
 }
+
+if (! function_exists('number_format_fr')) {
+    /**
+     * Formate un nombre au format français (ex: 1 500,00)
+     */
+    function number_format_fr($amount)
+    {
+        return app(App\Services\MoneyService::class)->formatNumber($amount);
+    }
+}

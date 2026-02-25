@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class ShowMembre extends Component
 {
+
     public Membre $membre;
     public bool $showAddPhotoModal = false;
 
@@ -17,6 +18,7 @@ class ShowMembre extends Component
 
     public function mount(Membre $membre)
     {
+        $this->authorize('view', $membre);
         $this->membre = $membre->load([
             'user',
             'agent',

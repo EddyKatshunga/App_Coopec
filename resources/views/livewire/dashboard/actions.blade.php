@@ -112,4 +112,13 @@
         />
     @endcan
 
+    @can('membre.view.profile')
+        <x-dashboard.action
+            title="Voir mon profil"
+            icon="user-edit"
+            route="membre.show"
+            :routeParams="['membre' => auth()->user()->membre->id]"
+        />
+    @endcan
+
 </div>
