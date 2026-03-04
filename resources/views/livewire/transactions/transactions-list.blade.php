@@ -10,12 +10,12 @@
             </h2>
             
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('comptes.index') }}" wire:navigate class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                <a href="{{ route('comptes.index') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Dépôt
                 </a>
                 @can('epargne.retrait.create')
-                <a href="{{ route('comptes.index') }}" wire:navigate class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                <a href="{{ route('comptes.index') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                     Retrait
                 </a>
@@ -106,6 +106,19 @@
                             </td>
                             <td class="px-6 py-4 text-right whitespace-nowrap font-mono text-sm font-bold text-gray-900 bg-gray-50/50 group-hover:bg-transparent">
                                 <a href="{{ route('transaction.show', $transaction) }}" wire:navigate >Voir</a>
+                                {{-- 1. Vérification Permission Spatie --}}
+                                @can('agent.create') 
+                                    {{-- 2. Vérification Journée Ouverte via le trait du modèle --}}
+                                    @if($transaction->canBeDeleted())
+                                        <button 
+                                            wire:click="deleteRecord('App\\Models\\Transaction', {{ $transaction->id }})"
+                                            wire:confirm="Êtes-vous sûr de vouloir supprimer définitivement cette opération ?"
+                                            class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                        >
+                                            Supprimer
+                                        </button>
+                                    @endif
+                                @endcan
                             </td>
                         </tr>
                     @empty

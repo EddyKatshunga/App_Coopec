@@ -21,10 +21,11 @@ class ComptePolicy
      */
     public function view(User $user, Compte $compte): bool
     {
+        //Les membres n'ont accès qu'à leurs propres comptes
         if ($user->hasRole('membre')) {
             return $user->id === $compte->user_id;
         }
-        return true;
+        return true; //Les agents ont accès à tous les comptes
     }
 
     /**

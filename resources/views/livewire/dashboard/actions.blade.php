@@ -32,7 +32,7 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Tableau de Bord des Depenses"
             icon="list"
@@ -40,7 +40,7 @@
         />
     @endcan
 
-     @can('agent.create')
+     @can('depense.create')
         <x-dashboard.action
             title="Tableau de Bord des Revenus"
             icon="list"
@@ -48,7 +48,7 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Gestion des Agents"
             icon="list"
@@ -56,7 +56,7 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Gestion des Agences"
             icon="list"
@@ -72,7 +72,7 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Gestion des Clotures Journalières"
             icon="list"
@@ -80,7 +80,7 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Gestion des Depenses"
             icon="list"
@@ -88,11 +88,27 @@
         />
     @endcan
 
-    @can('agent.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Gestion des Revenus"
             icon="list"
             route="revenus.index"
+        />
+    @endcan
+
+    @can('depense.create')
+        <x-dashboard.action
+            title="Gestion des Zones de crédits"
+            icon="list"
+            route="agences.zones.index"
+        />
+    @endcan
+
+    @can('depense.create')
+        <x-dashboard.action
+            title="Gestion des Remboursements"
+            icon="list"
+            route="remboursements.index"
         />
     @endcan
 
@@ -104,7 +120,7 @@
         />
     @endcan
 
-    @can('membre.create')
+    @can('depense.create')
         <x-dashboard.action
             title="Nouveau membre"
             icon="user-plus"
@@ -117,7 +133,7 @@
             title="Voir mon profil"
             icon="user-edit"
             route="membre.show"
-            :routeParams="['membre' => auth()->user()->membre->id]"
+            :routeParams="['membre' => auth()->user()->membre->uuid]"
         />
     @endcan
 

@@ -20,16 +20,22 @@ class CreditRemboursementService
      * Enregistre un remboursement de crédit
      *
      * $data attend :
-     * - date_paiement
+     * - date_paiement (Optionnel, défaut = date comptable)
      * - montant
      * - agent_id
      * - mode_paiement
+     * - reference_paiement
      */
     public function enregistrer(Credit $credit, array $data): CreditRemboursement
     {
         return DB::transaction(function () use ($credit, $data) {
             $montant = (float) $data['montant'];
             $zone = $credit->zone;
+
+            // Il est crucial d'avoir la date exacte du paiement pour les pénalités
+            $datePaiement = isset($data['date_paiement']) 
+                ? Carbon::parse($data['date_paiement']) 
+                : auth()->user()->journee_ouverte->date_cloture;
 
             if (!$zone) {
                 throw new \InvalidArgumentException('Le crédit n\'a pas de zone.');
@@ -40,54 +46,39 @@ class CreditRemboursementService
             }
 
             /* ================= ÉTAT AVANT ================= */ 
-
-            $totalRembourseAvant = $credit->remboursements()->sum('montant');
-
-            $penaliteAvant = $this->calculator
-                ->calculerPenalite($credit, auth()->user()->journee_ouverte->date_cloture);
-
-            $totalDuAvant = ($credit->capital + $credit->interet)
-                + $penaliteAvant
-                - $totalRembourseAvant;
+            // Le report est la somme de tous les paiements précédents (comme exigé)
+            $reportAvant = $credit->remboursements()->sum('montant');
 
             /* ================= VENTILATION ================= */
-
-            $repartition = $this->calculator
-                ->repartitionRemboursement($credit, $montant);
+            $repartition = $this->calculator->repartitionRemboursement($credit, $montant, $datePaiement);
 
             /* ================= ÉTAT APRÈS ================= */
-
-            $totalRembourseApres = $totalRembourseAvant + $montant;
-
-            $penaliteApres = max(
+            // Règle d'or : Les pénalités impayées ne s'ajoutent pas au reste dû.
+            // Le reste dû baisse uniquement grâce à la part du paiement allouée au capital et aux intérêts.
+            $resteDuApres = max(
                 0,
-                $penaliteAvant - $repartition['penalite_payee']
-            );
-
-            $totalDuApres = max(
-                0,
-                ($credit->capital + $credit->interet)
-                + $penaliteApres
-                - $totalRembourseApres
+                $repartition['reste_du_base_avant'] - $repartition['interet_payee'] - $repartition['capital_payee']
             );
 
             /* ================= ENREGISTREMENT ================= */
-
             return CreditRemboursement::create([
                 'credit_id' => $credit->id,
                 'montant' => $montant,
-                // ventilation
+                'date_paiement' => $datePaiement, // Toujours tracer la date de la transaction
+                
+                // Ventilation
                 'montant_penalite_payee' => $repartition['penalite_payee'],
                 'montant_interet_payee'  => $repartition['interet_payee'],
                 'montant_capital_payee'  => $repartition['capital_payee'],
-                // snapshots comptables
-                'report_avant' => round($totalRembourseAvant, 2),
-                'reste_du_apres' => round($totalDuApres, 2),
+                
+                // Snapshots comptables
+                'report_avant' => round($reportAvant, 5),
+                'reste_du_apres' => round($resteDuApres, 5),
+                
                 'agent_id' => $data['agent_id'],
                 'mode_paiement' => $data['mode_paiement'],
-                'reference_paiement' => $data['reference_paiement'],
+                'reference_paiement' => $data['reference_paiement'] ?? null,
                 'zone_id' => $zone->id,
-                'agence_id' => $zone->agence_id,
             ]);
         });
     }

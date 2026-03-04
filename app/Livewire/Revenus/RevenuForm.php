@@ -3,6 +3,7 @@
 namespace App\Livewire\Revenus;
 
 use App\Models\Revenu;
+use App\Models\Traits\HasAgenceContext;
 use App\Models\TypesRevenu;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -10,6 +11,8 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class RevenuForm extends Component
 {
+    use HasAgenceContext;
+
     public $montant, $monnaie = 'USD', $libelle, $reference, $description, $types_revenu_id;
 
     protected $rules = [
@@ -20,6 +23,12 @@ class RevenuForm extends Component
         'reference' => 'nullable|string',
         'description' => 'nullable|string',
     ];
+
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
+    }
 
     public function save()
     {

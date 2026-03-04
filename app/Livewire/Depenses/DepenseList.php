@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Depenses;
 
+use App\Livewire\Traits\CanDeleteAccountingRecords;
 use App\Models\Depense;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,7 +11,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class DepenseList extends Component
 {
-    use WithPagination;
+    use WithPagination, CanDeleteAccountingRecords;
 
     public $search = '';
 

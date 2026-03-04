@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
-use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Compte extends Model
 {
     use Blameable;
+
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
     
     protected $fillable = [
         'membre_id',

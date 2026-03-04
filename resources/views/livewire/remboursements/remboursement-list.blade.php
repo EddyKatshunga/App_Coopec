@@ -23,7 +23,7 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-bold text-blue-700">{{ $r->credit->reference }}</div>
-                        <div class="text-xs text-gray-500">{{ $r->credit->membre->name }}</div>
+                        <div class="text-xs text-gray-500">{{ $r->credit->user->name }}</div>
                     </td>
                     <td class="px-6 py-4 font-bold text-green-600">
                         {{ number_format($r->montant, 2, ',', ' ') }} <span class="text-[10px]">{{ $r->monnaie }}</span>
@@ -36,10 +36,25 @@
                     <td class="px-6 py-4 text-sm text-gray-600">
                         {{ number_format($r->reste_du_apres, 2, ',', ' ') }}
                     </td>
-                    <td class="px-6 py-4 text-right">
-                        <a href="{{ route('remboursements.show', $r->id) }}" wire:navigate class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                    {{-- Boutons Détails et Suppression --}}
+                    <td class="px-6 py-4 text-right flex justify-end gap-3">
+                        <a href="{{ route('remboursement.show', $r) }}" wire:navigate class="text-blue-600 hover:text-blue-900 text-sm font-medium">
                             Détails
                         </a>
+
+                        {{-- 1. Vérification Permission Spatie --}}
+                        @can('agent.create') 
+                            {{-- 2. Vérification Journée Ouverte via le trait du modèle --}}
+                            @if($r->canBeDeleted())
+                                <button 
+                                    wire:click="deleteRecord('App\\Models\\CreditRemboursement', {{ $r->id }})"
+                                    wire:confirm="Êtes-vous sûr de vouloir supprimer définitivement ce remboursement ?"
+                                    class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                >
+                                    Supprimer
+                                </button>
+                            @endif
+                        @endcan
                     </td>
                 </tr>
             @empty

@@ -25,12 +25,23 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                        <span class="block text-xs text-blue-500 font-bold uppercase tracking-tight">Report USD</span>
-                        <span class="block text-3xl font-mono font-black text-blue-900 mt-1">${{ number_format($reportVeilleUsd, 2, ',', ' ') }}</span>
+                        <span class="block text-xs text-blue-500 font-bold uppercase tracking-tight">Report Coffre USD</span>
+                        <span class="block text-3xl font-mono font-black text-blue-900 mt-1">${{ number_format($reportVeilleCoffreUsd, 2, ',', ' ') }}</span>
                     </div>
                     <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
-                        <span class="block text-xs text-indigo-500 font-bold uppercase tracking-tight">Report CDF</span>
-                        <span class="block text-3xl font-mono font-black text-indigo-900 mt-1">{{ number_format($reportVeilleCdf, 0, ',', ' ') }} <small class="text-lg">FC</small></span>
+                        <span class="block text-xs text-indigo-500 font-bold uppercase tracking-tight">Report Coffre CDF</span>
+                        <span class="block text-3xl font-mono font-black text-indigo-900 mt-1">{{ number_format($reportVeilleCoffreCdf, 0, ',', ' ') }} <small class="text-lg">FC</small></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
+                        <span class="block text-xs text-blue-500 font-bold uppercase tracking-tight">Report Epargne USD</span>
+                        <span class="block text-3xl font-mono font-black text-blue-900 mt-1">${{ number_format($reportVeilleEpargneUsd, 2, ',', ' ') }}</span>
+                    </div>
+                    <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
+                        <span class="block text-xs text-indigo-500 font-bold uppercase tracking-tight">Report Epargne CDF</span>
+                        <span class="block text-3xl font-mono font-black text-indigo-900 mt-1">{{ number_format($reportVeilleEpargneCdf, 0, ',', ' ') }} <small class="text-lg">FC</small></span>
                     </div>
                 </div>
 
@@ -102,28 +113,30 @@
 
             {{-- Contenu du Wizard --}}
             <div class="p-8 min-h-[400px]">
+                {{-- SECTION A : LES ENTRÉES (Flux entrants vers le coffre) --}}
                 @if($step == 1)
-                    @include('livewire.clotures.partials.step-table', ['title' => 'Dépôts Épargne', 'data' => $this->depots, 'relationName' => 'agent_collecteur', 'relationLabel' => 'Agent Collecteur'])
-                @endif
-
-                @if($step == 2)
-                    @include('livewire.clotures.partials.step-table', ['title' => 'Retraits Épargne', 'data' => $this->retraits, 'relationName' => 'creator', 'relationLabel' => 'Effectué par'])
-                @endif
-
-                @if($step == 3)
-                    @include('livewire.clotures.partials.step-table', ['title' => 'Déblocages Crédits', 'data' => $this->credits, 'relationName' => 'zone', 'relationLabel' => 'Zone'])
-                @endif
-
-                @if($step == 4)
                     @include('livewire.clotures.partials.step-table', ['title' => 'Remboursements Crédits', 'data' => $this->remboursements, 'relationName' => 'zone', 'relationLabel' => 'Zone'])
                 @endif
 
+                @if($step == 2)
+                    @include('livewire.clotures.partials.step-table', ['title' => 'Dépôts Épargne', 'data' => $this->depots, 'relationName' => 'agent_collecteur', 'relationLabel' => 'Agent Collecteur'])
+                @endif
+
+                @if($step == 3)
+                    @include('livewire.clotures.partials.step-table', ['title' => 'Revenus d\'Exploitation', 'data' => $this->revenus, 'relationName' => 'typeRevenu', 'relationLabel' => 'Type de Revenu'])
+                @endif
+
+                {{-- SECTION B : LES SORTIES (Flux sortants du coffre) --}}
+                @if($step == 4)
+                    @include('livewire.clotures.partials.step-table', ['title' => 'Déblocages Crédits', 'data' => $this->credits, 'relationName' => 'zone', 'relationLabel' => 'Zone'])
+                @endif
+
                 @if($step == 5)
-                    @include('livewire.clotures.partials.step-table', ['title' => 'Revenus', 'data' => $this->revenus, 'relationName' => 'typeRevenu', 'relationLabel' => 'Type de Revenu'])
+                    @include('livewire.clotures.partials.step-table', ['title' => 'Retraits Épargne', 'data' => $this->retraits, 'relationName' => 'creator', 'relationLabel' => 'Guichetier'])
                 @endif
 
                 @if($step == 6)
-                    @include('livewire.clotures.partials.step-table', ['title' => 'Dépenses', 'data' => $this->depenses, 'relationName' => 'typeDepense', 'relationLabel' => 'Type de Dépense'])
+                    @include('livewire.clotures.partials.step-table', ['title' => 'Dépenses & Charges', 'data' => $this->depenses, 'relationName' => 'typeDepense', 'relationLabel' => 'Type de Dépense'])
                 @endif
 
                 @if($step == 7)
@@ -188,7 +201,7 @@
                         Précédent
                     </button>
                 @else
-                    <a href="{{ route('clotures.index') }}" wire:navigate class="text-gray-400 hover:text-gray-600 text-sm font-bold">Abandonner la clôture</a>
+                    <a href="{{ route('clotures.show', $cloture) }}" wire:navigate class="text-gray-400 hover:text-gray-600 text-sm font-bold">Abandonner la clôture</a>
                 @endif
 
                 @if($step < $totalSteps)

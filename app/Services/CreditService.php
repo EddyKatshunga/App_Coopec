@@ -35,7 +35,7 @@ class CreditService
             'garant_adresse'   => $data['garant_adresse'] ?? null,
             'garant_telephone' => $data['garant_telephone'] ?? null,
             'statut'           => 'en_cours',
-            'observation'      => $data['observation'] ?? 'Rien à signaler',
+            'observation'      => $data['observation'] ?? null,
         ]);
     }
 }

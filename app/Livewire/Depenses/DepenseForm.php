@@ -5,13 +5,16 @@ namespace App\Livewire\Depenses;
 use App\Models\Depense;
 use App\Models\TypesDepense;
 use App\Models\Agent;
+use App\Models\Traits\HasAgenceContext;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class DepenseForm extends Component
 {
-    public $montant, $monnaie = 'USD', $libelle, $reference, $description, $types_depense_id, $beneficiaire_id;
+    use HasAgenceContext;
+
+    public $montant, $monnaie = 'CDF', $libelle, $reference, $description, $types_depense_id, $beneficiaire_id;
 
     protected $rules = [
         'montant' => 'required|numeric|min:1',
@@ -21,10 +24,15 @@ class DepenseForm extends Component
         'beneficiaire_id' => 'nullable|exists:agents,id',
     ];
 
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
+    }
+
     public function save()
     {
         $validatedData = $this->validate();
-        $validatedData['date_operation'] = now(); // Selon votre getDateColumnName()
 
         Depense::create($validatedData);
 

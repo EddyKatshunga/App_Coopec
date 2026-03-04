@@ -7,12 +7,20 @@ use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
 class Depense extends Model
 {
     use ManageClotureComptable;
     use Blameable;
     use AffectsCoffre;
+    
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'montant',

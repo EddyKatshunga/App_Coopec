@@ -16,11 +16,14 @@ use Livewire\Attributes\Layout;
 class CloturesForm extends Component
 {
     public ?CloturesComptable $cloture = null;
+    public ?Agence $agence = null;
     public bool $isOuverture = false;
     
     // Pour l'affichage lors de l'ouverture
-    public $reportVeilleUsd = 0;
-    public $reportVeilleCdf = 0;
+    public $reportVeilleCoffreUsd = 0;
+    public $reportVeilleCoffreCdf = 0;
+    public $reportVeilleEpargneUsd = 0;
+    public $reportVeilleEpargneCdf = 0;
 
     // Variables du Wizard (Clôture)
     public $step = 1;
@@ -38,28 +41,30 @@ class CloturesForm extends Component
 
     public function mount($cloture = null, $agence = null)
     {
-        // 1. Logique pour l'OUVERTURE (On reçoit une Agence ou un ID d'agence)
-        if ($agence) {
-            // Si c'est un ID qui est passé au lieu de l'objet
-            $agenceModel = ($agence instanceof Agence) ? $agence : Agence::findOrFail($agence);
+        // 1. Logique pour la CLÔTURE (On vérifie d'abord si c'est une clôture car c'est l'édition)
+        // On vérifie si $cloture est un objet ou un ID numérique
+        if ($cloture instanceof CloturesComptable || (is_numeric($cloture) && !empty($cloture))) {
             
-            $this->isOuverture = true;
-            
-            // On récupère la dernière clôture pour les reports
-            $derniere = CloturesComptable::where('agence_id', $agenceModel->id)
-                ->orderBy('date_cloture', 'desc')
-                ->first();
-                
-            $this->reportVeilleUsd = $derniere->solde_coffre_usd ?? 0;
-            $this->reportVeilleCdf = $derniere->solde_coffre_cdf ?? 0;
-        } 
-        // 2. Logique pour la CLÔTURE (On reçoit une Cloture existante)
-        elseif ($cloture && $cloture instanceof CloturesComptable && $cloture->exists) {
-            $this->cloture = $cloture;
+            $this->cloture = ($cloture instanceof CloturesComptable) 
+                ? $cloture 
+                : CloturesComptable::findOrFail($cloture);
+
             $this->isOuverture = false;
+            $this->physique_coffre_usd = $this->cloture->solde_coffre_usd ?? 0;
+            $this->physique_coffre_cdf = $this->cloture->solde_coffre_cdf ?? 0;
             
-            $this->physique_coffre_usd = $cloture->solde_coffre_usd ?? 0;
-            $this->physique_coffre_cdf = $cloture->solde_coffre_cdf ?? 0;
+            // Très important : charger l'agence liée à la clôture pour éviter les erreurs plus tard
+            $this->agence = $this->cloture->agence;
+        } 
+        // 2. Logique pour l'OUVERTURE
+        elseif ($agence) {
+            $this->agence = ($agence instanceof Agence) ? $agence : Agence::findOrFail($agence);
+            $this->isOuverture = true;
+                
+            $this->reportVeilleCoffreUsd = $this->agence->solde_actuel_coffre_usd ?? 0;
+            $this->reportVeilleCoffreCdf = $this->agence->solde_actuel_coffre_cdf ?? 0;
+            $this->reportVeilleEpargneUsd = $this->agence->solde_actuel_epargne_usd ?? 0;
+            $this->reportVeilleEpargneCdf = $this->agence->solde_actuel_epargne_cdf ?? 0;
         }
     }
 
@@ -67,8 +72,8 @@ class CloturesForm extends Component
     public function validerOuverture(ClotureService $service)
     {
         try {
-            $agenceId = auth()->user()->agence_id;
-            $service->ouvrirJournee($agenceId);
+            $agence = auth()->user()->agence;
+            $service->ouvrirJournee($agence);
             
             session()->flash('success', 'La journée a été ouverte avec succès.');
             return redirect()->route('clotures.index'); // Ou vers le dashboard
@@ -104,7 +109,7 @@ class CloturesForm extends Component
             ]);
 
             session()->flash('success', 'Journée clôturée avec succès.');
-            return redirect()->route('clotures.show', $this->cloture->id);
+            return redirect()->route('clotures.index');
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());
         }
@@ -112,22 +117,29 @@ class CloturesForm extends Component
 
     // --- COMPUTED PROPERTIES (Uniquement appelées si on est en clôture) ---
     public function getDepotsProperty() {
-        return $this->isOuverture ? [] : Transaction::getDepotsGroupedByAgent($this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : $this->cloture->depots()->with('agent_collecteur')
+            ->get()->groupBy('agent_collecteur_id');
     }
+
     public function getRetraitsProperty() {
-        return $this->isOuverture ? [] : Transaction::getRetraitsGroupedByAgent($this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : $this->cloture->retraits()->with('creator')
+            ->get()->groupBy('created_by');
     }
     public function getCreditsProperty() {
-        return $this->isOuverture ? [] : Credit::getCreditGroupedByZone($this->cloture->agence_id, $this->cloture->date_cloture, 'date_deblocage');
+        return $this->isOuverture ? [] : $this->cloture->credits()->with('zone')
+            ->get()->groupBy('zone_id');
     }
     public function getRemboursementsProperty() {
-        return $this->isOuverture ? [] : CreditRemboursement::getGroupedByZone($this->cloture->agence_id, $this->cloture->date_cloture, 'date_paiement');
+        return $this->isOuverture ? [] : $this->cloture->remboursements()->with('zone')
+            ->get()->groupBy('zone_id');
     }
     public function getRevenusProperty() {
-        return $this->isOuverture ? [] : Revenu::getGroupedByType($this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : $this->cloture->revenus()->with('typeRevenu')
+            ->get()->groupBy('types_revenu_id');
     }
     public function getDepensesProperty() {
-        return $this->isOuverture ? [] : Depense::getGroupedByType($this->cloture->agence_id, $this->cloture->date_cloture);
+        return $this->isOuverture ? [] : $this->cloture->depenses()->with('typeDepense')
+            ->get()->groupBy('types_depense_id');
     }
 
     public function render()

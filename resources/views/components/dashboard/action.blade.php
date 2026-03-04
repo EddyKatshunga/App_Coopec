@@ -5,7 +5,7 @@
     'routeParams' => [] // Paramètres optionnels de route
 ])
 
-<a href="{{ route($route, $routeParams) }}" wire:navigate
+<a href="{{ route($route, $routeParams) }}"
    class="block p-4 bg-white rounded shadow hover:bg-blue-50 transition">
     
     @if($icon)

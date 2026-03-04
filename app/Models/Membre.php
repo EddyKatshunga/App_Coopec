@@ -3,15 +3,22 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
-use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
 class Membre extends Model
 {
     use Blameable;
+    
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'user_id',
@@ -72,15 +79,17 @@ class Membre extends Model
     {
         return $this->hasMany(Credit::class);
     }
-
-    public function getNombreCreditsAttribute()
-    {
-        return $this->credits()->count();
-    }
-
+    
     public function creditEnCours()
     {
-        return $this->credits()->where('statut', 'en_cours')->orWhere('statut', 'en_retard')->first();
+        return $this->hasOne(Credit::class)
+            ->whereIn('statut', ['en_cours', 'en_retard']);
+    }
+
+    // Un helper pour clarifier le code dans Blade
+    public function hasActiveCredit(): bool
+    {
+        return $this->creditEnCours()->exists();
     }
 
     public function transactions()

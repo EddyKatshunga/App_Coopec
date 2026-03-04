@@ -16,11 +16,11 @@
                 <span class="block text-indigo-600 text-sm font-bold uppercase">Crédits Actifs</span>
                 <span class="text-3xl font-black">{{ $zone->credits->count() }}</span>
             </div>
-            </div>
+        </div>
 
         <div class="px-6 py-4 bg-gray-50 border-t flex justify-between">
             <a href="{{ route('agences.zones.index', $zone->agence_id) }}" class="text-indigo-600 hover:underline" wire:navigate>← Liste des zones</a>
-            <span class="text-gray-400 text-xs italic">Dernière modification par : {{ $zone->updated_by ?? 'Système' }}</span>
+            <span class="text-gray-400 text-xs italic">Dernière modification par : {{ $zone->editor?->name ?? 'Système' }}</span>
         </div>
     </div>
 </div>

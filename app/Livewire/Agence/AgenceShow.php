@@ -65,7 +65,7 @@ class AgenceShow extends Component
 
     public function render()
     {
-        $depenses = $this->agence->depenses;
-        return view('livewire.agence.agence-show', compact('depenses'));
+        $clotures_journalieres = $this->agence->cloturesComptables()->get();
+        return view('livewire.agence.agence-show', compact('clotures_journalieres'));
     }
 }

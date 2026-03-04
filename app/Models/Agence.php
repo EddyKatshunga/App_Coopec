@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Traits\Blameable;
-use App\Models\Traits\VerifieClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Agence extends Model
 {
     use Blameable;
+
+    protected $hidden = ['id'];
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'nom',
@@ -118,5 +124,15 @@ class Agence extends Model
     public function revenus(): HasMany
     {
         return $this->hasMany(Revenu::class);
+    }
+
+    public function cloturesComptables(): HasMany
+    {
+        return $this->hasMany(CloturesComptable::class);
+    }
+
+    public function journeeOuverte() : ?CloturesComptable
+    {
+        return $this->cloturesComptables()->where('statut', 'ouverte')->first();
     }
 }

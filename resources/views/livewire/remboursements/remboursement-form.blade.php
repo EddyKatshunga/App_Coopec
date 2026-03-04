@@ -1,7 +1,4 @@
 <div class="max-w-4xl mx-auto py-8">
-    @php
-        $date_credit = auth()->user()->journee_ouverte->date_cloture ?? 'Attention! Pas de journée ouvrable';
-    @endphp
 
     @if (session()->has('error'))
         <div class="mb-4 mx-4 mt-4 rounded-lg bg-green-100 px-4 py-3 text-green-800 text-sm">
@@ -30,7 +27,7 @@
             <h3 class="text-white font-bold text-lg">Nouveau Remboursement - {{ $credit->user->name }}</h3>
             <p class="text-blue-100 text-sm italic">Crédit Ref: {{ $credit->numero_credit }}</p>
             @if (auth()->user()->journee_ouverte)
-                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ auth()->user()->journee_ouverte->date_cloture->isoFormat('dddd D MMMM YYYY') }}</h3>
             @else
                 <h5>Opération Impossible, pas de date disponible</h5>
             @endif
@@ -38,8 +35,9 @@
 
         <form wire:submit.prevent="save" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="col-span-1">
-                <label class="block text-sm font-medium text-gray-700">Montant à payer ({{ $credit->monnaie }})</label>
-                <input type="number" step="0.01" wire:model="montant" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <label class="block text-sm font-medium text-gray-700">Montant à payer ({{ $monnaie }})</label>
+                <input type="number" step="0.01" wire:model.live="montant" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <span class="text-blue-500 text-xs">{{ money_to_words($montant, $monnaie) }}</span>
                 @error('montant') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 

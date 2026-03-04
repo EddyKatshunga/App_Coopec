@@ -15,81 +15,60 @@ class Credit extends Model
     use AffectsCoffre;
     use Blameable;
     
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+    
     protected $fillable = [
-        'numero_credit',
-        'membre_id',
-        'user_id',
-        'agent_id', //Agent ayant validé le crédit
-        'zone_id',
-        'monnaie',
-        'capital',
-        'interet',
-        'total_remboursement',
-        'taux_penalite_journalier',
-        'unite_temps',
-        'duree', //Echeance
-        'date_fin_prevue',
-        'garant_nom',
-        'garant_adresse',
-        'garant_telephone',
-        'negocie',
-        'note_negociation',
-        'date_cloture_forcee',
-        'observation',
+        'numero_credit', 'membre_id', 'user_id', 'agent_id', 'zone_id',
+        'monnaie', 'capital', 'interet', 'total_remboursement',
+        'taux_penalite_journalier', 'unite_temps', 'duree',
+        'date_fin_prevue', 'garant_nom', 'garant_adresse',
+        'garant_telephone', 'negocie', 'note_negociation',
+        'date_cloture_forcee', 'observation',
     ];
 
     protected $casts = [
         'date_credit' => 'date',
         'date_fin_prevue' => 'date',
+        'date_cloture_forcee' => 'datetime',
         'negocie' => 'boolean',
     ];
 
     /* ================= RELATIONS ================= */
+    
     public function journeeComptable(): BelongsTo
     {
         return $this->belongsTo(CloturesComptable::class, 'journee_comptable_id');
     }
 
-    /**
-     * Retourne la colonne de date spécifique à ce modèle.
-     */
     public function getDateColumnName(): string
     {
         return 'date_credit';
     }
+
+    public function getDateCalculAttribute()
+    {
+        return auth()->user()->journee_ouverte->date_cloture ?? now();
+    }
     
     public function remboursements(): HasMany
     {
-        return $this->hasMany(CreditRemboursement::class);
+        // Important : Toujours ordonner chronologiquement pour le calcul séquentiel
+        return $this->hasMany(CreditRemboursement::class)->orderBy('date_paiement', 'asc');
     }
 
-    public function membre(): BelongsTo
-    {
-        return $this->belongsTo(Membre::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function zone(): BelongsTo
-    {
-        return $this->belongsTo(Zone::class);
-    }
-
-    public function agence(): BelongsTo
-    {
-        return $this->belongsTo(Agence::class);
-    }
-
-    public function agent(): BelongsTo //L'agent ayant validé le crédit
-    {
-        return $this->belongsTo(Agent::class);
-    }
+    public function membre(): BelongsTo { return $this->belongsTo(Membre::class); }
+    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function zone(): BelongsTo { return $this->belongsTo(Zone::class); }
+    public function agence(): BelongsTo { return $this->belongsTo(Agence::class); }
+    public function agent(): BelongsTo { return $this->belongsTo(Agent::class); }
 
     public function isAddition(): bool {
-        return false; // Toujours une diminution
+        return false;
     }
 
     /* ================= ATTRIBUTS CALCULÉS ================= */
@@ -99,9 +78,9 @@ class Credit extends Model
         return $this->capital + $this->interet;
     }
 
-    public function getMontantEcheanceAttribute() //Le montant à payer par échéance
+    public function getMontantEcheanceAttribute()
     {
-        return ($this->capital + $this->interet) / $this->duree;
+        return $this->total / $this->duree;
     }
 
     public function getTotalRembourseAttribute()
@@ -109,42 +88,160 @@ class Credit extends Model
         return $this->remboursements()->sum('montant');
     }
 
-    public function getResteDuAttribute()
+    /**
+     * Moteur de calcul séquentiel (Cœur de votre logique métier)
+     * Retourne un tableau avec l'état exact du crédit à l'instant T (ou aujourd'hui).
+     */
+    public function getSituationActuelle($dateConsultation = null)
     {
-        return max(0, $this->total + $this->penalites_courantes - $this->total_rembourse);
+        $dateRef = $dateConsultation ?? $this->date_calcul;
+        $resteDu = $this->total;
+        $dateDernierCalcul = $this->date_fin_prevue->copy(); // Les pénalités commencent après cette date
+
+        $remboursements = $this->remboursements;
+        $totalPenalitesPayees = 0;
+
+        foreach ($remboursements as $paiement) {
+            $datePaiement = $paiement->date_paiement; // Assurez-vous que c'est casté en Carbon dans CreditRemboursement
+
+            // 1. Calcul des pénalités générées entre le dernier calcul et ce paiement
+            $penalitesDeCePaiement = 0;
+            if ($datePaiement->gt($dateDernierCalcul) && $datePaiement->gt($this->date_fin_prevue)) {
+                $joursRetard = $datePaiement->diffInDays($dateDernierCalcul);
+                $penalitesDeCePaiement = $joursRetard * $resteDu * ($this->taux_penalite_journalier / 100);
+            }
+
+            // 2. Le paiement absorbe d'abord les pénalités du moment, puis fait baisser le reste dû
+            $montantPaye = $paiement->montant;
+            
+            // Si le paiement couvre les pénalités
+            if ($montantPaye >= $penalitesDeCePaiement) {
+                $montantPourResteDu = $montantPaye - $penalitesDeCePaiement;
+                $totalPenalitesPayees += $penalitesDeCePaiement;
+            } else {
+                // S'il ne paie pas assez, le reste dû ne baisse pas, mais on ne cumule pas les pénalités
+                // selon votre règle : "Il n’y a pas de cumul de pénalités"
+                $montantPourResteDu = 0;
+                $totalPenalitesPayees += $montantPaye; 
+            }
+
+            $resteDu -= $montantPourResteDu;
+            
+            // Mise à jour de la date de référence pour le prochain calcul
+            // On ne met à jour que si on a dépassé la date de fin prévue
+            if ($datePaiement->gt($this->date_fin_prevue)) {
+                $dateDernierCalcul = $datePaiement->copy();
+            }
+        }
+
+        // 3. Calcul des pénalités non payées (courantes) entre le dernier paiement et la date de consultation
+        $penalitesCourantes = 0;
+        if ($dateRef->gt($dateDernierCalcul) && $dateRef->gt($this->date_fin_prevue) && $resteDu > 0) {
+            $joursRetardCourants = $dateRef->diffInDays($dateDernierCalcul);
+            $penalitesCourantes = $joursRetardCourants * $resteDu * ($this->taux_penalite_journalier / 100);
+        }
+
+        return [
+            'reste_du_base' => round($resteDu, 5), // Le capital + intérêts restants (ex: 125.75)
+            'penalites_courantes' => round($penalitesCourantes, 5), // Pénalités générées depuis le dernier paiement (ex: 1.88625)
+            'total_a_payer' => round($resteDu + $penalitesCourantes, 5), // Total absolu (ex: 127.63625)
+            'jours_retard_courants' => isset($joursRetardCourants) ? $joursRetardCourants : 0,
+        ];
     }
 
-    public function getJoursRetardAttribute()
+    public function getResteDuAttribute()
     {
-        $debut = $this->date_fin_prevue->addDays(10); //Mise en démeure
-        return now()->greaterThan($debut)
-            ? $debut->diffInDays(now())
-            : 0;
+        return $this->getSituationActuelle()['reste_du_base'];
     }
 
     public function getPenalitesCourantesAttribute()
     {
-        if ($this->jours_retard <= 0) return 0;
+        return $this->getSituationActuelle()['penalites_courantes'];
+    }
 
-        return ($this->reste_capital_penalisable *
-            $this->taux_penalite_journalier / 100) *
-            $this->jours_retard;
+    public function getJoursRetardAttribute()
+    {
+        // Total des jours depuis la date de fin (pour l'affichage global)
+        if ($this->date_calcul->gt($this->date_fin_prevue) && $this->getSituationActuelle()['total_a_payer'] > 0) {
+            return $this->date_calcul->diffInDays($this->date_fin_prevue);
+        }
+        return 0;
     }
 
     public function getStatutAttribute()
     {
-        if ($this->date_cloture_forcee) return 'termine_negocie';
+        if ($this->date_cloture_forcee && $this->negocie) return 'termine_negocie';
 
-        if ($this->reste_du <= 0 && now()->lte($this->date_fin_prevue))
-            return 'termine';
+        $situation = $this->getSituationActuelle();
+        
+        // S'il ne doit plus rien (y compris les pénalités)
+        if ($situation['total_a_payer'] <= 0) {
+            // Est-ce qu'il a terminé avec ou sans retard par rapport à la date de fin ?
+            // On regarde la date du dernier paiement
+            $dernierPaiement = $this->remboursements()->latest('date_paiement')->first();
+            $dateFinEffective = $dernierPaiement ? $dernierPaiement->date_paiement : $this->date_calcul;
 
-        if ($this->reste_du <= 0 && now()->gt($this->date_fin_prevue))
-            return 'termine_en_retard';
+            return $dateFinEffective->gt($this->date_fin_prevue) ? 'termine_en_retard' : 'termine';
+        }
 
-        if ($this->jours_retard > 0)
-            return 'en_retard';
+        // S'il doit encore de l'argent et qu'on a dépassé la date de fin
+        if ($this->date_calcul->gt($this->date_fin_prevue)) return 'en_retard';
 
         return 'en_cours';
+    }
+
+    /**
+     * Génère l'historique détaillé des paliers de pénalités pour le client.
+     */
+    public function getHistoriquePenalites()
+    {
+        $historique = [];
+        $resteDu = $this->total;
+        $dateRef = $this->date_fin_prevue->copy();
+        $remboursements = $this->remboursements()->orderBy('date_paiement', 'asc')->get();
+
+        foreach ($remboursements as $paiement) {
+            if ($paiement->date_paiement->gt($this->date_fin_prevue)) {
+                $jours = $paiement->date_paiement->diffInDays($dateRef);
+                
+                if ($jours > 0) {
+                    $montantPenalite = $jours * $resteDu * ($this->taux_penalite_journalier / 100);
+                    
+                    $historique[] = [
+                        'date_debut' => $dateRef->format('d/m/Y'),
+                        'date_fin'   => $paiement->date_paiement->format('d/m/Y'),
+                        'jours'      => $jours,
+                        'base'       => $resteDu,
+                        'taux'       => $this->taux_penalite_journalier,
+                        'total'      => $montantPenalite,
+                        'type'       => 'Paiement effectué'
+                    ];
+                    
+                    $dateRef = $paiement->date_paiement->copy();
+                }
+            }
+            // On déduit le capital/intérêt payé pour le prochain palier
+            $resteDu -= ($paiement->montant_capital_payee + $paiement->montant_interet_payee);
+        }
+
+        // Ajouter le palier "en cours" (entre le dernier paiement et aujourd'hui)
+        $today = now();
+        if ($today->gt($dateRef) && $resteDu > 0) {
+            $joursCourants = $today->diffInDays($dateRef);
+            if ($joursCourants > 0) {
+                $historique[] = [
+                    'date_debut' => $dateRef->format('d/m/Y'),
+                    'date_fin'   => $today->format('d/m/Y'),
+                    'jours'      => $joursCourants,
+                    'base'       => $resteDu,
+                    'taux'       => $this->taux_penalite_journalier,
+                    'total'      => $joursCourants * $resteDu * ($this->taux_penalite_journalier / 100),
+                    'type'       => 'Période en cours'
+                ];
+            }
+        }
+
+        return collect($historique);
     }
 
     public static function getCreditGroupedByZone(int $agenceId, $date)
@@ -168,5 +265,6 @@ class Credit extends Model
             ->get()
             ->groupBy('zone_id');
     }
+
 }
 

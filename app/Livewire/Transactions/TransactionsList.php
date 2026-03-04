@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Transactions;
 
+use App\Livewire\Traits\CanDeleteAccountingRecords;
 use App\Models\CloturesComptable;
 use App\Models\Transaction;
 use Livewire\Component;
@@ -11,7 +12,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class TransactionsList extends Component
 {
-    use WithPagination;
+    use WithPagination, CanDeleteAccountingRecords;
 
     public $search = '';
     public $type = '';
@@ -22,12 +23,12 @@ class TransactionsList extends Component
     // Filtre administrateur/superviseur
     public $all_agents = false;
 
-    public int $agenceId;
-    public ?CloturesComptable $journee_ouverte;
+    public ?int $agenceId = null;
+    public ?CloturesComptable $journee_ouverte = null;
 
     public function mount()
     {
-        $this->agenceId = auth()->user()->agence_id;
+        $this->agenceId = auth()->user()->agence?->id;
         $this->journee_ouverte = auth()->user()->journee_ouverte;
         // Par défaut, on filtre sur la journée en cours
         $this->date_debut = $this->journee_ouverte?->date_cloture ?? now()->format('Y-m-d');
@@ -42,7 +43,7 @@ class TransactionsList extends Component
 
         // Filtrage par agent (sauf si coché "tous les agents" et que l'utilisateur a les droits)
         if (!$this->all_agents) {
-            $query->where('agent_collecteur_id', auth()->user()->agent->id);
+            $query->where('agent_collecteur_id', auth()->user()->agent?->id);
         }
 
         // Filtres Dynamiques

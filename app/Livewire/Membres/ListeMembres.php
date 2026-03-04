@@ -40,7 +40,7 @@ class ListeMembres extends Component
     public function render()
     {
         $membres = Membre::query()
-            ->with('user', 'agent')
+            ->with('user', 'agent', 'creditEnCours')
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')

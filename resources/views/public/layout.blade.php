@@ -15,7 +15,7 @@
             <!-- Logo / Brand -->
             <div class="flex-shrink-0">
                 <a href="{{ route('public.home') }}" class="text-2xl font-bold text-blue-600 tracking-tight hover:text-blue-700 transition">
-                    COOPEC KIKWIT
+                    {{ config('app.name') }}
                 </a>
             </div>
 

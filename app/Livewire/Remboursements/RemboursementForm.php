@@ -4,8 +4,7 @@ namespace App\Livewire\Remboursements;
 
 use App\Models\Agent;
 use App\Models\Credit;
-use App\Models\CreditRemboursement;
-use App\Models\User;
+use App\Models\Traits\HasAgenceContext;
 use App\Services\CreditRemboursementService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -13,10 +12,12 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class RemboursementForm extends Component
 {
+    use HasAgenceContext;
     public Credit $credit;
 
     // Champs du formulaire
     public $montant;
+    public $monnaie;
     public $mode_paiement = 'cash';
     public $reference_paiement;
     public $agent_id;
@@ -41,7 +42,10 @@ class RemboursementForm extends Component
 
     public function mount(Credit $credit)
     {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
         $this->credit = $credit;
+        $this->monnaie = $credit->monnaie;
         $this->agent_id = auth()->user()->agent?->id;
     }
 
@@ -50,21 +54,21 @@ class RemboursementForm extends Component
         $data = $this->validate();
 
         try {
-            $service->enregistrer($this->credit, $data);
+            $service->enregistrer($this->credit, $data); //La monnaie sera géré par le service
             $message = "Remboursement enregistré avec succès.";
 
             session()->flash('message', $message);
             return redirect()->route('credit.show', $this->credit);
 
         } catch (\Exception $e) {
-            $this->addError('montant', $e->getMessage());
+            $this->addError('error', $e->getMessage());
         }
     }
 
     public function render()
     {
         return view('livewire.remboursements.remboursement-form', [
-            'agents' => Agent::where('agence_id', auth()->user()->agence_id)->get() // Idéalement filtrer par agence
+            'agents' => Agent::where('agence_id', auth()->user()->agence_id)->get()
         ]);
     }
 }

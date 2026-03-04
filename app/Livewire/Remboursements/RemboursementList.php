@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Remboursements;
 
+use App\Livewire\Traits\CanDeleteAccountingRecords;
 use App\Models\CreditRemboursement;
 use App\Models\Credit;
 use Livewire\Component;
@@ -11,7 +12,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class RemboursementList extends Component
 {
-    use WithPagination;
+    use WithPagination, CanDeleteAccountingRecords;
 
     public ?Credit $credit = null; // Optionnel : filtrer par crédit
     public $search = '';

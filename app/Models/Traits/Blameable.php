@@ -3,6 +3,7 @@
 namespace App\Models\Traits;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 trait Blameable
 {
@@ -12,6 +13,9 @@ trait Blameable
             if (Auth::check()) {
                 $model->created_by = Auth::id();
                 $model->updated_by = Auth::id();
+            }
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::ulid();
             }
         });
 

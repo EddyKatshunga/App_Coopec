@@ -23,11 +23,18 @@
                     <td class="p-3 border text-sm">{{ $revenu->typeRevenu->nom ?? 'N/A' }}</td>
                     <td class="p-3 border text-center space-x-3">
                         <a href="{{ route('revenus.show', $revenu->id) }}" class="text-blue-500 hover:text-blue-700" wire:navigate>Détails</a>
-                        <button wire:click="delete({{ $revenu->id }})" 
-                                wire:confirm="Voulez-vous vraiment annuler ce revenu ?"
-                                class="text-red-500 hover:text-red-700">
-                            Supprimer
-                        </button>
+                         @can('agent.create') 
+                            {{-- 2. Vérification Journée Ouverte via le trait du modèle --}}
+                            @if($revenu->canBeDeleted())
+                                <button 
+                                    wire:click="deleteRecord('App\\Models\\Depense', {{ $revenu->id }})"
+                                    wire:confirm="Êtes-vous sûr de vouloir supprimer définitivement cette dépense ?"
+                                    class="text-red-600 hover:text-red-900 text-sm font-medium"
+                                >
+                                    Supprimer
+                                </button>
+                            @endif
+                        @endcan
                     </td>
                 </tr>
             @endforeach

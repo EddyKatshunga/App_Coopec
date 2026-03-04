@@ -40,7 +40,7 @@ class DepenseObserver
         }
     }
 
-    public function deleted(Depense $model): void
+    public function deleting(Depense $model): void
     {
         $agence = $model->agence;
         if($model->monnaie === 'CDF'){

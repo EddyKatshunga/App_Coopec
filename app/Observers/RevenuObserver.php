@@ -22,7 +22,7 @@ class RevenuObserver
         }
     }
 
-    public function deleted(Revenu $model): void
+    public function deleting(Revenu $model): void
     {
         $agence = $model->agence;
 

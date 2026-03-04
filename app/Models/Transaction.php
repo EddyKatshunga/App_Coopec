@@ -13,6 +13,13 @@ class Transaction extends Model
     use ManageClotureComptable;
     Use Blameable;
     use AffectsCoffre;
+    
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'compte_id',

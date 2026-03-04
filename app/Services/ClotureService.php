@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Agence;
 use App\Models\CloturesComptable;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -12,14 +13,14 @@ class ClotureService
     /**
      * Ouvre une nouvelle journée comptable pour une agence
      */
-    public function ouvrirJournee(int $agenceId): CloturesComptable
+    public function ouvrirJournee(Agence $agence): CloturesComptable
     {
-        return DB::transaction(function () use ($agenceId) {
-            if (!$agenceId) {
+        return DB::transaction(function () use ($agence) {
+            if (!$agence) {
                 throw new Exception("L'Agence est Obligatoire.");
             }
 
-            $dejaOuverte = CloturesComptable::where('agence_id', $agenceId)
+            $dejaOuverte = CloturesComptable::where('agence_id', $agence->id)
                 ->where('statut', 'ouverte')
                 ->exists();
 
@@ -27,18 +28,14 @@ class ClotureService
                 throw new Exception("Une journée est déjà ouverte pour cette agence.");
             }
 
-            $derniere = CloturesComptable::where('agence_id', $agenceId)
-                ->orderBy('id', 'desc')
-                ->first();
-
             return CloturesComptable::create([
-                'agence_id'         => $agenceId,
-                'date_cloture'      => Carbon::create(2025, 12, 15), // production: now()->format('Y-m-d')
+                'agence_id'         => $agence->id,
+                'date_cloture'      => Carbon::create(2025, 12, 18), // production: now()->format('Y-m-d')
                 'statut'            => 'ouverte',
-                'report_coffre_usd' => $derniere->solde_coffre_usd ?? 0,
-                'report_coffre_cdf' => $derniere->solde_coffre_cdf ?? 0,
-                'report_epargne_usd' => $derniere->solde_epargne_usd ?? 0,
-                'report_epargne_cdf' => $derniere->solde_epargne_cdf ?? 0,
+                'report_coffre_usd' => $agence->solde_actuel_coffre_usd ?? 0,
+                'report_coffre_cdf' => $agence->solde_actuel_coffre_cdf ?? 0,
+                'report_epargne_usd' => $agence->solde_actuel_epargne_usd ?? 0,
+                'report_epargne_cdf' => $agence->solde_actuel_epargne_cdf ?? 0,
             ]);
         });
     }

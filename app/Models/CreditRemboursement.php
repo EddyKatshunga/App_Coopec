@@ -7,19 +7,26 @@ use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class CreditRemboursement extends Model
 {
     use ManageClotureComptable;
     use AffectsCoffre;
     use Blameable;
+    
+    protected $hidden = ['id'];
+    
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     /* ================= MASS ASSIGNMENT ================= */
 
     protected $fillable = [
         'credit_id',
         'montant',
+        'monnaie',
         // ventilation financière
         'montant_penalite_payee',
         'montant_interet_payee',

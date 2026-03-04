@@ -4,7 +4,7 @@
             <h2 class="text-xl font-bold text-gray-800">Enregistrer une nouvelle dépense</h2>
             <p class="text-sm text-gray-600">Les fonds seront déduits du coffre dès la validation.</p>
              @if (auth()->user()->journee_ouverte)
-                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+                <h3 class="text-gray-600 font-bold text-lg"> 📅 Date d'opération : {{ auth()->user()->journee_ouverte->date_cloture->isoFormat('dddd D MMMM YYYY') }}</h3>
             @else
                 <h5>Opération Impossible, pas de date disponible</h5>
             @endif
@@ -36,16 +36,17 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Montant</label>
                     <div class="mt-1 relative rounded-md shadow-sm">
-                        <input type="number" step="0.01" wire:model="montant" 
+                        <input type="number" step="0.01" wire:model.live="montant" 
                                class="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('montant') border-red-500 @enderror" 
                                placeholder="0.00">
                     </div>
+                    <span class="text-gray-700 text-xs mt-1">{{ money_to_words($montant, $monnaie) }}</span>
                     @error('montant') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Devise</label>
-                    <select wire:model="monnaie" 
+                    <select wire:model.live="monnaie" 
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="USD">USD ($)</option>
                         <option value="CDF">CDF (FC)</option>

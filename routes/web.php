@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ImpressionController;
 use App\Http\Controllers\Pdf\MembrePdfController;
 use App\Http\Controllers\Pdf\ReleveComptePdfController;
 use App\Http\Controllers\Public\ContactController;
@@ -51,6 +52,7 @@ use App\Livewire\Remboursements\RemboursementForm;
 use App\Livewire\Remboursements\RemboursementList;
 use App\Livewire\Remboursements\RemboursementShow;
 use App\Livewire\Transactions\TransactionShow;
+use App\Models\CreditRemboursement;
 use App\Models\HistoriqueRole;
 
 Route::prefix('admin')->group(function () {
@@ -85,11 +87,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/agences/zones/', ZoneList::class)->name('agences.zones.index');
-    Route::get('/agences/zones/{zoneId}/show/', ZoneShow::class)->name('agences.zones.show');
-    Route::get('/agences/{agence}/zones/create', ZoneForm::class)
-        ->name('agences.zones.create');
-    Route::get('/agences/{agence}/zones/{zone}/edit', ZoneForm::class)
-        ->name('agences.zones.edit');
+    Route::get('/agences/zones/{zone}/show/', ZoneShow::class)->name('agences.zones.show');
+    Route::get('/agences/{agenceUuid}/zones/create', ZoneForm::class)->name('agences.zones.create');
+    Route::get('/agences/zones/{zoneUuid}/edit', ZoneForm::class)->name('agences.zones.edit');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -179,5 +179,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/historiquesroles', HistoriqueRoleDashboard::class)->name('historiquesroles.index');
 });
 
+Route::get('/membres/imprimer-liste', function() {
+    $membres = \App\Models\Membre::with('user', 'agent')->orderBy('nom')->get();
+    return view('impressions.liste-membres', compact('membres'));
+})->name('membres.print-all');
+
+Route::get('/remboursements/{remboursement}/imprimer', function (CreditRemboursement $remboursement) {
+    // Si nécessaire, chargez les relations pour éviter les requêtes N+1
+    $remboursement->load(['credit.membre', 'agence', 'zone', 'agent']);
+    
+    return view('impressions.recu-paiement', compact('remboursement'));
+})->name('remboursements.print');
+
+Route::get('/impressions/releve/{cloture}/{type}', [ImpressionController::class, 'releve'])
+    ->name('impressions.releve');
+
+Route::get('/impressions/releve-compte/{compte}/{debut?}/{fin?}/{monnaie?}', [ImpressionController::class, 'releveIndividuel'])
+    ->name('impressions.releve.compte');
 
 require __DIR__.'/auth.php';

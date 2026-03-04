@@ -7,121 +7,124 @@
                 Crédit #{{ $credit->numero_credit }}
             </h1>
             <p class="text-sm text-gray-600">
-                Membre : {{ $credit->membre->nom }} {{ $credit->membre->postnom }}
+                Membre : {{ $credit->membre->nom ?? $credit->user->name }}
             </p>
         </div>
 
-        <span class="px-3 py-1 rounded-full text-sm font-semibold
-            @switch($credit->statut)
-                @case('en_cours') bg-blue-100 text-blue-800 @break
-                @case('en_retard') bg-orange-100 text-orange-800 @break
-                @case('retard_penalite') bg-red-100 text-red-800 @break
-                @case('termine') bg-green-100 text-green-800 @break
-                @default bg-gray-100 text-gray-800
-            @endswitch
-        ">
-            {{ ucfirst(str_replace('_', ' ', $credit->statut)) }}
-        </span>
+        <div class="flex items-center space-x-4">
+            @can('agent.create') 
+                @if($credit->canBeDeleted())
+                    <button 
+                        wire:click="deleteRecord('App\\Models\\Credit', {{ $credit->id }})"
+                        wire:confirm="Êtes-vous sûr de vouloir supprimer ce crédit ?"
+                        class="text-red-600 hover:text-red-900 text-sm font-medium"
+                    >
+                        Supprimer
+                    </button>
+                @endif
+            @endcan
+
+            <span class="px-3 py-1 rounded-full text-sm font-semibold
+                @switch($credit->statut)
+                    @case('en_cours') bg-blue-100 text-blue-800 @break
+                    @case('en_retard') bg-orange-100 text-orange-800 @break
+                    @case('termine') bg-green-100 text-green-800 @break
+                    @case('termine_en_retard') bg-purple-100 text-purple-800 @break
+                    @case('termine_negocie') bg-gray-700 text-white @break
+                    @default bg-gray-100 text-gray-800
+                @endswitch
+            ">
+                {{ ucfirst(str_replace('_', ' ', $credit->statut)) }}
+            </span>
+        </div>
     </div>
 
     {{-- ================= RÉSUMÉ FINANCIER ================= --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white shadow rounded p-4">
-            <p class="text-sm text-gray-500">Capital</p>
-            <p class="text-xl font-bold">{{ number_format($credit->capital, 2) }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="bg-white shadow rounded p-4 border-t-4 border-blue-500">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Échéance Finale</p>
+            <p class="text-lg font-bold">{{ $credit->date_fin_prevue->format('d/m/Y') }}</p>
         </div>
 
         <div class="bg-white shadow rounded p-4">
-            <p class="text-sm text-gray-500">Intérêt</p>
-            <p class="text-xl font-bold">{{ number_format($credit->interet, 2) }}</p>
+            <p class="text-sm text-gray-500 uppercase font-semibold">Capital & Intérêts</p>
+            <p class="text-lg font-bold">{{ number_format($credit->total, 2) }} {{ $credit->monnaie }}</p>
         </div>
 
         <div class="bg-white shadow rounded p-4">
-            <p class="text-sm text-gray-500">Pénalités (aujourd’hui)</p>
-            <p class="text-xl font-bold text-red-600">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Pénalités (à ce jour)</p>
+            <p class="text-lg font-bold text-red-600">
                 {{ number_format($penaliteCourante, 2) }}
             </p>
             @if($joursRetard > 0)
-                <p class="text-xs text-gray-500">
-                    {{ $joursRetard }} jour(s) de retard
-                </p>
+                <p class="text-[10px] text-red-500 italic">+{{ $joursRetard }} jours de retard</p>
             @endif
         </div>
 
-        <div class="bg-white shadow rounded p-4">
-            <p class="text-sm text-gray-500">Reste dû</p>
-            <p class="text-xl font-bold">
+        <div class="bg-white shadow rounded p-4 bg-gray-50">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Total Remboursé</p>
+            <p class="text-lg font-bold text-green-600">
+                {{ number_format($credit->total_rembourse, 2) }}
+            </p>
+        </div>
+
+        <div class="bg-white shadow rounded p-4 border-l-4 border-orange-500">
+            <p class="text-sm text-gray-700 uppercase font-extrabold">Net à Payer</p>
+            <p class="text-xl font-black text-orange-600">
                 {{ number_format($resteDu, 2) }}
             </p>
         </div>
     </div>
 
-    {{-- ================= TIMELINE REMBOURSEMENTS ================= --}}
+    {{-- ================= HISTORIQUE ================= --}}
     <div class="bg-white shadow rounded p-6">
-        <h2 class="text-lg font-semibold mb-4">
-            📆 Historique des remboursements
+        <h2 class="text-lg font-semibold mb-6 flex items-center">
+            <span class="mr-2">📊</span> Détails des Paiements Séquentiels
         </h2>
 
         @if($remboursements->isEmpty())
-            <p class="text-gray-500 italic">
-                Aucun remboursement enregistré.
-            </p>
+            <div class="text-center py-8 text-gray-400">
+                Aucun remboursement pour le moment.
+            </div>
         @else
-            <ol class="relative border-l border-gray-200 space-y-6">
-                @foreach($remboursements as $remboursement)
-                    <li class="ml-6">
-                        <span class="absolute -left-3 flex items-center
-                            justify-center w-6 h-6 bg-blue-600 rounded-full
-                            text-white text-xs">
-                            💰
-                        </span>
-
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold">
-                                    {{ $remboursement->date_paiement->format('d/m/Y') }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    {{ $remboursement->mode_paiement_label }}
-                                    — Agent :
-                                    {{ $remboursement->agent->name }}
-                                </p>
-                            </div>
-
-                            <p class="font-bold">
-                                {{ number_format($remboursement->montant, 2) }}
-                            </p>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 mt-2 text-sm">
-                            <span class="text-red-600">
-                                Pénalité :
-                                {{ number_format($remboursement->montant_penalite_payee, 2) }}
-                            </span>
-                            <span class="text-orange-600">
-                                Intérêt :
-                                {{ number_format($remboursement->montant_interet_payee, 2) }}
-                            </span>
-                            <span class="text-green-600">
-                                Capital :
-                                {{ number_format($remboursement->montant_capital_payee, 2) }}
-                            </span>
-                        </div>
-
-                        <p class="text-xs text-gray-500 mt-1">
-                            Reste dû après paiement :
-                            {{ number_format($remboursement->reste_du_apres, 2) }}
-                        </p>
-                    </li>
-                @endforeach
-            </ol>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b text-gray-500 uppercase text-xs">
+                            <th class="py-3 px-2">Date</th>
+                            <th class="py-3 px-2 text-right">Montant Payé</th>
+                            <th class="py-3 px-2 text-red-500 text-right">Pénalité</th>
+                            <th class="py-3 px-2 text-orange-500 text-right">Intérêt</th>
+                            <th class="py-3 px-2 text-green-500 text-right">Capital</th>
+                            <th class="py-3 px-2 text-blue-600 text-right font-bold">Reste Dû</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        @foreach($remboursements as $remb)
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 px-2 font-medium">
+                                    {{ $remb->date_paiement->format('d/m/Y') }}
+                                </td>
+                                <td class="py-4 px-2 text-right font-bold">
+                                    {{ number_format($remb->montant, 2) }}
+                                </td>
+                                <td class="py-4 px-2 text-right text-red-600">
+                                    {{ number_format($remb->montant_penalite_payee, 2) }}
+                                </td>
+                                <td class="py-4 px-2 text-right text-orange-600">
+                                    {{ number_format($remb->montant_interet_payee, 2) }}
+                                </td>
+                                <td class="py-4 px-2 text-right text-green-600">
+                                    {{ number_format($remb->montant_capital_payee, 2) }}
+                                </td>
+                                <td class="py-4 px-2 text-right font-mono font-semibold text-blue-700">
+                                    {{ number_format($remb->reste_du_apres, 2) }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @endif
     </div>
 </div>
-
-{{-- ================= SCRIPT POUR RAFRAÎCHIR TIMELINE ================= --}}
-<script>
-    Livewire.on('remboursementAdded', () => {
-        Livewire.emit('rafraichirEtat');
-    });
-</script>

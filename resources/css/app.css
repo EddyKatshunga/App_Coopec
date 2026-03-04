@@ -32,4 +32,28 @@
     .btn-primary { @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700; }
     .btn-secondary { @apply bg-gray-200 px-4 py-2 rounded; }
     .error { @apply text-sm text-red-600; }
+
+    .label {
+        @apply block text-sm font-bold uppercase tracking-wide text-gray-700 mb-2;
+    }
+
+    .input {
+        @apply w-full border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition;
+    }
+
+    .input-financier {
+        @apply w-full border-gray-300 rounded-xl pl-4 pr-14 py-4 text-xl font-bold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition;
+    }
+
+    .currency {
+        @apply absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm;
+    }
+
+    .montant-lettres {
+        @apply text-xs italic text-gray-500 bg-gray-50 px-3 py-2 rounded-lg;
+    }
+
+    .section-title {
+        @apply text-lg md:text-xl font-extrabold uppercase tracking-wider text-gray-800 border-b pb-3;
+    }
 }

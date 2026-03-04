@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $tables = [
+            'agence_direction_histories',
+            'credit_penalites_logs',
+            'historique_roles',
+            'users',
+        ];
+
+        foreach ($tables as $table) {
+            Schema::table($table, function (Blueprint $table) {
+                $table->ulid('uuid')->unique()->nullable()->after('id');
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        $tables = [
+            'agence_direction_histories',
+            'credit_penalites_logs',
+            'historique_roles',
+            'users',
+        ];
+
+        foreach ($tables as $table) {
+            Schema::table($table, function (Blueprint $table) {
+                $table->dropColumn('uuid');
+            });
+        }
+    }
+};

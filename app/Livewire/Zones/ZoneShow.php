@@ -11,9 +11,9 @@ class ZoneShow extends Component
 {
     public Zone $zone;
 
-    public function mount($zoneId)
+    public function mount($zone)
     {
-        $this->zone = Zone::with(['gerant', 'agence', 'credits'])->findOrFail($zoneId);
+        $this->zone = $zone;
     }
 
     public function render()

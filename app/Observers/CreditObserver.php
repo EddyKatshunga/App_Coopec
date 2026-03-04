@@ -18,7 +18,7 @@ class CreditObserver
         // On accède au membre lié au crédit
         $membre = $credit->membre;
 
-        if ($membre && $membre->creditEnCours()) {
+        if ($membre && $membre->hasActiveCredit()) {
             throw new Exception("Opération impossible : Ce membre possède déjà un crédit actif (en cours ou en retard).");
         }
 
@@ -56,7 +56,7 @@ class CreditObserver
         }
     }
 
-    public function deleted(Credit $model): void
+    public function deleting(Credit $model): void
     {
         $agence = $model->agence;
         if ($model->monnaie === 'CDF') {

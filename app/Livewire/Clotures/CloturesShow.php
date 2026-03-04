@@ -11,6 +11,11 @@ class CloturesShow extends Component
 {
     public CloturesComptable $cloture;
 
+    public function mount(CloturesComptable $cloture)
+    {
+        $this->cloture = $cloture;
+    }
+
     public function render()
     {
         // 1. Dépôts : Agent -> Monnaie

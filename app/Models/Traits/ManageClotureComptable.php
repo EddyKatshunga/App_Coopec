@@ -95,6 +95,16 @@ trait ManageClotureComptable
         }
     }
 
+    public function canBeDeleted(): bool
+    {
+        // On vérifie si la relation est chargée pour éviter les requêtes N+1
+        if (!$this->relationLoaded('journeeComptable')) {
+            $this->load('journeeComptable');
+        }
+
+        return $this->journeeComptable && $this->journeeComptable->statut === 'ouverte';
+    }
+
     /**
      * Retourne le nom de la colonne de date propre au modèle.
      * Chaque modèle doit implémenter cette méthode.

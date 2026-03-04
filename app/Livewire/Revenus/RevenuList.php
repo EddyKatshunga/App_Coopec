@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Revenus;
 
+use App\Livewire\Traits\CanDeleteAccountingRecords;
 use App\Models\Revenu;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,7 +11,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class RevenuList extends Component
 {
-    use WithPagination;
+    use WithPagination, CanDeleteAccountingRecords;
 
     public $search = '';
 

@@ -11,7 +11,7 @@
                         
                         <!-- Noms de l'entreprise et l'application (cachés sur très petit écran) -->
                         <div class="hidden xs:flex xs:items-center xs:space-x-2">
-                            <span class="text-sm sm:text-base font-semibold text-gray-900">COOPEC KIKWIT</span>
+                            <span class="text-sm sm:text-base font-semibold text-gray-900">{{config('app.name')}}</span>
                             <span class="text-gray-400 hidden sm:inline">|</span>
                             <span class="text-xs sm:text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full hidden sm:inline-block">
                                 SYSCO
@@ -167,11 +167,6 @@
                                 <label for="password" class="block text-xs sm:text-sm font-medium text-gray-700">
                                     Mot de passe
                                 </label>
-                                @if (Route::has('password.request'))
-                                    <a class="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-500 transition duration-200" href="{{ route('password.request') }}">
-                                        Mot de passe oublié ?
-                                    </a>
-                                @endif
                             </div>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -188,6 +183,12 @@
                                     placeholder="••••••••"
                                 >
                             </div>
+                            
+                                @if (Route::has('password.request'))
+                                    <a class="text-xs sm:text-sm font-medium text-indigo-600 hover:text-indigo-500 transition duration-200" href="{{ route('password.request') }}">
+                                        Mot de passe oublié ?
+                                    </a>
+                                @endif
                             <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
 

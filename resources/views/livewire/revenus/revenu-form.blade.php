@@ -3,7 +3,7 @@
         <div class="px-6 py-4 bg-gray-50 border-b">
             <h2 class="text-xl font-bold text-gray-800">Enregistrer une Entrée de Fonds</h2>
              @if (auth()->user()->journee_ouverte)
-                <h3 class="text-white font-bold text-lg"> 📅 Date d'opération : {{ \Carbon\Carbon::parse(auth()->user()->journee_ouverte->date_cloture)->format('d/m/Y') }}</h3>
+                <h3 class="text-green-500 font-bold text-lg"> 📅 Date d'opération : {{ auth()->user()->journee_ouverte->date_cloture->isoFormat('dddd D MMMM YYYY') }}</h3>
             @else
                 <h5>Opération Impossible, pas de date disponible</h5>
             @endif
@@ -31,13 +31,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Montant</label>
-                    <input type="number" step="0.01" wire:model="montant" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="number" step="0.01" wire:model.live="montant" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <span class="text-gray-700 text-xs">{{ money_to_words($montant, $monnaie) }}</span> 
                     @error('montant') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Devise</label>
-                    <select wire:model="monnaie" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <select wire:model.live="monnaie" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                         <option value="USD">USD ($)</option>
                         <option value="CDF">CDF (FC)</option>
                     </select>

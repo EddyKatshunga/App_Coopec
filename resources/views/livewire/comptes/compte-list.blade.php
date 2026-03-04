@@ -121,10 +121,10 @@
                     </div>
 
                     <div class="flex items-center justify-between pt-2 gap-2">
-                        <a href="{{ route('compte.show', $compte) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg text-[10px] font-bold text-center hover:bg-gray-50 transition uppercase" wire:navigate>Voir</a>
-                        <a href="{{ route('epargne.depot.create', $compte) }}" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-green-700 transition uppercase" wire:navigate>Dépôt</a>
+                        <a href="{{ route('compte.show', $compte) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg text-[10px] font-bold text-center hover:bg-gray-50 transition uppercase">Voir</a>
+                        <a href="{{ route('epargne.depot.create', $compte) }}" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-green-700 transition uppercase">Dépôt</a>
                         @can('epargne.retrait.create')
-                        <a href="{{ route('epargne.retrait.create', $compte) }}" class="flex-1 bg-amber-500 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-amber-600 transition uppercase" wire:navigate>Retrait</a>
+                        <a href="{{ route('epargne.retrait.create', $compte) }}" class="flex-1 bg-amber-500 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-amber-600 transition uppercase">Retrait</a>
                         @endcan
                     </div>
                 </div>

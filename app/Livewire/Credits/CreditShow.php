@@ -2,23 +2,24 @@
 
 namespace App\Livewire\Credits;
 
+use App\Livewire\Traits\CanDeleteAccountingRecords;
 use Livewire\Component;
 use App\Models\Credit;
-use App\Services\CreditCalculatorService;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class CreditShow extends Component
 {
+    use CanDeleteAccountingRecords;
+    
     public Credit $credit;
 
+    // On garde ces propriétés pour le binding Livewire si nécessaire, 
+    // mais on les alimente via le modèle.
     public float $penaliteCourante = 0;
     public int $joursRetard = 0;
-    public float $totalRembourse = 0;
     public float $resteDu = 0;
-
-    protected CreditCalculatorService $calculator;
 
     protected $listeners = [
         'remboursementAdded' => 'rafraichirEtat',
@@ -26,54 +27,30 @@ class CreditShow extends Component
 
     public function mount(Credit $credit) 
     {
-        $this->calculator = new CreditCalculatorService();
         $this->credit = $credit;
-
         $this->rafraichirEtat();
     }
 
     public function rafraichirEtat(): void
     {
-        $today = now();
+        // On force le rafraîchissement des relations pour inclure le nouveau remboursement
+        $this->credit->load('remboursements');
+        
+        // On utilise la méthode de calcul centralisée du modèle
+        $situation = $this->credit->getSituationActuelle();
 
-        // Pénalités en direct
-        $this->penaliteCourante = $this->calculator
-            ->calculerPenalite($this->credit, $today);
-
-        // Jour de retard après délai de grâce
-        $dateDebutPenalite = $this->credit->date_fin_prevue->copy()->addDays(10);
-        $this->joursRetard = $today->gt($dateDebutPenalite)
-            ? $dateDebutPenalite->diffInDays($today)
-            : 0;
-
-        // Total remboursé
-        $this->totalRembourse = $this->credit
-            ->remboursements()
-            ->sum('montant');
-
-        // Reste dû
-        $this->resteDu = max(
-            0,
-            ($this->credit->capital + $this->credit->interet)
-            + $this->penaliteCourante
-            - $this->totalRembourse
-        );
-    }
-
-    // S'assurer que le service est toujours initialisé
-    public function boot(): void
-    {
-        if (!isset($this->calculator)) {
-            $this->calculator = new CreditCalculatorService();
-        }
+        $this->penaliteCourante = $situation['penalites_courantes'];
+        $this->joursRetard = $situation['jours_retard_courants'];
+        
+        // Le Reste dû affiché est le "Total à payer" (Base + pénalités du jour)
+        $this->resteDu = $situation['total_a_payer'];
     }
 
     public function render()
     {
         return view('livewire.credits.credit-show', [
-            'remboursements' => $this->credit
-                ->remboursements()
-                ->orderBy('date_paiement')
+            'remboursements' => $this->credit->remboursements()
+                ->orderBy('date_paiement', 'asc')
                 ->get(),
         ]);
     }

@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Credit;
 use App\Models\Zone;
-use App\Models\User;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 
@@ -20,14 +19,12 @@ class CreditsList extends Component
     /* ================= FILTRES ================= */
     public $search = '';
     public $zone_id = null;
-    public $membre_id = null;
     public $statut = null;
     public $date_debut = null;
     public $date_fin = null;
     public $negocie = null;
 
     public $zones;
-    public $membres;
 
     public function mount()
     {
@@ -41,7 +38,8 @@ class CreditsList extends Component
 
     public function render()
     {
-        $query = Credit::query()->with(['user', 'zone']);
+        // On charge 'remboursements' pour que getSituationActuelle() soit rapide
+        $query = Credit::query()->with(['user', 'zone', 'remboursements']);
 
         if ($this->search) {
             $query->where(function($q) {
@@ -51,10 +49,12 @@ class CreditsList extends Component
         }
 
         if ($this->zone_id) $query->where('zone_id', $this->zone_id);
-        if ($this->membre_id) $query->where('membre_id', $this->membre_id);
+        
+        // Filtre de statut (Le statut est un attribut calculé ou stocké)
+        if ($this->statut) $query->where('statut', $this->statut);
+
         if (!is_null($this->negocie)) $query->where('negocie', $this->negocie);
         
-        // Dates
         if ($this->date_debut) $query->whereDate('date_credit', '>=', $this->date_debut);
         if ($this->date_fin) $query->whereDate('date_credit', '<=', $this->date_fin);
         

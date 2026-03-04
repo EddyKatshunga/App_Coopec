@@ -14,23 +14,25 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class ZoneForm extends Component
 {
-    public Agence $agence;
-    public AgentService $service;
+    public ?Agence $agence = null;
     public ?Zone $zone = null; // Optionnel, présent uniquement en édition
+    
 
     public $nom, $code, $gerant_id;
 
-    public function mount(Agence $agence, ?Zone $zone = null)
+    public function mount($agenceUuid = null, $zoneUuid = null)
     {
-        $this->agence = $agence;
-        
-        if ($zone && $zone->exists) {
-            $this->zone = $zone;
-            $this->nom = $zone->nom;
-            $this->code = $zone->code;
-            $this->gerant_id = $zone->gerant_id;
-            // On s'assure que l'agence est celle de la zone
-            $this->agence = $zone->agence;
+        // Mode édition : on a un UUID de zone
+        if ($zoneUuid) {
+            $this->zone = Zone::where('uuid', $zoneUuid)->firstOrFail();
+            $this->nom = $this->zone->nom;
+            $this->code = $this->zone->code;
+            $this->gerant_id = $this->zone->gerant_id;
+            $this->agence = $this->zone->agence;
+        } 
+        // Mode création : on a un UUID d'agence
+        elseif ($agenceUuid) {
+            $this->agence = Agence::where('uuid', $agenceUuid)->firstOrFail();
         }
     }
 

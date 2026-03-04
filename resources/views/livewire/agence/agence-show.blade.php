@@ -8,15 +8,18 @@
 
         <div class="flex space-x-3">
             {{-- NOUVEAU BOUTON : Ouvrir la journée --}}
-            <a href="{{ route('clotures.ouvrir', $agence) }}" wire:navigate
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow transition flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Ouvrir la journée
-            </a>
+            @if (!$agence->journeeOuverte())
+                <a href="{{ route('clotures.ouvrir', $agence) }}" wire:navigate
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow transition flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Demarrer les activités
+                </a>
+            @endif
+            
 
-            <a href="{{ route('agences.zones.create', $agence) }}" wire:navigate
+            <a href="{{ route('agences.zones.create', $agence->uuid) }}" wire:navigate
             class="text-gray-600 hover:text-gray-900 font-medium self-center">
                 Ajouter une zone Epargne
             </a>
@@ -147,45 +150,60 @@
     </div>
     {{-- FIN Liste Agents --}}
 
-    {{-- Liste Depenses du Jour --}}
+    {{-- Liste Journées comptables --}}
     <div class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b bg-gray-50">
             <h3 class="text-lg font-semibold text-gray-800">
-                Depenses de la journée
+                Journées de l'Agence
             </h3>
         </div>
         <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-                    <th class="px-6 py-4 text-left">Libelle</th>
-                    <th class="px-6 py-4 text-left">Montant</th>
-                    <th class="px-6 py-4 text-left">Exécutée par</th>
+                    <th class="px-6 py-4 text-left">Date</th>
+                    <th class="px-6 py-4 text-left">Report Coffre FC</th>
+                    <th class="px-6 py-4 text-left">Report Epargne FC</th>
+                    <th class="px-6 py-4 text-left">Solde Soffre FC</th>
+                    <th class="px-6 py-4 text-left">Solde Epargne FC</th>
+                    <th class="px-6 py-4 text-left">Voir plus</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 bg-white">
-                @forelse($depenses as $depense)
+                @forelse($clotures_journalieres as $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 font-medium text-gray-800">
-                            {{ $depense->libelle }}
+                            {{ $item->date_cloture }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $depense->montant }}
+                            {{ $item->report_coffre_cdf }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $depense->beneficiaire->nom }}
+                            {{ $item->report_epargne_cdf }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {{ $item->solde_coffre_cdf }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {{ $item->solde_epargne_cdf }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <a href="{{ route('clotures.show', $item) }}" wire:navigate
+                                class="text-gray-600 hover:text-gray-900 font-medium">
+                                Voir plus
+                            </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                            Aucun agent enregistré.
+                            Aucune journée enregistré.
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    {{-- FIN Liste Depenses du Jour --}}
+    {{-- FIN Liste Journée comptables --}}
 
     {{-- MODAL --}}
     @if($showModal)

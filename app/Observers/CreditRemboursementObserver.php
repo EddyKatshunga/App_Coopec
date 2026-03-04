@@ -3,50 +3,46 @@
 namespace App\Observers;
 
 use App\Models\CreditRemboursement;
+use Illuminate\Support\Facades\DB;
 
 class CreditRemboursementObserver
 {
     public function created(CreditRemboursement $model): void
     {
         $agence = $model->agence;
-
         $credit = $model->credit;
-        $credit->increment('total_remboursement', $model->montant);
+        $montant = $model->montant;
+        $monnaie = $model->credit->monnaie;
 
-        if($model->monnaie === 'CDF'){
+        // Mise à jour directe du crédit (sans événements)
+        DB::table('credits')
+            ->where('id', $credit->id)
+            ->increment('total_remboursement', $montant);
+        
+        // Mise à jour de l'agence
+        if($monnaie === 'CDF'){
             $agence->increment('solde_actuel_coffre_cdf', $model->montant);
         }else{
             $agence->increment('solde_actuel_coffre_usd', $model->montant);
         }
     }
 
-    public function deleted(CreditRemboursement $model): void
+    public function deleting(CreditRemboursement $model): void
     {
         $agence = $model->agence;
-
         $credit = $model->credit;
-        $credit->decrement('total_remboursement', $model->montant);
+        $montant = $model->montant;
+        $monnaie = $model->credit->monnaie;
 
-        if($model->monnaie === 'CDF'){
+        DB::table('credits')
+            ->where('id', $credit->id)
+            ->decrement('total_remboursement', $montant);
+
+        // Mise à jour directe de l'agence
+        if($monnaie === 'CDF'){
             $agence->decrement('solde_actuel_coffre_cdf', $model->montant);
         }else{
             $agence->decrement('solde_actuel_coffre_usd', $model->montant);
         }
-    }
-
-    /**
-     * Handle the CreditRemboursement "restored" event.
-     */
-    public function restored(CreditRemboursement $creditRemboursement): void
-    {
-        //
-    }
-
-    /**
-     * Handle the CreditRemboursement "force deleted" event.
-     */
-    public function forceDeleted(CreditRemboursement $creditRemboursement): void
-    {
-        //
     }
 }

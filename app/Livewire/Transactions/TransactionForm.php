@@ -5,12 +5,15 @@ namespace App\Livewire\Transactions;
 use Livewire\Component;
 use App\Models\Compte;
 use App\Models\Agent;
+use App\Models\Traits\HasAgenceContext;
 use App\Services\TransactionService;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
 class TransactionForm extends Component
 {
+    use HasAgenceContext;
+
     public Compte $compte;
     public string $type_transaction = 'DEPOT';
     public string $monnaie = 'CDF';
@@ -28,6 +31,8 @@ class TransactionForm extends Component
 
     public function mount(Compte $compte, string $type = 'DEPOT')
     {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
         $this->compte = $compte;
         $this->type_transaction = $type;
         $this->agent_collecteur_id = auth()->user()->agent?->id;

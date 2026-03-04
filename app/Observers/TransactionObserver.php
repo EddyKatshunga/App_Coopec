@@ -14,38 +14,9 @@ class TransactionObserver
     /**
      * Handle the Transaction "deleted" event.
      */
-    public function deleted(Transaction $model): void
+    public function deleting(Transaction $model): void
     {
-        // TRÈS IMPORTANT : Si c'est une suppression définitive, 
-        // on ne fait rien car deleted() est appelé juste avant forceDeleted().
-        // On évite ainsi de décompter les montants deux fois.
-        if ($model->isForceDeleting()) {
-            return;
-        }
-
         $this->adjustBalances($model, 'decrement');
-    }
-
-    /**
-     * Handle the Transaction "restored" event.
-     */
-    public function restored(Transaction $model): void
-    {
-        // Si on restaure une transaction, on rajoute les montants aux soldes
-        $this->adjustBalances($model, 'increment');
-    }
-
-    /**
-     * Handle the Transaction "force deleted" event.
-     */
-    public function forceDeleted(Transaction $model): void
-    {
-        // Si la transaction n'était pas déjà en soft delete au moment de l'appel
-        // (donc si on forceDelete une transaction active), on ajuste les soldes.
-        // Si elle était déjà en soft delete, les soldes ont déjà été ajustés par deleted().
-        if (!$model->wasRecentlyCreated && $model->deleted_at === null) {
-             $this->adjustBalances($model, 'decrement');
-        }
     }
 
     /**
