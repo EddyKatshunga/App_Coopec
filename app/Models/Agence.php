@@ -41,15 +41,6 @@ class Agence extends Model
             'code'  => "nullable|string|max:50|unique:agences,code,{$id}",
             'ville' => 'nullable|string|max:255',
             'pays'  => 'nullable|string|max:255',
-            
-            // Validation de la clé étrangère vers la table des agents
-            'chef_agence_id' => 'nullable|exists:agents,id',
-            
-            // Les soldes ne peuvent pas être négatifs (min:0)
-            'solde_actuel_coffre_cdf'  => 'nullable|numeric|min:0',
-            'solde_actuel_coffre_usd'  => 'nullable|numeric|min:0',
-            'solde_actuel_epargne_cdf' => 'nullable|numeric|min:0',
-            'solde_actuel_epargne_usd' => 'nullable|numeric|min:0',
         ];
     }
     

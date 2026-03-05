@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Agence;
-use App\Models\User;
 
 class AgenceContext
 {

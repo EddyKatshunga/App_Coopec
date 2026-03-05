@@ -14,11 +14,7 @@ class AgenceForm extends Component
     public ?Agence $agence = null;
 
     // Propriétés du formulaire
-    public $nom, $code, $ville, $pays, $chef_agence_id;
-    public $solde_actuel_coffre_cdf = 0;
-    public $solde_actuel_coffre_usd = 0;
-    public $solde_actuel_epargne_cdf = 0;
-    public $solde_actuel_epargne_usd = 0;
+    public $nom, $code, $ville, $pays;
 
     public bool $isEdit = false;
 
@@ -39,11 +35,6 @@ class AgenceForm extends Component
             $this->code = $agence->code;
             $this->ville = $agence->ville;
             $this->pays = $agence->pays;
-            $this->chef_agence_id = $agence->chef_agence_id;
-            $this->solde_actuel_coffre_cdf = $agence->solde_actuel_coffre_cdf;
-            $this->solde_actuel_coffre_usd = $agence->solde_actuel_coffre_usd;
-            $this->solde_actuel_epargne_cdf = $agence->solde_actuel_epargne_cdf;
-            $this->solde_actuel_epargne_usd = $agence->solde_actuel_epargne_usd;
         }
     }
 
@@ -66,8 +57,6 @@ class AgenceForm extends Component
 
     public function render()
     {
-        return view('livewire.agence.agence-form', [
-            'agents' => Agent::orderBy('nom')->get() // Pour le menu déroulant
-        ]);
+        return view('livewire.agence.agence-form');
     }
 }

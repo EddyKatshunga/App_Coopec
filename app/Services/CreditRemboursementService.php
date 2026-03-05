@@ -52,7 +52,6 @@ class CreditRemboursementService
             /* ================= VENTILATION ================= */
             $repartition = $this->calculator->repartitionRemboursement($credit, $montant, $datePaiement);
 
-            /* ================= ÉTAT APRÈS ================= */
             // Règle d'or : Les pénalités impayées ne s'ajoutent pas au reste dû.
             // Le reste dû baisse uniquement grâce à la part du paiement allouée au capital et aux intérêts.
             $resteDuApres = max(
@@ -64,18 +63,18 @@ class CreditRemboursementService
             return CreditRemboursement::create([
                 'credit_id' => $credit->id,
                 'montant' => $montant,
-                'date_paiement' => $datePaiement, // Toujours tracer la date de la transaction
+                'agent_id' => $data['agent_id'],
                 
                 // Ventilation
                 'montant_penalite_payee' => $repartition['penalite_payee'],
                 'montant_interet_payee'  => $repartition['interet_payee'],
                 'montant_capital_payee'  => $repartition['capital_payee'],
+                'reste_penalite'  => $repartition['reste_penalite'],
                 
                 // Snapshots comptables
                 'report_avant' => round($reportAvant, 5),
                 'reste_du_apres' => round($resteDuApres, 5),
-                
-                'agent_id' => $data['agent_id'],
+
                 'mode_paiement' => $data['mode_paiement'],
                 'reference_paiement' => $data['reference_paiement'] ?? null,
                 'zone_id' => $zone->id,

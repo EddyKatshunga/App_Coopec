@@ -54,6 +54,7 @@ class PermissionSeeder extends Seeder
             'compta.audit.logs',       // Surveillance des actions utilisateurs
 
             // ----- Structure & Agences -----
+            'agence.operations.view', //Les opérations d'une agence
             'agent.create',            // Création de comptes employés
             'agent.assign.role',       // Modification des privilèges
             'zone.create',
@@ -95,8 +96,7 @@ class PermissionSeeder extends Seeder
 
         // 🧾 AGENT ÉPARGNE (Terrain)
         $agentEpargnePermissions = array_merge($membrePermissions, [
-            'epargne.depot.create', 'epargne.view.my_depots', 'epargne.view.transactions', 
-            'membre.create', 'zone.view',
+            'epargne.depot.create', 'epargne.view.my_depots',
         ]);
 
         // 💳 AGENT CRÉDIT (Analyse)
@@ -120,8 +120,8 @@ class PermissionSeeder extends Seeder
 
         // 🧠 SUPERVISEUR (Opérationnel local)
         $superviseurPermissions = array_merge($caissierePermissions, $agentCreditPermissions, [
-            'epargne.correct', 'credit.remboursement.correct', 'membre.update', 
-            'depense.create', 'credit.cloturer',
+            'epargne.correct', 'credit.remboursement.correct', 'membre.create',
+            'depense.create', 'credit.cloturer', 'agence.operations.view',
         ]);
 
         // 🏢 CHEF D’AGENCE (Autorité locale maximale)

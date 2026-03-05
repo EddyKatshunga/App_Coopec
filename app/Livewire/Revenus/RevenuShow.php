@@ -11,9 +11,9 @@ class RevenuShow extends Component
 {
     public Revenu $revenu;
 
-    public function mount($id)
+    public function mount(Revenu $revenu)
     {
-        $this->revenu = Revenu::with(['typeRevenu', 'agence'])->findOrFail($id);
+        $this->revenu = $revenu;
     }
 
     public function render()

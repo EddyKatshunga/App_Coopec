@@ -39,6 +39,7 @@ class CreditRemboursement extends Model
         'agent_id',
         'zone_id',
         'mode_paiement',
+        'reste_penalite',
     ];
 
     /* ================= CASTS ================= */

@@ -11,9 +11,9 @@ class DepenseShow extends Component
 {
     public Depense $depense;
 
-    public function mount($id)
+    public function mount(Depense $depense)
     {
-        $this->depense = Depense::with(['typeDepense', 'beneficiaire', 'agence'])->findOrFail($id);
+        $this->depense = $depense;
     }
 
     public function render()

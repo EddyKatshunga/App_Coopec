@@ -47,14 +47,14 @@
         </div>
 
         <div class="bg-white shadow rounded p-4">
-            <p class="text-sm text-gray-500 uppercase font-semibold">Capital & Intérêts</p>
-            <p class="text-lg font-bold">{{ number_format($credit->total, 2) }} {{ $credit->monnaie }}</p>
+            <p class="text-sm text-gray-500 uppercase font-semibold">Capital & Intérêts ({{ $credit->monnaie }})</p>
+            <p class="text-lg font-bold">{{ number_format_fr($credit->total) }}</p>
         </div>
 
         <div class="bg-white shadow rounded p-4">
             <p class="text-sm text-gray-500 uppercase font-semibold">Pénalités (à ce jour)</p>
             <p class="text-lg font-bold text-red-600">
-                {{ number_format($penaliteCourante, 2) }}
+                {{ number_format_fr($penaliteCourante) }}
             </p>
             @if($joursRetard > 0)
                 <p class="text-[10px] text-red-500 italic">+{{ $joursRetard }} jours de retard</p>
@@ -64,14 +64,14 @@
         <div class="bg-white shadow rounded p-4 bg-gray-50">
             <p class="text-sm text-gray-500 uppercase font-semibold">Total Remboursé</p>
             <p class="text-lg font-bold text-green-600">
-                {{ number_format($credit->total_rembourse, 2) }}
+                {{ number_format_fr($credit->total_rembourse) }}
             </p>
         </div>
 
         <div class="bg-white shadow rounded p-4 border-l-4 border-orange-500">
             <p class="text-sm text-gray-700 uppercase font-extrabold">Net à Payer</p>
             <p class="text-xl font-black text-orange-600">
-                {{ number_format($resteDu, 2) }}
+                {{ number_format_fr($resteDu) }}
             </p>
         </div>
     </div>
@@ -97,6 +97,7 @@
                             <th class="py-3 px-2 text-orange-500 text-right">Intérêt</th>
                             <th class="py-3 px-2 text-green-500 text-right">Capital</th>
                             <th class="py-3 px-2 text-blue-600 text-right font-bold">Reste Dû</th>
+                            <th class="py-3 px-2 text-blue-600 text-right font-bold">Reste Pen.</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
@@ -119,6 +120,9 @@
                                 </td>
                                 <td class="py-4 px-2 text-right font-mono font-semibold text-blue-700">
                                     {{ number_format($remb->reste_du_apres, 2) }}
+                                </td>
+                                <td class="py-4 px-2 text-right font-mono font-semibold text-blue-700">
+                                    {{ number_format($remb->reste_penalite, 2) }}
                                 </td>
                             </tr>
                         @endforeach

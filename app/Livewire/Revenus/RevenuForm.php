@@ -13,11 +13,11 @@ class RevenuForm extends Component
 {
     use HasAgenceContext;
 
-    public $montant, $monnaie = 'USD', $libelle, $reference, $description, $types_revenu_id;
+    public $montant, $monnaie = 'CDF', $libelle, $reference, $description, $types_revenu_id;
 
     protected $rules = [
         'montant' => 'required|numeric|min:0.01',
-        'monnaie' => 'required|string|max:3',
+        'monnaie' => 'required|in:CDF,USD',
         'libelle' => 'required|string|min:3',
         'types_revenu_id' => 'required|exists:types_revenus,id',
         'reference' => 'nullable|string',

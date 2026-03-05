@@ -88,64 +88,46 @@ class Credit extends Model
         return $this->remboursements()->sum('montant');
     }
 
-    /**
-     * Moteur de calcul séquentiel (Cœur de votre logique métier)
-     * Retourne un tableau avec l'état exact du crédit à l'instant T (ou aujourd'hui).
-     */
     public function getSituationActuelle($dateConsultation = null)
     {
         $dateRef = $dateConsultation ?? $this->date_calcul;
-        $resteDu = $this->total;
-        $dateDernierCalcul = $this->date_fin_prevue->copy(); // Les pénalités commencent après cette date
+        $resteDu = $this->total; // Base de départ : Capital + Intérêt
+        $dateDernierCalcul = $this->date_fin_prevue->copy();
 
-        $remboursements = $this->remboursements;
-        $totalPenalitesPayees = 0;
+        $remboursements = $this->remboursements()
+                            ->where('date_paiement', '<=', $dateRef) // ✅ Inclut les paiements du jour
+                            ->orderBy('date_paiement', 'asc') 
+                            ->get();
 
+        $restePenalite = 0;
         foreach ($remboursements as $paiement) {
-            $datePaiement = $paiement->date_paiement; // Assurez-vous que c'est casté en Carbon dans CreditRemboursement
-
-            // 1. Calcul des pénalités générées entre le dernier calcul et ce paiement
-            $penalitesDeCePaiement = 0;
-            if ($datePaiement->gt($dateDernierCalcul) && $datePaiement->gt($this->date_fin_prevue)) {
-                $joursRetard = $datePaiement->diffInDays($dateDernierCalcul);
-                $penalitesDeCePaiement = $joursRetard * $resteDu * ($this->taux_penalite_journalier / 100);
-            }
-
-            // 2. Le paiement absorbe d'abord les pénalités du moment, puis fait baisser le reste dû
-            $montantPaye = $paiement->montant;
+            // RÈGLE D'OR : On réduit la base UNIQUEMENT de ce qui a été ventilé
+            $montantAffecteALaBase = $paiement->montant_capital_payee + $paiement->montant_interet_payee;
             
-            // Si le paiement couvre les pénalités
-            if ($montantPaye >= $penalitesDeCePaiement) {
-                $montantPourResteDu = $montantPaye - $penalitesDeCePaiement;
-                $totalPenalitesPayees += $penalitesDeCePaiement;
-            } else {
-                // S'il ne paie pas assez, le reste dû ne baisse pas, mais on ne cumule pas les pénalités
-                // selon votre règle : "Il n’y a pas de cumul de pénalités"
-                $montantPourResteDu = 0;
-                $totalPenalitesPayees += $montantPaye; 
-            }
+            $resteDu -= $montantAffecteALaBase;
+            $restePenalite = $paiement->reste_penalite;
 
-            $resteDu -= $montantPourResteDu;
-            
-            // Mise à jour de la date de référence pour le prochain calcul
-            // On ne met à jour que si on a dépassé la date de fin prévue
-            if ($datePaiement->gt($this->date_fin_prevue)) {
-                $dateDernierCalcul = $datePaiement->copy();
+            // On met à jour la date de référence si on est en période de retard
+            if ($paiement->date_paiement->gt($this->date_fin_prevue)) {
+                $dateDernierCalcul = $paiement->date_paiement->copy();
             }
         }
-
-        // 3. Calcul des pénalités non payées (courantes) entre le dernier paiement et la date de consultation
-        $penalitesCourantes = 0;
+        // Calcul des pénalités courantes depuis le dernier mouvement jusqu'à aujourd'hui
+        
+        $penalitesCourantes = $restePenalite;
+        (int)$joursRetardCourants = 0;
+        
         if ($dateRef->gt($dateDernierCalcul) && $dateRef->gt($this->date_fin_prevue) && $resteDu > 0) {
-            $joursRetardCourants = $dateRef->diffInDays($dateDernierCalcul);
-            $penalitesCourantes = $joursRetardCourants * $resteDu * ($this->taux_penalite_journalier / 100);
+            $joursRetardCourants = $dateRef->diffInDays($dateDernierCalcul, true);
+            $penalitesCourantes += $joursRetardCourants * $resteDu * ($this->taux_penalite_journalier / 100);
         }
+
 
         return [
-            'reste_du_base' => round($resteDu, 5), // Le capital + intérêts restants (ex: 125.75)
-            'penalites_courantes' => round($penalitesCourantes, 5), // Pénalités générées depuis le dernier paiement (ex: 1.88625)
-            'total_a_payer' => round($resteDu + $penalitesCourantes, 5), // Total absolu (ex: 127.63625)
-            'jours_retard_courants' => isset($joursRetardCourants) ? $joursRetardCourants : 0,
+            'reste_du_base' => max(0, round($resteDu, 2)), // Ex: 145620
+            'penalites_courantes' => round($penalitesCourantes, 2),
+            'total_a_payer' => round(max(0, $resteDu) + $penalitesCourantes, 2),
+            'jours_retard_courants' => $joursRetardCourants,
         ];
     }
 

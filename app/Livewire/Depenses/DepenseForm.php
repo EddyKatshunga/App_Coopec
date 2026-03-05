@@ -17,8 +17,8 @@ class DepenseForm extends Component
     public $montant, $monnaie = 'CDF', $libelle, $reference, $description, $types_depense_id, $beneficiaire_id;
 
     protected $rules = [
-        'montant' => 'required|numeric|min:1',
-        'monnaie' => 'required|string|max:3',
+        'montant' => 'required|numeric|min:0.01',
+        'monnaie' => 'required|in:CDF,USD',
         'libelle' => 'required|string|min:3',
         'types_depense_id' => 'required|exists:types_depenses,id',
         'beneficiaire_id' => 'nullable|exists:agents,id',

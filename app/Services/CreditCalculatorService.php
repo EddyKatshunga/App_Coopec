@@ -7,47 +7,51 @@ use Carbon\Carbon;
 
 class CreditCalculatorService
 {
-    /**
-     * Ventile un remboursement selon l’ordre strict :
-     * 1. pénalités
-     * 2. intérêts
-     * 3. capital
-     */
     public function repartitionRemboursement(
         Credit $credit,
-        float $montant,
+        float $montantTotal,
         Carbon $datePaiement
     ): array {
-        $reste = $montant;
+        // Sécurité : On travaille sur une copie du montant pour ne jamais dépasser le versement
+        $reliquat = $montantTotal;
 
-        // On récupère la situation exacte à l'instant T (date du paiement)
+        // 1. Récupération de la situation (Pénalités générées à cette date)
         $situation = $credit->getSituationActuelle($datePaiement);
         
-        /* ================= PÉNALITÉS ================= */
-        $penalitesCourantes = $situation['penalites_courantes'];
-        $penalitePayee = min($reste, $penalitesCourantes);
-        $reste -= $penalitePayee;
+        /* ================= PRIORITÉ 1 : PÉNALITÉS ================= */
+        $penalitesDues = $situation['penalites_courantes'];
+        $restePenalite = $reliquat < $penalitesDues ? $penalitesDues - $reliquat : 0;
+        $penalitePayee = min($reliquat, $penalitesDues);
+        $reliquat = max(0, $reliquat - $penalitesDues);
 
-        /* ================= INTÉRÊTS ================= */
-        $interetDejaPaye = $credit->remboursements()->sum('montant_interet_payee');
-        $interetRestant = max(0, $credit->interet - $interetDejaPaye);
+        /* ================= PRIORITÉ 2 : INTÉRÊTS ================= */
+        // On calcule ce qu'il reste à payer en intérêts AVANT ce paiement
+        $interetDejaPaye = $credit->remboursements()->sum('montant_interet_payee') ?? 0;
+        $interetTotalInitial = $credit->interet;
+        $interetRestantAcouvrir = max(0, $interetTotalInitial - $interetDejaPaye);
 
-        $interetPayee = min($reste, $interetRestant);
-        $reste -= $interetPayee;
+        $interetPayee = min($reliquat, $interetRestantAcouvrir);
+        $reliquat -= $interetPayee;
 
-        /* ================= CAPITAL ================= */
-        $capitalDejaPaye = $credit->remboursements()->sum('montant_capital_payee');
-        $capitalRestant = max(0, $credit->capital - $capitalDejaPaye);
+        /* ================= PRIORITÉ 3 : CAPITAL ================= */
+        // On calcule ce qu'il reste à payer en capital AVANT ce paiement
+        $capitalDejaPaye = $credit->remboursements()->sum('montant_capital_payee') ?? 0;
+        $capitalTotalInitial = $credit->capital;
+        $capitalRestantAcouvrir = max(0, $capitalTotalInitial - $capitalDejaPaye);
 
-        $capitalPayee = min($reste, $capitalRestant);
-        $reste -= $capitalPayee;
+        $capitalPayee = min($reliquat, $capitalRestantAcouvrir);
+        $reliquat -= $capitalPayee;
 
+        /* ================= BILAN ! ================= */
+        // Le reste_non_alloue est le trop-perçu (si le client donne plus que sa dette totale)
+        
         return [
-            'penalite_payee'      => round($penalitePayee, 5), // Précision augmentée pour les décimales de pénalités
-            'interet_payee'       => round($interetPayee, 5),
-            'capital_payee'       => round($capitalPayee, 5),
-            'reste_non_alloue'    => round($reste, 5), // L'éventuel trop-perçu
-            'reste_du_base_avant' => $situation['reste_du_base'] // Utile pour le snapshot
+            'penalite_payee'      => round($penalitePayee, 2),
+            'interet_payee'       => round($interetPayee, 2),
+            'capital_payee'       => round($capitalPayee, 2),
+            'reste_penalite'      => round($restePenalite, 2),
+            'reste_non_alloue'    => round($reliquat, 2), 
+            'reste_du_base_avant' => $situation['reste_du_base']
         ];
     }
 }

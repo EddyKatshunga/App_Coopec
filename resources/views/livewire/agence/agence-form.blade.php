@@ -86,39 +86,6 @@
                 </div>
             </div>
 
-            {{-- Section Fonds initial --}}
-            @unless($isEdit)
-            <div class="border-t pt-8">
-                <h3 class="text-lg font-semibold text-gray-800 mb-6">
-                    Fonds initial du coffre
-                </h3>
-
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
-                    <p class="text-sm text-blue-800 leading-relaxed">
-                        Vous pouvez allouer un montant initial pour le lancement de l’agence. 
-                        Ce montant sera enregistré comme <strong>solde actuel du coffre</strong>.
-                        <br class="hidden md:block">
-                        Le solde épargne sera initialisé automatiquement à <strong>0</strong>.
-                    </p>
-                </div>
-
-                <div class="max-w-md">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Montant initial (CDF)
-                    </label>
-                    <input type="number"
-                           wire:model.defer="solde_initial_coffre"
-                           min="0"
-                           step="0.01"
-                           class="w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition duration-200"
-                           placeholder="Ex: 5 000 000">
-                    @error('solde_initial_coffre') 
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p> 
-                    @enderror
-                </div>
-            </div>
-            @endunless
-
 
             {{-- Information Directeur --}}
             <div class="border-t pt-8">
@@ -135,7 +102,7 @@
                         Après la création, vous devrez :
                         <ul class="list-disc list-inside mt-2 space-y-1">
                             <li>Créer au moins un agent</li>
-                            <li>Attribuer le rôle <strong>Directeur</strong> à l’un des agents</li>
+                            <li>Attribuer le rôle <strong>Chef d'Agence</strong> à l’un des agents</li>
                         </ul>
                     </p>
                 </div>
