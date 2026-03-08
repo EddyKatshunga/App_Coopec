@@ -69,10 +69,10 @@ class MembreService
                 'password' => Hash::make($data['password']),
             ]);
 
-            $user->assignRole('membre');
+            $user->assignRole('niveau 0');
 
             // Récupération de l'ID du rôle 'membre'
-            $roleMembre = Role::where('name', 'membre')->first();
+            $roleMembre = Role::where('name', 'niveau 0')->first();
             $nouveauRoleId = $roleMembre->id;
 
             // Enregistrement dans l'historique via la méthode statique

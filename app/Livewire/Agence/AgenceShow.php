@@ -28,6 +28,7 @@ class AgenceShow extends Component
 
     public function mount(Agence $agence)
     {
+        abort_unless(auth()->user()->can('can.level4'), 403, 'ACCES REFUSE');
         $this->authorize('view', $agence);
         $this->agence = $agence->load(['chefAgence']);
     }
@@ -65,7 +66,14 @@ class AgenceShow extends Component
 
     public function render()
     {
-        $clotures_journalieres = $this->agence->cloturesComptables()->get();
-        return view('livewire.agence.agence-show', compact('clotures_journalieres'));
+        $agents = $this->agence->agents()->whereDoesntHave('zone_dirige')
+                            ->whereDoesntHave('agence_dirige')
+                            ->get();
+        $clotures_journalieres = $this->agence->cloturesComptables()->latest('date_cloture')->get();
+
+        return view('livewire.agence.agence-show', [
+            'clotures_journalieres' => $clotures_journalieres,
+            'agents' => $agents,
+        ]);
     }
 }

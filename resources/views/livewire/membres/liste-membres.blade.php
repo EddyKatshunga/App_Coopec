@@ -1,10 +1,4 @@
 <div class="p-6 bg-white rounded-2xl shadow-lg space-y-6">
-    {{-- ================= MESSAGE SUCCÈS ================= --}}
-    @if (session()->has('success'))
-        <div class="mb-6 rounded-lg bg-green-100 px-4 py-3 text-green-800">
-            {{ session('success') }}
-        </div>
-    @endif
 
     {{-- Titre et bouton d'ajout --}}
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -19,7 +13,7 @@
             </svg>
             Imprimer la liste
         </a>
-        <a href="{{ route('membre.create') }}" wire:navigate class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition">
+        <a href="{{ route('membre.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Nouveau membre
         </a>
@@ -180,7 +174,7 @@
                             Modifier
                         </a>
 
-                        @can('credit.pret.create')
+                        @can('can.level4')
                             @if(!$membre->hasActiveCredit())
                                 {{-- Le bouton ne s'affiche que s'il n'y a pas de crédit actif --}}
                                 <a href="{{ route('credit.pret.create', $membre) }}" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-[10px] font-bold text-center hover:bg-green-700 transition uppercase">

@@ -3,10 +3,19 @@
 namespace App\Observers;
 
 use App\Models\CreditRemboursement;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class CreditRemboursementObserver
 {
+    public function creating(CreditRemboursement $model): void
+    {
+        $credit = $model->credit;
+        if(str_contains($credit->statut, 'termine'))
+        {
+            throw new Exception("Opération impossible : Crédit déjà terminé.");
+        }
+    }
     public function created(CreditRemboursement $model): void
     {
         $agence = $model->agence;

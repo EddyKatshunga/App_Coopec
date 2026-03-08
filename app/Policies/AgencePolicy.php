@@ -21,9 +21,9 @@ class AgencePolicy
      */
     public function view(User $user, Agence $agence): bool
     {
-        if ($user->can('agence.view.all')) { //On suppose que c'est le PCA ou Directrice Regionale
+        if ($user->can('can.level6')) { //On suppose que c'est le PCA ou Directrice Regionale
             return true;
-        }elseif ($user->can('credit.cloturer')){ //On choisit une permission que seul le sup et chef d'agence possède
+        }elseif ($user->can('can.level4')){ //On choisit une permission que seul le sup et chef d'agence possède
             return $user->agence_id === $agence->id;
         }
         return false;

@@ -51,6 +51,10 @@ class CreditCreate extends Component
 
     public function mount(Membre $membre)
     {
+        if ($this->membre->hasActiveCredit()) {
+            session()->flash('error', 'Opération impossible : Ce membre possède déjà un crédit actif.');
+            return redirect()->route('membre.show', $membre);
+        }
         $this->membre = $membre;
         $journee = $this->secureJourneeContext();
         $this->date_credit = $journee->date_cloture;

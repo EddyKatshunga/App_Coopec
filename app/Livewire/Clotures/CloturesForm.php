@@ -72,7 +72,7 @@ class CloturesForm extends Component
     public function validerOuverture(ClotureService $service)
     {
         try {
-            $agence = auth()->user()->agence;
+            $agence = $this->agence;
             $service->ouvrirJournee($agence);
             
             session()->flash('success', 'La journée a été ouverte avec succès.');

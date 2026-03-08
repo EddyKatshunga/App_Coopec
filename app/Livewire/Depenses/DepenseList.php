@@ -31,7 +31,7 @@ class DepenseList extends Component
         $this->date_debut = now()->startOfMonth()->format('Y-m-d');
         $this->date_fin = now()->format('Y-m-d');
 
-        if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;
         }
     }
@@ -44,7 +44,7 @@ class DepenseList extends Component
         $query = Depense::with(['typeDepense', 'beneficiaire', 'agence', 'creator']);
 
         // --- SÉCURITÉ NIVEAU 3 : Admin ---
-        if ($user->can('agence.view.all')) {
+        if ($user->can('can.level6')) {
             $query->when($this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id));
         } 
         // --- SÉCURITÉ NIVEAU 1 & 2 : Restriction Agence ---
@@ -54,9 +54,9 @@ class DepenseList extends Component
 
         // --- SÉCURITÉ NIVEAU 1 : Restriction Personnelle ---
         // On vérifie si l'utilisateur a le droit de voir toute l'agence
-        if (!$user->can('agence.operations.view') || !$this->all_agents) {
+        if (!$user->can('can.level4') || !$this->all_agents) {
             // Si pas admin global, on restreint au créateur
-            if (!$user->can('agence.view.all')) {
+            if (!$user->can('can.level6')) {
                 $query->where('created_by', $user->id);
             }
         }
@@ -74,7 +74,7 @@ class DepenseList extends Component
 
         return view('livewire.depenses.depense-list', [
             'depenses' => $query->latest('date_operation')->paginate(20),
-            'agences' => $user->can('agence.view.all') ? Agence::all() : []
+            'agences' => $user->can('can.level6') ? Agence::all() : []
         ]);
     }
 }

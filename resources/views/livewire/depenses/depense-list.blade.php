@@ -24,7 +24,7 @@
                 <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
 
-            @can('agence.view.all')
+            @can('can.level6')
             <select wire:model.live="selected_agence_id" class="border-gray-200 rounded-lg text-sm focus:ring-blue-500">
                 <option value="">Toutes les agences</option>
                 @foreach($agences as $agence)
@@ -36,7 +36,7 @@
             <input type="date" wire:model.live="date_debut" class="border-gray-200 rounded-lg text-sm focus:ring-blue-500">
             <input type="date" wire:model.live="date_fin" class="border-gray-200 rounded-lg text-sm focus:ring-blue-500">
 
-            @can('agence.operations.view')
+            @can('can.level4')
             <div class="flex items-center gap-2 px-3 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                 <input type="checkbox" wire:model.live="all_agents" id="all_agents" class="rounded text-red-600 focus:ring-red-500">
                 <label for="all_agents" class="text-[10px] font-bold text-gray-600 uppercase cursor-pointer">Toute l'agence</label>
@@ -55,7 +55,7 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Libellé & Type</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Bénéficiaire</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Montant</th>
-                        @if($all_agents || auth()->user()->can('agence.view.all'))
+                        @if($all_agents || auth()->user()->can('can.level6'))
                             <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Auteur / Agence</th>
                         @endif
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
@@ -80,7 +80,7 @@
                                 </span>
                             </td>
 
-                            @if($all_agents || auth()->user()->can('agence.view.all'))
+                            @if($all_agents || auth()->user()->can('can.level6'))
                             <td class="px-6 py-4 whitespace-nowrap border-l border-gray-50">
                                 <div class="text-xs font-medium text-gray-700">{{ $depense->creator->name ?? 'Système' }}</div>
                                 <div class="text-[10px] text-gray-400 font-bold uppercase">{{ $depense->agence->nom ?? '-' }}</div>
@@ -92,7 +92,7 @@
                                     <a href="{{ route('depenses.show', $depense->id) }}" class="text-gray-400 hover:text-blue-600 transition-colors" wire:navigate>
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     </a>
-                                    @can('agent.create') 
+                                    @can('can.level4')
                                         @if($depense->canBeDeleted())
                                             <button wire:click="deleteRecord('App\\Models\\Depense', {{ $depense->id }})" 
                                                     wire:confirm="Supprimer cette dépense ?" 

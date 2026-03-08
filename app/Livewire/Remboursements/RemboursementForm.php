@@ -28,7 +28,7 @@ class RemboursementForm extends Component
             'montant' => 'required|numeric|min:1',
             'mode_paiement' => 'required|in:cash,mpesa,airtel,banque',
             'reference_paiement' => 'nullable|string|max:100',
-            'agent_id' => 'required|exists:users,id',
+            'agent_id' => 'required|exists:agents,id',
         ];
     }
 

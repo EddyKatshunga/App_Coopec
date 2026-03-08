@@ -24,6 +24,7 @@
                 </a>
             </div>
 
+            @if (!auth()->user()->hasRole('niveau 0'))
             <!-- Status Journée - Centré sur desktop, adapté sur mobile -->
             <div class="flex items-center flex-1 justify-center">
                 @if($journeeOuverte)
@@ -54,6 +55,7 @@
                     </div>
                 @endif
             </div>
+            @endif <!-- Fin Journne Ouverte -->
 
             <!-- Photo de profil et menu (toujours visible) -->
             <div class="flex items-center space-x-2 sm:space-x-4">
@@ -87,10 +89,12 @@
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                                 <p class="text-xs text-gray-500">{{ $user->email }}</p>
+                                @if (!auth()->user()->hasRole('niveau 0'))
                                 <p class="text-xs text-gray-500 mt-1">{{ $agence ? 'Agence : '.$agence->nom : 'Aucune agence' }}</p>
                                 <p class="text-xs mt-1 {{ $journeeOuverte ? 'text-green-600' : 'text-red-600' }}">
                                     {{ $journeeOuverte ? '✅ Session active' : '⛔ Session inactive' }}
                                 </p>
+                                @endif
                             </div>
                             
                             <!-- Lien de déconnexion -->

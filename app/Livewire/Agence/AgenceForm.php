@@ -26,6 +26,7 @@ class AgenceForm extends Component
 
     public function mount(?Agence $agence = null)
     {
+        abort_unless(auth()->user()->can('can.level6'), 403, 'ACCES REFUSE');
         if ($agence && $agence->exists) {
             $this->isEdit = true;
             $this->agence = $agence;

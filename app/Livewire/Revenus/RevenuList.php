@@ -31,7 +31,7 @@ class RevenuList extends Component
         $this->date_debut = now()->startOfMonth()->format('Y-m-d');
         $this->date_fin = now()->format('Y-m-d');
 
-        if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;
         }
     }
@@ -44,7 +44,7 @@ class RevenuList extends Component
         $query = Revenu::with(['typeRevenu', 'agence', 'creator']);
 
         // --- SÉCURITÉ NIVEAU 3 : Admin Global ---
-        if ($user->can('agence.view.all')) {
+        if ($user->can('can.level6')) {
             $query->when($this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id));
         } 
         // --- SÉCURITÉ NIVEAU 1 & 2 : Restriction Agence ---
@@ -53,8 +53,8 @@ class RevenuList extends Component
         }
 
         // --- SÉCURITÉ NIVEAU 1 : Restriction Personnelle ---
-        if (!$user->can('agence.operations.view') || !$this->all_agents) {
-            if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level4') || !$this->all_agents) {
+            if (!$user->can('can.level6')) {
                 $query->where('created_by', $user->id);
             }
         }
@@ -69,7 +69,7 @@ class RevenuList extends Component
 
         return view('livewire.revenus.revenu-list', [
             'revenus' => $query->latest('date_operation')->paginate(20),
-            'agences' => $user->can('agence.view.all') ? Agence::all() : []
+            'agences' => $user->can('can.level6') ? Agence::all() : []
         ]);
     }
 }

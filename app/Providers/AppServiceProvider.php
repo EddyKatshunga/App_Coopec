@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Models\Credit;
 use App\Models\CreditRemboursement;
 use App\Models\Depense;
@@ -12,6 +13,7 @@ use App\Observers\CreditRemboursementObserver;
 use App\Observers\DepenseObserver;
 use App\Observers\RevenuObserver;
 use App\Observers\TransactionObserver;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,5 +36,9 @@ class AppServiceProvider extends ServiceProvider
         Transaction::observe(TransactionObserver::class);
         Credit::observe(CreditObserver::class);
         CreditRemboursement::observe(CreditRemboursementObserver::class);
+
+        Gate::define('canTransact', function (User $user) {
+            return $user->agent && $user->journee_ouverte;
+        });
     }
 }

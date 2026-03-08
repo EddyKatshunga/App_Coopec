@@ -13,6 +13,7 @@ class AgentShow extends Component
 
     public function mount(Agent $agent)
     {
+        $this->authorize('view', $agent);
         // On charge les relations nécessaires et les compteurs
         $this->agent = $agent->load([
             'user', 

@@ -10,7 +10,7 @@ trait CanDeleteAccountingRecords
             $record = $modelClass::findOrFail($id);
 
             // La sécurité Spatie (à adapter selon vos noms de permissions)
-            if (!auth()->user()->can('agent.create')) { //Une permission spécifique du Chef d'Agence
+            if (!auth()->user()->can('can.level4')) { //Une permission spécifique au sup et chef d'agence
                 throw new \Exception("Vous n'avez pas la permission de supprimer.");
             }
 

@@ -18,7 +18,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('membre.show', $compte->membre) }}" wire:navigate
+                <a href="{{ url()->previous() }}"
                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Retour
@@ -109,7 +109,7 @@
                     <tr class="bg-gray-50/50">
                         <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Détails Date</th>
                         <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Type / Sens</th>
-                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider">Mouvement</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Mouvement</th>
                         <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-right">Progressif</th>
                         <th class="px-6 py-4 text-[11px] font-black text-gray-400 uppercase tracking-wider text-center">Validation</th>
                     </tr>
@@ -136,15 +136,15 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 text-right">
                                 <p class="text-sm font-black text-gray-800">
-                                    {{ number_format($transaction->montant, $transaction->monnaie == 'USD' ? 2 : 0, ',', ' ') }}
+                                    {{ number_format_fr($transaction->montant, $transaction->monnaie) }}
                                     <span class="text-[10px] font-normal text-gray-400">{{ $transaction->monnaie }}</span>
                                 </p>
                                 <p class="text-[10px] text-gray-400 uppercase italic">Ref: {{ $transaction->id }}</p>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <p class="text-sm font-bold text-gray-900">{{ number_format($transaction->solde_apres, $transaction->monnaie == 'USD' ? 2 : 0, ',', ' ') }}</p>
+                                <p class="text-sm font-bold text-gray-900">{{ number_format_fr($transaction->solde_apres, $transaction->monnaie) }}</p>
                                 <p class="text-[9px] text-gray-400 uppercase">Solde après op.</p>
                             </td>
                             <td class="px-6 py-4 text-center">

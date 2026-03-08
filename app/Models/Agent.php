@@ -80,29 +80,9 @@ class Agent extends Model
         return $this->belongsTo(Agence::class, 'agence_id');
     }
 
-    public function allTransactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'agent_collecteur_id');
-    }
-
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class, 'agent_collecteur_id')
-            ->where('statut', 'VALIDE');
-    }
-
-    public function transactionsPeriode(
-        ?string $dateDebut = null, 
-        ?string $dateFin = null,
-        string $dateColumn = 'date_transaction'
-    ): HasMany {
-        $query = $this->hasMany(Transaction::class, 'agent_collecteur_id')->where('statut', 'VALIDE');
-        
-        // Définir les dates par défaut
-        $dateDebut = $dateDebut ?? now()->format('Y-m-d');
-        $dateFin = $dateFin ?? $dateDebut;
-        
-        return $query->whereBetween($dateColumn, [$dateDebut, $dateFin]);
+        return $this->hasMany(Transaction::class, 'agent_collecteur_id');
     }
 
     public function remboursements(): HasMany
@@ -110,20 +90,4 @@ class Agent extends Model
         return $this->hasMany(CreditRemboursement::class, 'agent_id');
     }
 
-    /*Remboursements d'un seul jour : $agent->remboursementsPeriode('2024-01-15', '2024-01-15');
-        Remboursements d'ajourd'hui : $agent->remboursementsPeriode();
-        Remboursements sur une période : $agent->remboursementsPeriode('2024-01-01', '2024-01-31')*/
-    public function remboursementsPeriode(
-        ?string $dateDebut = null, 
-        ?string $dateFin = null,
-        string $dateColumn = 'date_paiement'
-    ): HasMany {
-        $query = $this->hasMany(CreditRemboursement::class, 'agent_id');
-        
-        // Définir les dates par défaut
-        $dateDebut = $dateDebut ?? now()->format('Y-m-d');
-        $dateFin = $dateFin ?? $dateDebut;
-        
-        return $query->whereBetween($dateColumn, [$dateDebut, $dateFin]);
-    }
 }

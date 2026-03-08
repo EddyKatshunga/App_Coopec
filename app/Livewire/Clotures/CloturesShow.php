@@ -13,6 +13,7 @@ class CloturesShow extends Component
 
     public function mount(CloturesComptable $cloture)
     {
+        $this->authorize('view', $cloture); //Application des policies
         $this->cloture = $cloture;
     }
 

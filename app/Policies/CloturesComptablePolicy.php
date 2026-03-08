@@ -21,9 +21,9 @@ class CloturesComptablePolicy
      */
     public function view(User $user, CloturesComptable $cloturesComptable): bool
     {
-        if($user->can('agence.view.all')){ //Le PCA et autre
+        if($user->can('can.level6')){ //Le PCA et autre
             return true;
-        }elseif ($user->can('credit.cloturer')){ //On choisit une permission que seul le sup et chef d'agence possède
+        }elseif ($user->can('can.level4')){ //On choisit une permission que seul le sup et chef d'agence possède
             return $user->agence_id === $cloturesComptable->agence_id;
         }
         return false;

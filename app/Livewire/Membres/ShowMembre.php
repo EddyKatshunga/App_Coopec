@@ -18,12 +18,14 @@ class ShowMembre extends Component
 
     public function mount(Membre $membre)
     {
-        $this->authorize('view', $membre);
+        $this->authorize('view', $membre); //Application des policies
         $this->membre = $membre->load([
             'user',
             'agent',
             'agentParrain',
-            'comptes'
+            'comptes',
+            'credits',
+            'creditEnCours'
         ]);
 
         $this->calculerStatistiques();
@@ -33,11 +35,6 @@ class ShowMembre extends Component
     {
         $this->totalSoldeCDF = $this->membre->comptes->sum('solde_cdf');
         $this->totalSoldeUSD = $this->membre->comptes->sum('solde_usd');
-    }
-
-    public function telechargerFiche()
-    {
-        return redirect()->route('membre.fiche.pdf', $this->membre);
     }
 
     public function render()

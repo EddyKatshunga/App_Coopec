@@ -51,40 +51,7 @@ class Agence extends Model
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class)->where('statut', 'VALIDE');
-    }
-
-    public function allTransactions()
-    {
         return $this->hasMany(Transaction::class);
-    }
-
-    public function transactionsPeriode(
-        ?string $dateDebut = null, 
-        ?string $dateFin = null,
-        string $dateColumn = 'date_transaction'
-    ): HasMany {
-        $query = $this->hasMany(Transaction::class)->where('statut', 'VALIDE');
-        
-        // Définir les dates par défaut
-        $dateDebut = $dateDebut ?? now()->format('Y-m-d');
-        $dateFin = $dateFin ?? $dateDebut;
-        
-        return $query->whereBetween($dateColumn, [$dateDebut, $dateFin]);
-    }
-
-    public function allTransactionsPeriode(
-        ?string $dateDebut = null, 
-        ?string $dateFin = null,
-        string $dateColumn = 'date_transaction'
-    ): HasMany {
-        $query = $this->hasMany(Transaction::class);
-        
-        // Définir les dates par défaut
-        $dateDebut = $dateDebut ?? now()->format('Y-m-d');
-        $dateFin = $dateFin ?? $dateDebut;
-        
-        return $query->whereBetween($dateColumn, [$dateDebut, $dateFin]);
     }
 
     public function zones(): HasMany

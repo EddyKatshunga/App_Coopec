@@ -5,7 +5,6 @@ namespace App\Livewire\Clotures;
 use Livewire\Component;
 use App\Models\CloturesComptable;
 use App\Models\Agence;
-use App\Services\ClotureService;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 
@@ -14,18 +13,18 @@ class CloturesList extends Component
 {
     use WithPagination;
 
-    // Filtres
-    public $agenceId;
+    public $agenceId = null;
     public $dateDebut;
     public $dateFin;
 
     public function mount()
     {
-        // Par défaut, l'agence de l'utilisateur
-        $this->agenceId = auth()->user()->agence_id;
+        $this->agenceId = auth()->user()->agence_id ?? null;
+        // Optionnel : Par défaut les 30 derniers jours
+        $this->dateDebut = now()->subDays(30)->format('Y-m-d');
+        $this->dateFin = now()->format('Y-m-d');
     }
 
-    // Réinitialise la pagination lors d'un changement de filtre
     public function updated($propertyName)
     {
         if (in_array($propertyName, ['agenceId', 'dateDebut', 'dateFin'])) {
@@ -35,38 +34,28 @@ class CloturesList extends Component
 
     public function render()
     {
-        $query = CloturesComptable::query();
+        $query = CloturesComptable::query()
+            ->where('agence_id', $this->agenceId);
 
-        // Filtre par Agence (obligatoire par défaut)
-        if ($this->agenceId) {
-            $query->where('agence_id', $this->agenceId);
-        }
+        if ($this->dateDebut) $query->whereDate('date_cloture', '>=', $this->dateDebut);
+        if ($this->dateFin) $query->whereDate('date_cloture', '<=', $this->dateFin);
 
-        // Filtre par Date de départ
-        if ($this->dateDebut) {
-            $query->whereDate('date_cloture', '>=', $this->dateDebut);
-        }
+        // Calcul des agrégats pour la période filtrée
+        $stats = (clone $query)->selectRaw('
+            SUM(total_depot_usd) as depot_usd, SUM(total_depot_cdf) as depot_cdf,
+            SUM(total_retrait_usd) as retrait_usd, SUM(total_retrait_cdf) as retrait_cdf,
+            SUM(total_remboursement_usd) as rembourse_usd, SUM(total_remboursement_cdf) as rembourse_cdf,
+            SUM(total_credit_usd) as credit_usd, SUM(total_credit_cdf) as credit_cdf,
+            SUM(total_depense_usd) as depense_usd, SUM(total_depense_cdf) as depense_cdf
+        ')->first();
 
-        // Filtre par Date de fin
-        if ($this->dateFin) {
-            $query->whereDate('date_cloture', '<=', $this->dateFin);
-        }
-
-        $clotures = $query->orderBy('date_cloture', 'desc')->paginate(10);
-
-        // On vérifie si une journée est ouverte pour l'agence sélectionnée
-        $journeeOuverte = CloturesComptable::where('agence_id', $this->agenceId)
-            ->where('statut', 'ouverte')
-            ->exists();
-
-        // Liste des agences pour le filtre (uniquement si l'utilisateur a le droit)
-        // Remplacez 'view-all-agencies' par votre gate/permission réelle
-        $agences = auth()->user()->can('view-all-agencies') ? Agence::all() : [];
+        $clotures = $query->orderBy('date_cloture', 'desc')->paginate(15);
+        $agences = auth()->user()->can('can.level6') ? Agence::all() : collect();
 
         return view('livewire.clotures.clotures-list', [
             'clotures' => $clotures,
-            'journeeOuverte' => $journeeOuverte,
             'agences' => $agences,
+            'stats' => $stats
         ]);
     }
 }

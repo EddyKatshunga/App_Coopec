@@ -75,9 +75,9 @@ class AgentService
             // On récupère le rôle actuel avant modification
             $currentRoleName = $user->getRoleNames()->first();
 
-            if (in_array($currentRoleName, ['chef_agence', 'agent_credit'])) {
+            if (in_array($currentRoleName, ['niveau 5', 'niveau 2'])) {
                 // Si le rôle actuel est sensible, on vérifie si l'agence tente d'être changée
-                throw new \Exception("Impossible de modifier l'agence pour un agent ayant le rôle : " . $currentRoleName);
+                throw new \Exception("Impossible de modifier l'agence pour un agent ayant le niveau : " . $currentRoleName);
             }
 
             // Mise à jour de l'agence

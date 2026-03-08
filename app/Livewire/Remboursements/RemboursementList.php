@@ -32,7 +32,7 @@ class RemboursementList extends Component
         $this->date_debut = auth()->user()->journee_ouverte?->date_cloture->format('Y-m-d');
         $this->date_fin = now()->format('Y-m-d');
 
-        if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;
         }
     }
@@ -50,7 +50,7 @@ class RemboursementList extends Component
         }
 
         // --- SÉCURITÉ NIVEAU 3 : Admin Global ---
-        if ($user->can('agence.view.all')) {
+        if ($user->can('can.level6')) {
             $query->when($this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id));
         } 
         // --- SÉCURITÉ NIVEAU 1 & 2 : Restriction Agence ---
@@ -59,8 +59,8 @@ class RemboursementList extends Component
         }
 
         // --- SÉCURITÉ NIVEAU 1 : Restriction Personnelle ---
-        if (!$user->can('agence.operations.view') || !$this->all_agents) {
-            if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level4') || !$this->all_agents) {
+            if (!$user->can('can.level6')) {
                 $query->where('created_by', $user->id);
             }
         }
@@ -78,7 +78,7 @@ class RemboursementList extends Component
 
         return view('livewire.remboursements.remboursement-list', [
             'remboursements' => $query->latest('date_paiement')->paginate(100),
-            'agences' => $user->can('agence.view.all') ? Agence::all() : []
+            'agences' => $user->can('can.level6') ? Agence::all() : []
         ]);
     }
 }

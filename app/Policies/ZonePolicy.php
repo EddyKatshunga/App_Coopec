@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Membre;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Auth\Access\Response;
 
-class MembrePolicy
+class ZonePolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,13 +19,17 @@ class MembrePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Membre $membre): bool
+    public function view(User $user, Zone $zone): bool
     {
-        if ($user->hasRole('niveau 0')) {
-            return $user->id === $membre->user_id;
+        if ($user->can('can.level6')) { //On suppose que c'est le PCA ...
+            return true;
+        }elseif ($user->can('can.level4')){ //On choisit une permission que seul le sup et chef d'agence possède
+            return $user->agence_id === $zone->agence_id;
         }
-
-        return true;
+        if($user->hasRole('niveau 2')){
+            return $user->agent->id === $zone->gerant_id;
+        }
+        return false;
     }
 
     /**
@@ -39,7 +43,7 @@ class MembrePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Membre $membre): bool
+    public function update(User $user, Zone $zone): bool
     {
         return false;
     }
@@ -47,7 +51,7 @@ class MembrePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Membre $membre): bool
+    public function delete(User $user, Zone $zone): bool
     {
         return false;
     }
@@ -55,7 +59,7 @@ class MembrePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Membre $membre): bool
+    public function restore(User $user, Zone $zone): bool
     {
         return false;
     }
@@ -63,7 +67,7 @@ class MembrePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Membre $membre): bool
+    public function forceDelete(User $user, Zone $zone): bool
     {
         return false;
     }

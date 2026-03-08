@@ -30,7 +30,7 @@ class ClotureService
 
             return CloturesComptable::create([
                 'agence_id'         => $agence->id,
-                'date_cloture'      => Carbon::create(2025, 12, 23), // production: now()->format('Y-m-d')
+                'date_cloture'      => now()->format('Y-m-d'),
                 'statut'            => 'ouverte',
                 'report_coffre_usd' => $agence->solde_actuel_coffre_usd ?? 0,
                 'report_coffre_cdf' => $agence->solde_actuel_coffre_cdf ?? 0,

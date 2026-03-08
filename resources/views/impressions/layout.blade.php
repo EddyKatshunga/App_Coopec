@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Document')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         @media print {
             @page { 
@@ -35,8 +35,7 @@
         
         <div class="flex justify-between items-center mb-8 border-b-2 border-gray-800 pb-4">
             <div class="flex items-center space-x-4">
-                {{-- <img src="{{ asset('logo.png') }}" class="h-16"> --}}
-                <div class="h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">MF</div>
+                <img src="{{ asset('images/logo.png') }}" class="h-16">
                 <div>
                     <h2 class="text-xl font-black text-gray-800 uppercase">SYSCO - LA FINANCE SAINE</h2>
                     <p class="text-xs text-gray-500 italic">L'excellence au service de vos projets</p>

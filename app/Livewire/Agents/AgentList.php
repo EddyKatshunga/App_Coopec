@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Agents;
 
+use App\Models\Agent;
+use App\Models\Agence;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Agent;
-use App\Services\AgentService;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
@@ -14,45 +14,39 @@ class AgentList extends Component
     use WithPagination;
 
     public $search = '';
-    public $statut = '';
-    public $agence_id = '';
+    public $agence_id = null;
 
-    protected $listeners = ['refreshAgents' => '$refresh'];
-
-    public function toggleStatut(int $agentId, AgentService $service)
+    public function mount()
     {
-        $agent = Agent::findOrFail($agentId);
-
-        $nouveauStatut = $agent->statut === 'actif' ? 'inactif' : 'actif';
-
-        $service->update(
-            $agent->id,
-            $agent->agence_id,
-            $nouveauStatut,
-            $agent->membre->user->roles->pluck('name')->toArray()
-        );
-
-        session()->flash('success', 'Statut de l’agent mis à jour');
-        $this->dispatch('refreshAgents');
+        // Par défaut, l'agence de l'utilisateur connecté
+        $this->agence_id = auth()->user()->agence_id ?? null;
     }
 
     public function render()
     {
-        $agents = Agent::with(['membre.user', 'agence'])
+        // Sécurité : seul le level6 peut changer d'agence, sinon on force l'agence de l'user
+        $currentAgenceId = auth()->user()->can('can.level6') 
+            ? $this->agence_id 
+            : auth()->user()->agence_id;
+
+        $agents = Agent::with(['membre.user.roles', 'agence'])
+            ->where('agence_id', $currentAgenceId)
             ->when($this->search, function ($q) {
                 $q->whereHas('membre.user', fn ($u) =>
                     $u->where('name', 'like', "%{$this->search}%")
+                      ->orWhere('email', 'like', "%{$this->search}%")
                 );
             })
-            ->when($this->statut, fn ($q) =>
-                $q->where('statut', $this->statut)
-            )
-            ->when($this->agence_id, fn ($q) =>
-                $q->where('agence_id', $this->agence_id)
-            )
             ->latest()
-            ->paginate(10);
+            ->paginate(12);
 
-        return view('livewire.agents.agent-list', compact('agents'));
+        $agences = auth()->user()->can('can.level6') 
+            ? Agence::orderBy('nom')->get() 
+            : collect();
+
+        return view('livewire.agents.agent-list', [
+            'agents' => $agents,
+            'agences' => $agences
+        ]);
     }
 }

@@ -23,6 +23,11 @@ class AgenceList extends Component
         $this->resetPage();
     }
 
+    public function mount()
+    {
+        abort_unless(auth()->user()->can('can.level6'), 403, 'ACCES REFUSE');
+    }
+
     public function render()
     {
         $agences = Agence::with('chefAgence.user')

@@ -22,31 +22,29 @@ class AgentForm extends Component
     public $agence_id;
     public $role_name = ''; // Nom pour Spatie
     public $role_id = '';   // ID pour l'historique
-
-    // Liste des rôles autorisés à l'affichage
-    protected $allowedRoles = [
-        'agent_epargne', 'superviseur', 'ops', 
-        'conseiller', 'caissiere', 'auditeur'
-    ];
+    public $allowedRoles = [];
 
     public function mount(?Membre $membre = null, ?Agent $agent = null)
     {
-        if ($agent && $agent->exists) {
+        abort_unless(auth()->user()->can('can.level6'), 403, 'ACCES REFUSE');
+        if ($agent && $agent->exists) { //Editing
             $this->agent = $agent;
             $this->membre = $agent->membre;
             $this->membre_id = $agent->membre_id;
             $this->user_id = $agent->user_id;
             $this->agence_id = $agent->agence_id;
+            $this->allowedRoles = ['niveau 1', 'niveau 3', 'niveau 4', 'niveau 6', 'niveau 7'];
             
             $currentRole = $agent->user->roles->first();
             if ($currentRole) {
                 $this->role_name = $currentRole->name;
                 $this->role_id = $currentRole->id;
             }
-        } elseif ($membre && $membre->exists) {
+        } elseif ($membre && $membre->exists) { //Creating
             $this->membre = $membre;
             $this->membre_id = $membre->id;
-            $this->user_id = $membre->user_id; 
+            $this->user_id = $membre->user_id;
+            $this->allowedRoles = ['niveau 1', 'niveau 3', 'niveau 4'];
         } else {
             abort(403, 'Contexte invalide.');
         }

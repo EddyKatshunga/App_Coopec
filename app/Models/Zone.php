@@ -6,6 +6,7 @@ use App\Models\Traits\Blameable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Zone extends Model
 {
@@ -31,7 +32,7 @@ class Zone extends Model
         return $this->belongsTo(Agent::class, 'gerant_id');
     }
 
-    public function credits()
+    public function credits(): HasMany
     {
         return $this->hasMany(Credit::class);
     }

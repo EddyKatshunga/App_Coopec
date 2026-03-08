@@ -10,11 +10,13 @@
             </h2>
             
             <div class="flex flex-wrap gap-2">
+                @can('can.level1')
                 <a href="{{ route('comptes.index') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Dépôt
                 </a>
-                @can('epargne.retrait.create')
+                @endcan
+                @can('can.level3')
                 <a href="{{ route('comptes.index') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
                     Retrait
@@ -53,7 +55,7 @@
             <input type="date" wire:model.live="date_fin" class="border-gray-200 rounded-lg text-sm">
 
             {{-- Toggle Toute l'agence (Niveau 2 et 3) --}}
-            @can('agence.operations.view')
+            @can('can.level4')
             <div class="flex items-center gap-2 px-2 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                 <input type="checkbox" wire:model.live="all_agents" id="all_agents" class="rounded text-blue-600">
                 <label for="all_agents" class="text-[10px] font-bold text-gray-600 uppercase cursor-pointer">Toute l'agence</label>
@@ -72,7 +74,7 @@
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Détails Membre</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-center">Opération</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Montant</th>
-                        @if($all_agents || auth()->user()->can('agence.view.all'))
+                        @if($all_agents || auth()->user()->can('can.level6'))
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Agent / Agence</th>
                         @endif
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
@@ -101,7 +103,7 @@
                                 <div class="text-[10px] text-gray-400">Solde : {{ number_format($transaction->solde_apres, 2, ',', ' ') }}</div>
                             </td>
                             
-                            @if($all_agents || auth()->user()->can('agence.view.all'))
+                            @if($all_agents || auth()->user()->can('can.level6'))
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-xs font-medium text-gray-700">{{ $transaction->creator->name ?? 'N/A' }}</div>
                                 <div class="text-[10px] text-gray-400">{{ $transaction->agence->nom ?? '-' }}</div>
@@ -111,7 +113,7 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-3">
                                     <a href="{{ route('transaction.show', $transaction) }}" class="text-blue-600 hover:text-blue-800 text-sm font-bold">Voir</a>
-                                    @can('agent.create') 
+                                    @can('can.level4') 
                                         @if($transaction->canBeDeleted())
                                             <button wire:click="deleteRecord('App\\Models\\Transaction', {{ $transaction->id }})" 
                                                     wire:confirm="Supprimer cette opération ?" 

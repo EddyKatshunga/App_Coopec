@@ -92,14 +92,4 @@ class Membre extends Model
         return $this->creditEnCours()->exists();
     }
 
-    public function transactions()
-    {
-        return $this->comptes->transactions();
-    }
-
-    public function alltransactions()
-    {
-        return $this->comptes->allTransactions();
-    }
-
 }

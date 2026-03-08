@@ -1,334 +1,261 @@
-<div class="max-w-7xl mx-auto py-10 px-6">
-
-    {{-- Header --}}
-    <div class="flex justify-between items-start mb-8">
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+    
+    {{-- BARRE DE NAVIGATION & STATUT --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">{{ $agence->nom }}</h2>
-            </div>
-
-        <div class="flex space-x-3">
-            {{-- NOUVEAU BOUTON : Ouvrir la journée --}}
-            @if (!$agence->journeeOuverte())
-                <a href="{{ route('clotures.ouvrir', $agence) }}" wire:navigate
-                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow transition flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Demarrer les activités
+            <nav class="flex mb-2" aria-label="Breadcrumb">
+                <a href="{{ url()->previous() }}" wire:navigate class="text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 transition">
+                    ← Retour
                 </a>
-            @endif
-            
-
-            <a href="{{ route('agences.zones.create', $agence->uuid) }}" wire:navigate
-            class="text-gray-600 hover:text-gray-900 font-medium self-center">
-                Ajouter une zone Epargne
-            </a>
-
-            <a href="{{ route('agences.index') }}" wire:navigate
-                class="text-gray-600 hover:text-gray-900 font-medium">
-                ← Retour
-            </a>
-        </div>
-    </div>
-
-    {{-- Cartes Soldes CDF --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <p class="text-sm text-gray-500">TOTAL GENERAL ACTUEL CDF</p>
-            <p class="text-2xl font-bold mt-2
-                      {{ $agence->solde_actuel_coffre < 0 ? 'text-red-600' : 'text-gray-800' }}">
-                {{ number_format($agence->solde_actuel_coffre_cdf, 2, ',', ' ') }} CDF
-            </p>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <p class="text-sm text-gray-500">TOTAL GENERAL ACTUEL USD</p>
-            <p class="text-2xl font-bold mt-2 text-gray-800">
-                {{ number_format($agence->solde_actuel_coffre_usd, 2, ',', ' ') }} USD
-            </p>
-        </div>
-
-    </div>
-
-     {{-- Cartes Soldes --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <p class="text-sm text-gray-500">TOTAL EPARGNE CDF</p>
-            <p class="text-2xl font-bold mt-2
-                      {{ $agence->solde_actuel_coffre < 0 ? 'text-red-600' : 'text-gray-800' }}">
-                {{ number_format($agence->solde_actuel_epargne_cdf, 2, ',', ' ') }} CDF
-            </p>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <p class="text-sm text-gray-500">TOTAL EPARGNE USD</p>
-            <p class="text-2xl font-bold mt-2 text-gray-800">
-                {{ number_format($agence->solde_actuel_epargne_usd, 2, ',', ' ') }} USD
-            </p>
-        </div>
-
-    </div>
-
-    {{-- Chef_Agence --}}
-    <div class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100 mb-10">
-
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">
-                Direction
-            </h3>
-
-
-            {{-- Prévoir une double vérification du mot de passe avant validation --}}
-            <button wire:click="ouvrirModal"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white
-                           rounded-xl font-semibold shadow transition">
-                Changer le Chef d'Agence
-            </button>
-        </div>
-
-        @if($agence->chefAgence)
-            <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                <p class="text-sm text-green-800">
-                    Chef d'Agence actuel :
-                    <strong>{{ $agence->chefAgence->user->name }}</strong>
-                </p>
-            </div>
-        @else
-            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <p class="text-sm text-yellow-800">
-                    Aucun Chef d'Agence assigné.
-                </p>
-            </div>
-        @endif
-
-    </div>
-
-    {{-- Liste Agents --}}
-    <div class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b bg-gray-50">
-            <h3 class="text-lg font-semibold text-gray-800">
-                Liste des Agents
-            </h3>
-        </div>
-        <table class="min-w-full divide-y divide-gray-100">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                    <th class="px-6 py-4 text-left">Nom</th>
-                    <th class="px-6 py-4 text-left">Email</th>
-                    <th class="px-6 py-4 text-left">Rôle</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 bg-white">
-                @forelse($agence->agents as $agent)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 font-medium text-gray-800">
-                            {{ $agent->user->name }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $agent->user->email }}
-                        </td>
-                        <td class="px-6 py-4">
-                            @foreach($agent->user->roles as $role)
-                                <span class="inline-flex px-3 py-1 text-xs font-semibold
-                                             bg-indigo-100 text-indigo-700 rounded-full mr-1">
-                                    {{ ucfirst($role->name) }}
-                                </span>
-                            @endforeach
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                            Aucun agent enregistré.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    {{-- FIN Liste Agents --}}
-
-    {{-- Liste Journées comptables --}}
-    <div class="bg-white shadow-xl rounded-2xl border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b bg-gray-50">
-            <h3 class="text-lg font-semibold text-gray-800">
-                Journées de l'Agence
-            </h3>
-        </div>
-        <table class="min-w-full divide-y divide-gray-100">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                    <th class="px-6 py-4 text-left">Date</th>
-                    <th class="px-6 py-4 text-left">Report Coffre FC</th>
-                    <th class="px-6 py-4 text-left">Report Epargne FC</th>
-                    <th class="px-6 py-4 text-left">Solde Soffre FC</th>
-                    <th class="px-6 py-4 text-left">Solde Epargne FC</th>
-                    <th class="px-6 py-4 text-left">Voir plus</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 bg-white">
-                @forelse($clotures_journalieres as $item)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 font-medium text-gray-800">
-                            {{ $item->date_cloture }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $item->report_coffre_cdf }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $item->report_epargne_cdf }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $item->solde_coffre_cdf }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $item->solde_epargne_cdf }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            <a href="{{ route('clotures.show', $item) }}" wire:navigate
-                                class="text-gray-600 hover:text-gray-900 font-medium">
-                                Voir plus
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">
-                            Aucune journée enregistré.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    {{-- FIN Liste Journée comptables --}}
-
-    {{-- MODAL --}}
-    @if($showModal)
-    <div class="fixed inset-0 flex items-center justify-center z-50">
-        <div class="absolute inset-0 bg-black opacity-50"></div>
-
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative z-10">
-
-            <h3 class="text-xl font-bold text-gray-800 mb-4">
-                Confirmation du changement du Chef d'Agence
-            </h3>
-
-            {{-- Directeur actuel (nom + photo) --}}
-            @if($agence->chefAgence)
-                <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 flex items-center space-x-4">
-                    <div class="flex-shrink-0">
-                        @if($agence->chefAgence->user->profile_photo_url)
-                            <img src="{{ $agence->chefAgence->user->profile_photo_url }}"
-                                alt="Photo du directeur"
-                                class="w-12 h-12 rounded-full object-cover">
-                        @else
-                            <div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
-                                <span class="text-xl font-bold">
-                                    {{ substr($agence->chefAgence->user->name, 0, 1) }}
-                                </span>
-                            </div>
-                        @endif
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Directeur actuel</p>
-                        <p class="font-semibold text-gray-800">
-                            {{ $agence->chefAgence->user->name }}
-                        </p>
-                    </div>
-                </div>
-            @else
-                <div class="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-                    <p class="text-sm text-yellow-800">Aucun directeur assigné actuellement.</p>
-                </div>
-            @endif
-
-            {{-- Avertissement --}}
-            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-                <p class="text-sm text-red-800">
-                    ⚠ Cette opération est sensible.
-                    <br><br>
-                    • L’ancien Chef d'Agence deviendra <strong>Superviseur</strong> dans cette même agence.
-                    <br>
-                    • Le nouvel agent sélectionné deviendra <strong>Chef d'Agence</strong>.
-                </p>
-            </div>
-
-            {{-- Champ mot de passe --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Mot de passe (pour confirmer votre identité)
-                </label>
-                <input type="password"
-                    wire:model="motDePasse"
-                    class="w-full rounded-xl border-gray-300 shadow-sm
-                            focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="Votre mot de passe">
-                @error('motDePasse')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-                @if($motDePasseError)
-                    <p class="text-red-500 text-sm mt-1">{{ $motDePasseError }}</p>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">{{ $agence->nom }}</h2>
+                @if($agence->journeeOuverte())
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 animate-pulse">
+                        <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full"></span> Opérationnelle
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500">
+                        <span class="w-2 h-2 mr-1.5 bg-slate-400 rounded-full"></span> Fermée
+                    </span>
                 @endif
             </div>
+            <p class="text-slate-500 text-sm mt-1">{{ $agence->ville }}, {{ $agence->pays }} | Code: <span class="font-mono font-bold">{{ $agence->code ?? 'N/A' }}</span></p>
+        </div>
 
-            {{-- Sélection du nouveau directeur --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Sélectionner le nouveau Chef d'Agence
-                </label>
+        <div class="flex flex-wrap gap-3">
+            @can('can.level6')
+            <a href="{{ route('agences.zones.create', $agence->uuid) }}" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition">
+                <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Nouvelle Zone
+            </a>
+            <a href="{{ route('membre.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition">
+                <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Nouvell Agent
+            </a>    
+            @endcan
 
-                <select wire:model="nouveauDirecteurId"
-                        class="w-full rounded-xl border-gray-300 shadow-sm
-                            focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                    <option value="">-- Choisir un agent --</option>
-                    @foreach($agence->agents as $agent)
-                        <option value="{{ $agent->id }}">
-                            {{ $agent->user->name }}
-                        </option>
-                    @endforeach
-                </select>
-
-                @error('nouveauDirecteurId')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            {{-- Checkbox de confirmation --}}
-            <div class="mb-6">
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox"
-                        wire:model="confirmation"
-                        class="rounded border-gray-300 text-red-600 shadow-sm focus:ring-red-500">
-                    <span class="text-sm text-gray-700">
-                        Je confirme vouloir effectuer cette opération.
-                    </span>
-                </label>
-
-                @error('confirmation')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            {{-- Boutons --}}
-            <div class="flex justify-end space-x-3">
-                <button wire:click="$set('showModal', false)"
-                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300
-                            rounded-xl font-medium">
-                    Annuler
-                </button>
-
-                <button wire:click="changerDirecteur"
-                        class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white
-                            rounded-xl font-semibold shadow transition">
-                    Confirmer
-                </button>
-            </div>
+            @if (!$agence->journeeOuverte())
+                {{-- Cas : Journée fermée --}}
+                <a href="{{ route('clotures.ouvrir', $agence) }}" class="inline-flex items-center px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition active:scale-95">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Démarrer les activités
+                </a>
+            @else
+                {{-- Cas : Journée ouverte --}}
+                <a href="{{ route('clotures.show', $agence->journeeOuverte()) }}" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Voir la journée en cours
+                </a>
+            @endif
 
         </div>
     </div>
+
+    {{-- SECTION FINANCIÈRE : LES SOLDES --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+            <div class="relative z-10">
+                <div class="flex justify-between items-start">
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-widest">Trésorerie Coffre (Cash)</span>
+                    <svg class="w-8 h-8 text-slate-700" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <p class="text-3xl font-mono font-bold tracking-tighter">{{ number_format_fr($agence->solde_actuel_coffre_cdf, 'CDF') }} <span class="text-blue-400 text-sm">CDF</span></p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-800">
+                        <p class="text-2xl font-mono font-bold tracking-tighter">{{ number_format_fr($agence->solde_actuel_coffre_usd, 'USD') }} <span class="text-emerald-400 text-sm">USD</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-slate-800 rounded-full opacity-50"></div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex justify-between items-start">
+                    <span class="text-slate-500 text-xs font-bold uppercase tracking-widest text-blue-600">Encours Épargne</span>
+                    <svg class="w-8 h-8 text-blue-100" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                </div>
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <p class="text-3xl font-mono font-bold text-slate-800 tracking-tighter">{{ number_format_fr($agence->solde_actuel_epargne_cdf, 'CDF') }} <span class="text-slate-400 text-sm italic">CDF</span></p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-50">
+                        <p class="text-2xl font-mono font-bold text-slate-800 tracking-tighter">{{ number_format_fr($agence->solde_actuel_epargne_usd, 'USD') }} <span class="text-slate-400 text-sm italic">USD</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {{-- COLONNE GAUCHE : DIRECTION ET AGENTS --}}
+        <div class="lg:col-span-1 space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-bold text-slate-800 tracking-tight text-lg italic">Direction</h3>
+                        @can('can.level6')
+                        <button wire:click="ouvrirModal" class="p-2 text-slate-400 hover:text-red-600 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        </button>
+                        @endcan
+                    </div>
+                    
+                    @if($agence->chefAgence)
+                        <div class="flex items-center space-x-4">
+                            <div class="h-14 w-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl border-4 border-blue-50 shadow-inner">
+                                {{ substr($agence->chefAgence->user->name, 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-900 leading-none">{{ $agence->chefAgence->user->name }}</p>
+                                <p class="text-xs text-slate-500 mt-1 italic">Chef d'Agence principal</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl text-center">
+                            <p class="text-xs font-bold text-amber-700 uppercase">Poste Vacant</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-sm uppercase tracking-widest">Équipe Terrain</h3>
+                </div>
+                <ul class="divide-y divide-slate-100">
+                    @forelse($agence->agents as $agent)
+                        <li class="px-6 py-4 hover:bg-slate-50 transition flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">{{ $agent->user->name }}</p>
+                                <div class="flex gap-1 mt-1">
+                                    @foreach($agent->user->roles as $role)
+                                        <span class="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded uppercase tracking-tighter">{{ $role->name }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <a href="{{ route('agent.show', $agent) }}">
+                                <svg class="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            </a>
+                        </li>
+                    @empty
+                        <li class="p-6 text-center text-slate-400 text-sm italic italic">Aucun agent</li>
+                    @endforelse
+                </ul>
+            </div>
+        </div>
+
+        {{-- COLONNE DROITE : HISTORIQUE DES JOURNÉES --}}
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Historique des Journées</h3>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Flux Comptable</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50/50">
+                                <th class="px-8 py-4">Date</th>
+                                <th class="px-4 py-4">Report Coffre</th>
+                                <th class="px-4 py-4 text-blue-600">Report Épargne</th>
+                                <th class="px-4 py-4">Solde Journée</th>
+                                <th class="px-8 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse($clotures_journalieres as $item)
+                                <tr class="group hover:bg-blue-50/30 transition">
+                                    <td class="px-8 py-5">
+                                        <span class="text-sm font-bold text-slate-700">{{ $item->date_cloture->isoFormat('dddd D MMMM YYYY') }}</span>
+                                    </td>
+                                    <td class="px-4 py-5 font-mono text-xs font-semibold text-slate-600">
+                                        {{ number_format_fr($item->report_coffre_cdf, 'CDF') }}
+                                    </td>
+                                    <td class="px-4 py-5 font-mono text-xs font-semibold text-blue-500">
+                                        {{ number_format_fr($item->report_epargne_cdf, 'CDF') }}
+                                    </td>
+                                    <td class="px-4 py-5">
+                                        <div class="text-sm font-black text-slate-800">{{ number_format_fr($item->solde_coffre_cdf, 'CDF') }}</div>
+                                        <div class="text-[10px] text-slate-400 italic">{{ $item->statut }}</div>
+                                    </td>
+                                    <td class="px-8 py-5 text-right">
+                                        <a href="{{ route('clotures.show', $item) }}" wire:navigate class="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:border-blue-500 hover:text-blue-600 transition">
+                                            Détails
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-8 py-12 text-center">
+                                        <div class="text-slate-300">Aucune activité enregistrée.</div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL : RE-STYLISÉ --}}
+    @if($showModal)
+        <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" wire:click="$set('showModal', false)"></div>
+            
+            <div class="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 transform transition-all">
+                <div class="bg-red-600 p-6 text-white text-center">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-black tracking-tight">Alerte Gouvernance</h3>
+                    <p class="text-red-100 text-sm">Modification de la hiérarchie de l'agence</p>
+                </div>
+
+                <div class="p-8 space-y-6">
+                    <div class="p-4 bg-slate-50 rounded-2xl flex items-center space-x-4 border border-slate-100">
+                        <div class="h-10 w-10 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-600 italic">
+                            {{ substr($agence->chefAgence->user->name ?? '?', 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sortant</p>
+                            <p class="text-sm font-bold text-slate-700">{{ $agence->chefAgence->user->name ?? 'Inconnu' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 font-inter">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1 italic">Nouveau Chef d'Agence</label>
+                            <select wire:model="nouveauDirecteurId" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-red-500 transition">
+                                <option value="">-- Sélectionner l'agent --</option>
+                                @foreach($agents as $agent)
+                                    <option value="{{ $agent->id }}">{{ $agent->user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1 italic">Signature Autorité (Mot de passe)</label>
+                            <input type="password" wire:model="motDePasse" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-red-500 transition">
+                        </div>
+
+                        <label class="flex items-start space-x-3 p-3 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                            <input type="checkbox" wire:model="confirmation" class="mt-1 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                            <span class="text-xs text-slate-500 leading-relaxed font-medium">Je comprends que l'ancien chef d'agence perdra ses droits de signature immédiate au profit du nouvel agent.</span>
+                        </label>
+                    </div>
+
+                    <div class="flex space-x-3 pt-4">
+                        <button wire:click="$set('showModal', false)" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition">Annuler</button>
+                        <button wire:click="changerDirecteur" class="flex-2 px-8 py-3 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition active:scale-95">Confirmer le Transfert</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 
 </div>

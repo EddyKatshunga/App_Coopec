@@ -17,14 +17,12 @@ class ZoneService
     {
         return DB::transaction(function () use ($data, $zone) {
             $nouveauChef = Agent::findOrFail($data['gerant_id']);
-            $roleAgentCredit = Role::where('name', 'agent_credit')->first();
-            $roleAgentEpargne = Role::where('name', 'agent_epargne')->first();
 
             // 1. Gestion de l'ancien chef (en cas d'édition)
             if ($zone && $zone->gerant_id !== $nouveauChef->id) {
                 $ancienChef = $zone->gerant;
                 if ($ancienChef && $ancienChef->user) {
-                    $this->updateUserRole($ancienChef->user, 'agent_epargne');
+                    $this->updateUserRole($ancienChef->user, 'niveau 1');
                 }
             }
 
@@ -37,7 +35,7 @@ class ZoneService
 
             // 3. Assigner le rôle au nouveau chef
             if ($nouveauChef->user) {
-                $this->updateUserRole($nouveauChef->user, 'agent_credit');
+                $this->updateUserRole($nouveauChef->user, 'niveau 2');
             }
 
             return $zone;

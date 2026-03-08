@@ -28,7 +28,7 @@ class CreditsList extends Component
     public function mount()
     {
         $user = Auth::user();
-        if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;
         }
     }
@@ -42,7 +42,7 @@ class CreditsList extends Component
         $query = Credit::with(['user', 'zone', 'remboursements', 'agence', 'creator']);
 
         // --- SÉCURITÉ NIVEAU 3 : Admin Global ---
-        if ($user->can('agence.view.all')) {
+        if ($user->can('can.level6')) {
             $query->when($this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id));
         } 
         // --- SÉCURITÉ NIVEAU 1 & 2 : Restriction Agence ---
@@ -51,8 +51,8 @@ class CreditsList extends Component
         }
 
         // --- SÉCURITÉ NIVEAU 1 : Restriction Personnelle ---
-        if (!$user->can('agence.operations.view') || !$this->all_agents) {
-            if (!$user->can('agence.view.all')) {
+        if (!$user->can('can.level4') || !$this->all_agents) {
+            if (!$user->can('can.level6')) {
                 $query->where('created_by', $user->id);
             }
         }
@@ -72,7 +72,7 @@ class CreditsList extends Component
         return view('livewire.credits.credits-list', [
             'credits' => $query->latest('date_credit')->paginate(12),
             'zones' => Zone::orderBy('nom')->get(),
-            'agences' => $user->can('agence.view.all') ? Agence::all() : []
+            'agences' => $user->can('can.level6') ? Agence::all() : []
         ]);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Livewire\Credits;
 use App\Livewire\Traits\CanDeleteAccountingRecords;
 use Livewire\Component;
 use App\Models\Credit;
-use Carbon\Carbon;
+use App\Services\CreditService;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
@@ -14,9 +14,15 @@ class CreditShow extends Component
     use CanDeleteAccountingRecords;
     
     public Credit $credit;
+    
+    // État du Modal (remplace Alpine)
+    public bool $showClotureModal = false;
 
-    // On garde ces propriétés pour le binding Livewire si nécessaire, 
-    // mais on les alimente via le modèle.
+    // Propriétés du formulaire
+    public string $noteCloture = '';
+    public bool $confirmCloture = false;
+
+    // Propriétés de situation financière
     public float $penaliteCourante = 0;
     public int $joursRetard = 0;
     public float $resteDu = 0;
@@ -33,17 +39,42 @@ class CreditShow extends Component
 
     public function rafraichirEtat(): void
     {
-        // On force le rafraîchissement des relations pour inclure le nouveau remboursement
         $this->credit->load('remboursements');
-        
-        // On utilise la méthode de calcul centralisée du modèle
         $situation = $this->credit->getSituationActuelle();
 
         $this->penaliteCourante = $situation['penalites_courantes'];
         $this->joursRetard = $situation['jours_retard_courants'];
-        
-        // Le Reste dû affiché est le "Total à payer" (Base + pénalités du jour)
         $this->resteDu = $situation['total_a_payer'];
+    }
+
+    // Ouvre/Ferme le modal et réinitialise les champs
+    public function toggleClotureModal()
+    {
+        $this->showClotureModal = !$this->showClotureModal;
+        if (!$this->showClotureModal) {
+            $this->reset(['noteCloture', 'confirmCloture']);
+            $this->resetValidation();
+        }
+    }
+
+    public function validerClotureForcee(CreditService $service)
+    {
+        $this->validate([
+            'noteCloture' => 'required|min:5',
+            'confirmCloture' => 'accepted'
+        ], [
+            'noteCloture.required' => 'Le motif est obligatoire.',
+            'confirmCloture.accepted' => 'Veuillez confirmer l\'opération.'
+        ]);
+
+        $service->forcerCloture($this->credit, $this->noteCloture);
+
+        // Mise à jour de l'interface
+        $this->showClotureModal = false;
+        $this->credit->refresh();
+        $this->rafraichirEtat();
+
+        session()->flash('success', 'Le crédit a été clôturé avec succès.');
     }
 
     public function render()

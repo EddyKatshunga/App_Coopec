@@ -103,10 +103,10 @@ class AgenceService
             | MODIFICATION DES RÔLES
             |--------------------------------------------------------------------------
             */
-            $role = \Spatie\Permission\Models\Role::findByName('superviseur');
+            $role = \Spatie\Permission\Models\Role::findByName('niveau 4');
             $superviseurRoleId = $role->id;
 
-            $role = \Spatie\Permission\Models\Role::findByName('chef_agence');
+            $role = \Spatie\Permission\Models\Role::findByName('niveau 5');
             $chefAgenceRoleId = $role->id;
 
             $oldRole = $nouveauDirecteurUser->roles->first(); //Probablement Superviseur ou Agent_Epargne
@@ -115,7 +115,7 @@ class AgenceService
 
             // 1️⃣ Ancien directeur → superviseur
             if ($ancienDirecteur && $ancienDirecteur->user) {
-                $ancienDirecteur->user->syncRoles(['superviseur']);
+                $ancienDirecteur->user->syncRoles(['niveau 4']);
                 
                 HistoriqueRole::create([
                     'user_id'      => $ancienDirecteur->user->id,
@@ -125,7 +125,7 @@ class AgenceService
             }
 
             // 2️⃣ Nouveau directeur → directeur
-            $nouveauDirecteur->user->syncRoles(['chef_agence']);
+            $nouveauDirecteur->user->syncRoles(['niveau 5']);
             HistoriqueRole::create([
                 'user_id'      => $nouveauDirecteur->user->id,
                 'nouveau_role' => $chefAgenceRoleId,

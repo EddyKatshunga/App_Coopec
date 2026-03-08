@@ -185,9 +185,7 @@ Route::get('/membres/imprimer-liste', function() {
 })->name('membres.print-all');
 
 Route::get('/remboursements/{remboursement}/imprimer', function (CreditRemboursement $remboursement) {
-    // Si nécessaire, chargez les relations pour éviter les requêtes N+1
     $remboursement->load(['credit.membre', 'agence', 'zone', 'agent']);
-    
     return view('impressions.recu-paiement', compact('remboursement'));
 })->name('remboursements.print');
 
@@ -196,5 +194,11 @@ Route::get('/impressions/releve/{cloture}/{type}', [ImpressionController::class,
 
 Route::get('/impressions/releve-compte/{compte}/{debut?}/{fin?}/{monnaie?}', [ImpressionController::class, 'releveIndividuel'])
     ->name('impressions.releve.compte');
-
+Route::get('/impressions/rapport-journalier/{cloture}', [ImpressionController::class, 'rapportJournalier'])
+    ->name('impressions.rapport.journalier');
+Route::get('/impressions/membre/{membre}', [ImpressionController::class, 'ficheMembre'])
+    ->name('impressions.membre.fiche');
+Route::get('/impressions/periodique/{agenceId}/{debut}/{fin}', [ImpressionController::class, 'rapportPeriodique'])
+    ->name('impressions.periodique');
+    
 require __DIR__.'/auth.php';

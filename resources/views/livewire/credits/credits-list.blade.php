@@ -19,7 +19,7 @@
                 <input type="text" wire:model.live.debounce.500ms="search" placeholder="Membre ou n° de dossier..." class="w-full border-gray-200 rounded-xl text-sm focus:ring-blue-500">
             </div>
             
-            @can('agence.view.all')
+            @can('can.level6')
             <select wire:model.live="selected_agence_id" class="border-gray-200 rounded-xl text-sm focus:ring-blue-500">
                 <option value="">Toutes les agences</option>
                 @foreach($agences as $agence) <option value="{{ $agence->id }}">{{ $agence->nom }}</option> @endforeach
@@ -40,7 +40,7 @@
                 <option value="termine_negocie">🤝 Négocié</option>
             </select>
 
-            @can('agence.operations.view')
+            @can('can.level4')
             <div class="flex items-center gap-2 px-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                 <input type="checkbox" wire:model.live="all_agents" id="all_agents_credit" class="rounded text-blue-600 focus:ring-blue-500">
                 <label for="all_agents_credit" class="text-[10px] font-bold text-gray-600 uppercase cursor-pointer leading-tight">Voir toute l'agence</label>
@@ -131,7 +131,7 @@
                         <a href="{{ route('credit.show', $credit) }}" class="flex-1 bg-white border border-gray-200 text-gray-700 py-2.5 rounded-xl text-[11px] font-black uppercase text-center hover:bg-gray-100 transition shadow-sm">
                             Détails complets
                         </a>
-                        @if($situation['total_a_payer'] > 0)
+                        @if($credit->statut === 'en_cours' || $credit->statut === 'en_retard')
                             <a href="{{ route('remboursement.create', $credit) }}" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-[11px] font-black uppercase text-center hover:bg-blue-700 shadow-md transition">
                                 Encaisser
                             </a>

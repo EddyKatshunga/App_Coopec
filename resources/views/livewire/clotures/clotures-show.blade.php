@@ -10,10 +10,32 @@
             </span>
 
             @if($cloture->statut === 'ouverte')
-                <a href="{{ route('clotures.valider', $cloture) }}" class="flex items-center text-red-600 hover:text-red-800 font-bold bg-red-50 px-4 py-2 rounded-lg transition">
-                    Clôturer la Journée 
-                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </a>
+                {{-- Dropdown si ouverte --}}
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
+                        Actions
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+
+                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                        {{-- Bouton Rapport Global --}}
+                        <a href="{{ route('clotures.valider', $cloture) }}" 
+                        class="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-black transition shadow-sm">
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Clôturer la Journée 
+                        </a>
+                        <a href="{{ route('depenses.create') }}" 
+                        class="block px-4 py-3 hover:bg-indigo-50 border-b border-gray-50 group">
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Ajouter une dépense
+                        </a>
+                        <a href="{{ route('revenus.create') }}" 
+                        class="block px-4 py-3 hover:bg-indigo-50 border-b border-gray-50 group">
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Ajouter un revenu
+                        </a>
+                    </div>
+                </div>
             @else
                 {{-- Dropdown pour les rapports si clôturée --}}
                 <div x-data="{ open: false }" class="relative">
@@ -23,6 +45,12 @@
                     </button>
 
                     <div x-show="open" x-transition class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                        {{-- Bouton Rapport Global --}}
+                        <a href="{{ route('impressions.rapport.journalier', $cloture) }}" target="_blank" 
+                        class="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-black transition shadow-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Rapport de la Journée
+                        </a>
                         <a href="{{ route('impressions.releve', [$cloture, 'type' => 'epargne']) }}" target="_blank" class="block px-4 py-3 hover:bg-blue-50 border-b border-gray-50 group">
                             <div class="text-sm font-bold text-gray-700 group-hover:text-blue-700">Relevé des Épargnes</div>
                             <div class="text-[10px] text-gray-400">Dépôts: ${{ number_format_fr($cloture->total_depot_usd) }} | Retraits: ${{ number_format_fr($cloture->total_retrait_usd) }}</div>

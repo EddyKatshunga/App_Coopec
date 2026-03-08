@@ -85,7 +85,17 @@ class Credit extends Model
 
     public function getTotalRembourseAttribute()
     {
-        return $this->remboursements()->sum('montant');
+        return $this->total_capital_paye + $this->total_interet_paye;
+    }
+
+    public function getTotalCapitalPayeAttribute()
+    {
+        return $this->remboursements()->sum('montant_capital_payee');
+    }
+
+    public function getTotalInteretPayeAttribute()
+    {
+        return $this->remboursements()->sum('montant_interet_payee');
     }
 
     public function getSituationActuelle($dateConsultation = null)
@@ -124,7 +134,7 @@ class Credit extends Model
 
 
         return [
-            'reste_du_base' => max(0, round($resteDu, 2)), // Ex: 145620
+            'reste_du_base' => max(0, round($resteDu, 2)),
             'penalites_courantes' => round($penalitesCourantes, 2),
             'total_a_payer' => round(max(0, $resteDu) + $penalitesCourantes, 2),
             'jours_retard_courants' => $joursRetardCourants,
