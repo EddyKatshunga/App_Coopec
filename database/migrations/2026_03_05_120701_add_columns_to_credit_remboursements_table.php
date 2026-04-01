@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('credit_remboursements', function (Blueprint $table) {
-            $table->decimal('reste_penalite', 15, 2)->default(0)->after('montant_penalite_paye');
-            $table->decimal('reste_non_alloue', 15, 2)->default(0)->after('montant_capital_paye');
+            $table->decimal('reste_penalite', 15, 2)->default(0)->after('montant_penalite_payee');
+            $table->decimal('reste_non_alloue', 15, 2)->default(0)->after('montant_capital_payee');
         });
     }
 

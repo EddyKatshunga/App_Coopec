@@ -25,15 +25,14 @@ return new class extends Migration
             $table->string('activites');
             $table->string('adresse_activite');
             $table->date('date_adhesion');
-            $table->foreignId('agent_parrain_id')
-                ->nullable()
-                ->constrained('agents')
-                ->onDelete('set null');
+            $table->unsignedBigInteger('agent_parrain_id')->nullable();
 
             // 🔐 Audit
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
+			
+			$table->index('agent_parrain_id');
         });
     }
 

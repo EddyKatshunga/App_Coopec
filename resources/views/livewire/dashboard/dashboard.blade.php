@@ -20,10 +20,10 @@
     <livewire:dashboard.actions />
 
     {{-- 3. ZONE DE STATISTIQUES (Optionnel, selon le niveau) --}}
-    @if(auth()->user()->hasRole('niveau 0'))
-        <livewire:dashboard.stats-membre-mini />
-    @else
+    @if(auth()->user()->agent)
         <livewire:dashboard.stats-agent-mini />
+    @else
+        <livewire:dashboard.stats-membre-mini />
     @endif
 
 </div>

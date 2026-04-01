@@ -20,6 +20,8 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
+			$table->index('membre_id');
+            $table->index('agence_id');
         });
     }
 

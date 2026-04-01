@@ -37,6 +37,11 @@ class Zone extends Model
         return $this->hasMany(Credit::class);
     }
 
+    public function remboursement(): HasMany
+    {
+        return $this->hasMany(CreditRemboursement::class);
+    }
+
     public function agence(): BelongsTo
     {
         return $this->belongsTo(Agence::class);

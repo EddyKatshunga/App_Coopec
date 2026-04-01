@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comptes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('membre_id')->constrained()->onDelete('cascade');
-            $table->string('intitule', 15)->default('Compte principal');
+            $table->string('intitule', 50)->default('Compte principal');
             $table->string('numero_compte', 15)->unique();
             $table->decimal('solde_cdf', 15, 2)->default(0); 
             $table->decimal('solde_usd', 15, 2)->default(0);
