@@ -2,11 +2,9 @@
 
 return [
 
-    'name' => env('APP_NAME', 'SYSCO'),
-
     'env' => env('APP_ENV', 'production'),
 
-    'nom_entreprise' => 'COOPEC KIKWIT',
+    'nom_entreprise' => 'COOPEC KWILU',
 
     'debug' => (bool) env('APP_DEBUG', false),
 

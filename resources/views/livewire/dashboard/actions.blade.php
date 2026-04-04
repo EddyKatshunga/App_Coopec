@@ -71,7 +71,7 @@
                 @endcan
 
                 @can('can.level4')
-                    <x-dashboard.action title="Nouveau Prêt" icon="document-add" route="membre.index" />
+                    <x-dashboard.action title="Liste des membres" icon="document-add" route="membre.index" />
                 @endcan
              @endcan
         </div>

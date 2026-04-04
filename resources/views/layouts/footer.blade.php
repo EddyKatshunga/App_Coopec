@@ -6,20 +6,17 @@
         <div class="flex flex-col sm:hidden space-y-4">
             <!-- Logo et identité -->
             <div class="flex items-center justify-center space-x-2">
-                <img src="{{ asset('images/logo1.png') }}" alt="COOPEC KIKWIT" class="h-8 w-auto">
+                <img src="{{ asset('images/logo1.png') }}" alt="{{config('app.nom_entreprise')}}" class="h-8 w-auto">
                 <div class="flex flex-col items-start">
-                    <span class="text-sm font-semibold text-gray-900">COOPEC KIKWIT</span>
-                    <span class="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">SYSCO</span>
+                    <span class="text-sm font-semibold text-gray-900">{{config('app.nom_entreprise')}}</span>
+                    <span class="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{{config('app.name')}}</span>
                 </div>
             </div>
 
             <!-- Copyright -->
             <div class="text-center">
                 <p class="text-xs text-gray-500">
-                    © {{ date('Y') }} COOPEC KIKWIT. Tous droits réservés.
-                </p>
-                <p class="text-xs text-gray-400 mt-1">
-                    Conçu avec ❤️ par l'équipe SYSCO
+                    © {{ date('Y') }} {{config('app.nom_entreprise')}}. Tous droits réservés.
                 </p>
             </div>
 
@@ -45,20 +42,17 @@
         <div class="hidden sm:flex sm:flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
             <!-- Logo et identité -->
             <div class="flex items-center space-x-3">
-                <img src="{{ asset('images/logo1.png') }}" alt="COOPEC KIKWIT" class="h-10 w-auto">
+                <img src="{{ asset('images/logo1.png') }}" alt="{{config('app.nom_entreprise')}}" class="h-10 w-auto">
                 <div>
-                    <span class="text-sm font-semibold text-gray-900 block">COOPEC KIKWIT</span>
-                    <span class="text-xs text-indigo-600">SYSCO - Système de Coopérative</span>
+                    <span class="text-sm font-semibold text-gray-900 block">{{config('app.nom_entreprise')}}</span>
+                    <span class="text-xs text-indigo-600">{{config('app.name')}} - Système de Coopérative</span>
                 </div>
             </div>
 
             <!-- Copyright -->
             <div class="text-center">
                 <p class="text-sm text-gray-500">
-                    © {{ date('Y') }} COOPEC KIKWIT. Tous droits réservés.
-                </p>
-                <p class="text-xs text-gray-400 mt-1">
-                    Conçu avec ❤️ par l'équipe SYSCO
+                    © {{ date('Y') }} {{config('app.nom_entreprise')}}. Tous droits réservés.
                 </p>
             </div>
 
@@ -79,19 +73,5 @@
                 @endif
             @endauth
         </div>
-
-        <!-- Version très compacte (optionnel) -->
-        @auth
-            @if($showLogout)
-                <div class="xs:hidden mt-4 pt-4 border-t border-gray-100 text-center">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-xs text-red-600 hover:text-red-700">
-                            Se déconnecter
-                        </button>
-                    </form>
-                </div>
-            @endif
-        @endauth
     </div>
 </footer>

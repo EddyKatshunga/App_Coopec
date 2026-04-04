@@ -12,28 +12,60 @@
             @if($cloture->statut === 'ouverte')
                 {{-- Dropdown si ouverte --}}
                 <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
-                        Actions
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    <button @click="open = !open" 
+                            @click.away="open = false" 
+                            class="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-slate-800 transition-all duration-200 shadow-sm active:scale-95">
+                        <span>Actions</span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </button>
 
-                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                        {{-- Bouton Rapport Global --}}
-                        <a href="{{ route('clotures.valider', $cloture) }}" 
-                        class="flex items-center bg-gray-800 text-white px-4 py-2 rounded-lg font-bold hover:bg-black transition shadow-sm">
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Clôturer la Journée 
-                        </a>
-                        <a href="{{ route('depenses.create') }}" 
-                        class="block px-4 py-3 hover:bg-indigo-50 border-b border-gray-50 group">
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Ajouter une dépense
-                        </a>
-                        <a href="{{ route('revenus.create') }}" 
-                        class="block px-4 py-3 hover:bg-indigo-50 border-b border-gray-50 group">
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Ajouter un revenu
-                        </a>
+                    <div x-show="open" 
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95 translate-y-[-10px]"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 scale-95 translate-y-[-10px]"
+                        class="absolute right-0 mt-3 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                        style="display: none;">
+                        
+                        <div class="p-2 space-y-1">
+                            <a href="{{ route('depenses.create') }}" 
+                            class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 rounded-lg transition-colors group">
+                                <div class="p-1.5 bg-slate-100 group-hover:bg-indigo-100 rounded-md transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium">Ajouter une dépense</span>
+                            </a>
+
+                            <a href="{{ route('revenus.create') }}" 
+                            class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-emerald-600 rounded-lg transition-colors group">
+                                <div class="p-1.5 bg-slate-100 group-hover:bg-emerald-100 rounded-md transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium">Ajouter un revenu</span>
+                            </a>
+                        </div>
+
+                        <div class="border-t border-slate-100"></div>
+
+                        <div class="p-2">
+                            <a href="{{ route('clotures.valider', $cloture) }}" 
+                            class="flex items-center gap-3 px-3 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white rounded-lg transition-all group">
+                                <div class="p-1.5 bg-rose-100 group-hover:bg-rose-500 rounded-md transition-colors text-rose-600 group-hover:text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-bold uppercase tracking-tight">Clôturer la journée</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             @else

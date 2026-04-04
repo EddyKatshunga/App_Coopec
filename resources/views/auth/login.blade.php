@@ -7,14 +7,14 @@
                 <div class="flex items-center space-x-3">
                     <a href="{{ url('/') }}" class="flex items-center space-x-3">
                         <!-- Logo -->
-                        <img src="{{ asset('images/logo1.png') }}" alt="COOPEC KIKWIT" class="h-8 sm:h-10 w-auto">
+                        <img src="{{ asset('images/logo1.png') }}" alt="{{config('app.nom_entreprise')}}" class="h-8 sm:h-10 w-auto">
                         
                         <!-- Noms de l'entreprise et l'application (cachés sur très petit écran) -->
                         <div class="hidden xs:flex xs:items-center xs:space-x-2">
                             <span class="text-sm sm:text-base font-semibold text-gray-900">{{config('app.name')}}</span>
                             <span class="text-gray-400 hidden sm:inline">|</span>
                             <span class="text-xs sm:text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full hidden sm:inline-block">
-                                SYSCO
+                                {{config('app.nom_entreprise')}}
                             </span>
                         </div>
                     </a>
@@ -67,7 +67,7 @@
                     </div>
                     
                     <h2 class="text-4xl lg:text-5xl font-bold leading-tight">
-                        Bienvenue sur<br>SYSCO
+                        Bienvenue sur<br>{{config('app.name')}}
                     </h2>
                     
                     <p class="text-lg text-indigo-100 leading-relaxed">
@@ -111,9 +111,9 @@
                 <!-- Badge d'application pour mobile (visible uniquement sur mobile) -->
                 <div class="lg:hidden mb-6 text-center">
                     <div class="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-indigo-100">
-                        <span class="text-sm font-medium text-indigo-700">SYSCO</span>
+                        <span class="text-sm font-medium text-indigo-700">{{config('app.name')}}</span>
                         <span class="text-indigo-300">•</span>
-                        <span class="text-sm text-indigo-600">COOPEC KIKWIT</span>
+                        <span class="text-sm text-indigo-600">{{config('app.nom_entreprise')}}</span>
                     </div>
                 </div>
 
@@ -214,7 +214,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
                 <!-- Copyright -->
                 <div class="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
-                    © {{ date('Y') }} COOPEC KIKWIT. Tous droits réservés.
+                    © {{ date('Y') }} {{config('app.nom_entreprise')}}. Tous droits réservés.
                 </div>
                 
                 <!-- Liens légaux -->

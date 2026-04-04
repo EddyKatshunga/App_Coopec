@@ -181,7 +181,12 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/membres/imprimer-liste', function() {
     $membres = \App\Models\Membre::with('user', 'agent')->orderBy('nom')->get();
-    return view('impressions.liste-membres', compact('membres'));
+    $statsSexe = $membres->groupBy('sexe')->map->count();
+    return view('impressions.liste-membres', [
+        'membres' => $membres,
+        'nbHommes' => $statsSexe->get('M', 0),
+        'nbFemmes' => $statsSexe->get('F', 0),
+    ]);
 })->name('membres.print-all');
 
 Route::get('/remboursements/{remboursement}/imprimer', function (CreditRemboursement $remboursement) {

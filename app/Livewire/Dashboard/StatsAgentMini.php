@@ -10,7 +10,7 @@ class StatsAgentMini extends Component
 {
     public function render()
     {
-        $today = auth()->user()->journee_ouverte?->date_cloture;//now()->startOfDay();
+        $today = auth()->user()->journee_ouverte?->date_cloture;
         
         return view('livewire.dashboard.stats-agent-mini', [
             'collecte_jour_cdf' => Transaction::where('created_by', auth()->user()->id)
@@ -23,7 +23,7 @@ class StatsAgentMini extends Component
                 ->where('monnaie', 'USD')
                 ->whereDate('date_transaction', $today)
                 ->sum('montant'),
-            'nouveaux_membres' => Membre::where('agent_id', auth()->user()->id)
+            'nouveaux_membres' => Membre::where('agent_parrain_id', auth()->user()->id)
                 ->whereDate('created_at', $today)
                 ->count()
         ]);

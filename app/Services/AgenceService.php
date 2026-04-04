@@ -33,7 +33,7 @@ class AgenceService
                 'code' => $data['code'],
                 'ville' => $data['ville'],
                 'pays' => $data['pays'],
-                'directeur_id' => null,
+                'chef_agence_id' => null,
                 'solde_actuel_coffre' => $data['solde_actuel_coffre'] ?? 0,
                 'solde_actuel_epargne' => 0,
             ]);
@@ -86,7 +86,7 @@ class AgenceService
             }
 
             // Empêcher qu’il soit directeur ailleurs
-            $dejaDirecteur = Agence::where('directeur_id', $nouveauDirecteur->id)
+            $dejaDirecteur = Agence::where('chef_agence_id', $nouveauDirecteur->id)
                 ->where('id', '!=', $agence->id)
                 ->exists();
 

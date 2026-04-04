@@ -37,14 +37,16 @@
             <div class="flex items-center space-x-4">
                 <img src="{{ asset('images/logo.png') }}" class="h-16">
                 <div>
-                    <h2 class="text-xl font-black text-gray-800 uppercase">SYSCO - LA FINANCE SAINE</h2>
-                    <p class="text-xs text-gray-500 italic">L'excellence au service de vos projets</p>
+                    <h2 class="text-xl font-black text-gray-800 uppercase">{{config('app.nom_entreprise')}} - LA FINANCE SAINE</h2>
+                    <p class="text-xs text-gray-500 italic">Solidarité et développement</p>
                 </div>
             </div>
             <div class="text-right text-xs">
-                <p>République Démocratique du Congo</p>
-                <p>Direction Générale</p>
-                <p>Contact : +243 819 467 591</p>
+                <p>{{config('app.nom_entreprise')}}</p>
+                <p>Contact : +243 819 197 885</p>
+                <p>Email : coopeckwilu6@gmail.com</p>
+                <p>Adresse : 1464, boulevard nat. Q/Lunia C/Lukolela
+                    <br>Réf. Marché Batetela, Immeuble Kasongo </p>
             </div>
         </div>
 
@@ -53,7 +55,7 @@
         </main>
 
         <footer class="mt-12 pt-4 border-t border-gray-200 text-[10px] text-gray-400 text-center">
-            <p>Document généré le {{ now()->format('d/m/Y H:i') }} par {{ auth()->user()->name }} - SYSCO</p>
+            <p>Document généré le {{ now()->format('d/m/Y H:i') }} par {{ auth()->user()->name }} - {{config('app.name')}}</p>
         </footer>
     </div>
 

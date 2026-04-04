@@ -11,14 +11,14 @@
             <!-- Logo (toujours visible) -->
             <div class="flex items-center">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2 sm:space-x-3">
-                    <img src="{{ asset('images/logo1.png') }}" alt="COOPEC KIKWIT" class="h-8 sm:h-10 w-auto">
+                    <img src="{{ asset('images/logo1.png') }}" alt="{{config('app.nom_entreprise')}}" class="h-8 sm:h-10 w-auto">
                     
                     <!-- Noms d'entreprise (cachés sur mobile) -->
                     <div class="hidden sm:flex sm:items-center sm:space-x-2">
                         <span class="text-sm sm:text-base font-semibold text-gray-900">{{config('app.name')}}</span>
                         <span class="text-gray-400 hidden lg:inline">|</span>
                         <span class="text-xs sm:text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full hidden lg:inline-block">
-                            SYSCO
+                            {{config('app.nom_entreprise')}}
                         </span>
                     </div>
                 </a>
