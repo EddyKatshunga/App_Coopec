@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
                 'email' => 'admin@example.com',
                 'password' => 'password123',
             ],
-            roleName: 'niveau 7',
+            roleName: 'niveau 8',
             membreData: [
                 'numero_identification' => 'ADMIN-001',
                 'qualite' => 'Auxiliaire',

@@ -1,5 +1,5 @@
-<div class="max-w-7xl mx-auto p-4 md:p-8 space-y-10 bg-gray-50 min-h-screen" x-data="{ openMenu: false }">
-
+<div class="max-w-7xl mx-auto p-4 md:p-8 space-y-10 bg-gray-50 min-h-screen" 
+     x-data="{ openMenu: false, showPasswordModal: false }">
     {{-- ================= HEADER DYNAMIQUE ================= --}}
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
         <div class="flex items-center gap-5">
@@ -23,11 +23,16 @@
                 <x-heroicon-o-arrow-down-tray class="w-5 h-5"/>
                 Fiche Membre
             </a>
-            {{-- Visible par le Membre ET l'Admin/Agent --}}
-            <button class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition">
-                <x-heroicon-o-key class="w-5 h-5"/>
-                Sécurité
-            </button>
+
+            {{-- CONDITION : Uniquement si l'utilisateur connecté est le propriétaire du compte --}}
+            @if(auth()->id() === $membre->user_id)
+                <a href="{{ route('membres.change-password', $membre) }}" 
+                wire:navigate
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition">
+                    <x-heroicon-o-key class="w-5 h-5"/>
+                    Sécurité
+                </a>
+            @endif
 
             {{-- Actions d'Administration --}}
             @can('can.level4')

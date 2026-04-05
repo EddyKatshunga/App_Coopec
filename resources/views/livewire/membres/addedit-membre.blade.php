@@ -51,7 +51,7 @@
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
+                @can('can.level8')
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Mot de passe
@@ -61,13 +61,8 @@
                     @error('password')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
-
-                    @if($isEdit)
-                        <p class="text-xs text-gray-500 mt-1">
-                            Laissez vide pour conserver le mot de passe actuel
-                        </p>
-                    @endif
                 </div>
+                @endcan
 
             </div>
         </div>

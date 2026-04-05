@@ -38,6 +38,7 @@ use App\Livewire\Depenses\DepenseForm;
 use App\Livewire\Depenses\DepenseList;
 use App\Livewire\Depenses\DepenseShow;
 use App\Livewire\Historiques\HistoriqueRoleDashboard;
+use App\Livewire\Membres\ChangePassword;
 use App\Livewire\Revenus\RevenuForm;
 use App\Livewire\Revenus\RevenuList;
 use App\Livewire\Revenus\RevenuShow;
@@ -112,6 +113,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/membre/add', AddEditMembre::class)->name('membre.create');
     Route::get('/membre/{membre}', ShowMembre::class)->name('membre.show');
     Route::get('/membre/{membre}/edit', AddEditMembre::class)->name('membre.edit');
+    Route::get('membres/{membre}/securite', ChangePassword::class)->name('membres.change-password');
 });
 
 Route::middleware(['auth'])->group(function () {

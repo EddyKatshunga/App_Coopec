@@ -26,7 +26,7 @@ class AgentForm extends Component
 
     public function mount(?Membre $membre = null, ?Agent $agent = null)
     {
-        abort_unless(auth()->user()->can('can.level6'), 403, 'ACCES REFUSE');
+        abort_unless(auth()->user()->can('can.level5'), 403, 'ACCES REFUSE');
         if ($agent && $agent->exists) { //Editing
             $this->agent = $agent;
             $this->membre = $agent->membre;
