@@ -32,9 +32,14 @@ class TransactionsList extends Component
         $user = Auth::user();
         $this->journee_ouverte = $user->journee_ouverte;
         
-        // Initialisation des dates sur la journée comptable ou aujourd'hui
-        $this->date_debut = $this->journee_ouverte?->date_cloture ?? now()->format('Y-m-d');
-        $this->date_fin = $this->date_debut;
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
 
         // Si l'utilisateur est restreint à son agence, on la fixe
         if (!$user->can('can.level6')) {

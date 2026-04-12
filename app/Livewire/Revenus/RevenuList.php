@@ -27,9 +27,15 @@ class RevenuList extends Component
     public function mount()
     {
         $user = Auth::user();
-        // Par défaut : du début du mois à aujourd'hui
-        $this->date_debut = now()->startOfMonth()->format('Y-m-d');
-        $this->date_fin = now()->format('Y-m-d');
+        
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
 
         if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;

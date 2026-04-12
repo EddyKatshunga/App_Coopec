@@ -27,9 +27,15 @@ class DepenseList extends Component
     public function mount()
     {
         $user = Auth::user();
-        // Initialisation des dates (par défaut sur le mois en cours pour les dépenses)
-        $this->date_debut = now()->startOfMonth()->format('Y-m-d');
-        $this->date_fin = now()->format('Y-m-d');
+        
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
 
         if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;

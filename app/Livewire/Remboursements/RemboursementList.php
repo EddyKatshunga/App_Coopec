@@ -29,8 +29,15 @@ class RemboursementList extends Component
     public function mount()
     {
         $user = Auth::user();
-        $this->date_debut = auth()->user()->journee_ouverte?->date_cloture->format('Y-m-d');
-        $this->date_fin = now()->format('Y-m-d');
+        
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
 
         if (!$user->can('can.level6')) {
             $this->selected_agence_id = $user->agence_id;

@@ -15,15 +15,21 @@ class ZoneList extends Component
     use WithPagination;
 
     public $selectedAgenceId = null;
-    public $dateDebut;
-    public $dateFin;
+    public $date_debut;
+    public $date_fin;
 
     public function mount()
     {
         $this->selectedAgenceId = auth()->user()->agence_id ?? null;
-        // Par défaut : mois en cours
-        $this->dateDebut = now()->startOfMonth()->format('Y-m-d');
-        $this->dateFin = now()->format('Y-m-d');
+
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
     }
 
     public function render()

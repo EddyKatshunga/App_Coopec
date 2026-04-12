@@ -49,8 +49,15 @@ class TransactionListing extends Component
         $this->agence_id = $user->agent->agence_id;
 
         $this->date_jour   = now()->toDateString();
-        $this->date_debut  = now()->startOfMonth()->toDateString();
-        $this->date_fin    = now()->toDateString();
+        
+        //Initialisation des dates
+        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture 
+            ? $derniereCloture->date_cloture->format('Y-m-d') 
+            : now()->format('Y-m-d');
+
+        $this->date_debut = $dateParDefaut;
+        $this->date_fin = $dateParDefaut;
 
         $this->chargerTransactions();
     }
