@@ -42,23 +42,23 @@ class ZoneList extends Component
             ->with(['gerant'])
             // Agrégation des Crédits (Capital et Intérêt) sur la période
             ->withSum(['credits as total_capital_usd' => function($q) {
-                $q->whereBetween('date_credit', [$this->dateDebut, $this->dateFin])->where('monnaie', 'USD');
+                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
             }], 'capital')
             ->withSum(['credits as total_capital_cdf' => function($q) {
-                $q->whereBetween('date_credit', [$this->dateDebut, $this->dateFin])->where('monnaie', 'CDF');
+                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
             }], 'capital')
             ->withSum(['credits as total_interet_usd' => function($q) {
-                $q->whereBetween('date_credit', [$this->dateDebut, $this->dateFin])->where('monnaie', 'USD');
+                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
             }], 'interet')
             ->withSum(['credits as total_interet_cdf' => function($q) {
-                $q->whereBetween('date_credit', [$this->dateDebut, $this->dateFin])->where('monnaie', 'CDF');
+                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
             }], 'interet')
             // Agrégation des Remboursements sur la période
             ->withSum(['remboursement as total_rembourse_usd' => function($q) {
-                $q->whereBetween('date_paiement', [$this->dateDebut, $this->dateFin])->where('monnaie', 'USD');
+                $q->whereBetween('date_paiement', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
             }], 'montant')
             ->withSum(['remboursement as total_rembourse_cdf' => function($q) {
-                $q->whereBetween('date_paiement', [$this->dateDebut, $this->dateFin])->where('monnaie', 'CDF');
+                $q->whereBetween('date_paiement', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
             }], 'montant')
             ->latest()
             ->paginate(15);
