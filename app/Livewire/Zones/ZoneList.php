@@ -20,7 +20,7 @@ class ZoneList extends Component
 
     public function mount()
     {
-        $this->selectedAgenceId = auth()->user()->agence_id ?? null;
+        $this->selectedAgenceId = auth()->user()->agence_id ?? Agence::first()->id ?? null;
 
         //Initialisation des dates
         $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
