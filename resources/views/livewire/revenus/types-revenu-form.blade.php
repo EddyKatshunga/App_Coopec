@@ -8,14 +8,14 @@
 
         <div>
             <label class="block font-medium">Nom</label>
-            <input type="text" wire:model.defer="nom"
+            <input type="text" wire:model="nom"
                    class="w-full border rounded px-3 py-2">
             @error('nom') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div>
             <label class="block font-medium">Code comptable</label>
-            <input type="text" wire:model.defer="code_comptable"
+            <input type="text" wire:model="code_comptable"
                    class="w-full border rounded px-3 py-2">
             @error('code_comptable') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>

@@ -9,7 +9,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class TypesRevenuForm extends Component
 {
-        public ?TypesRevenu $typesRevenu = null;
+    public ?TypesRevenu $typesRevenu = null;
 
     public $nom = '';
     public $code_comptable = '';
@@ -25,11 +25,18 @@ class TypesRevenuForm extends Component
 
     protected function rules()
     {
+        // On récupère l'ID si on est en édition, sinon null pour la création
+        $id = $this->typesRevenu?->id;
+
         return [
-            'nom' => 'required|string|max:255',
-            'code_comptable' => 'required|string|max:100|unique:types_Revenus,code_comptable,' . ($this->typesRevenu->id ?? 'NULL'),
+            // Ajout de 'unique' sur le nom pour éviter l'erreur SQLSTATE[23000]
+            'nom' => "required|string|max:255|unique:types_Revenus,nom,{$id}",
+            
+            // Correction de la syntaxe pour le code_comptable
+            'code_comptable' => "required|string|max:100|unique:types_Revenus,code_comptable,{$id}",
         ];
     }
+
 
     public function save()
     {

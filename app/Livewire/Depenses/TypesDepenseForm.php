@@ -25,11 +25,17 @@ class TypesDepenseForm extends Component
 
     protected function rules()
     {
+        // Récupère l'ID si on est en édition, sinon null pour la création
+        $id = $this->typesDepense?->id;
+
         return [
-            'nom' => 'required|string|max:255',
-            'code_comptable' => 'required|string|max:100|unique:types_depenses,code_comptable,' . ($this->typesDepense->id ?? 'NULL'),
+            // Ajoute l'unicité ici aussi pour le champ 'nom'
+            'nom' => "required|string|max:255|unique:types_depenses,nom,{$id}",
+            
+            'code_comptable' => "required|string|max:100|unique:types_depenses,code_comptable,{$id}",
         ];
     }
+
 
     public function save()
     {
