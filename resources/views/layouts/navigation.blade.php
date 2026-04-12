@@ -31,7 +31,7 @@
             if ($user->can('can.level5')) {
                 $adminItems = array_merge($adminItems, [
                     ['separator' => true],
-                    ['route' => 'agence.index', 'label' => 'Agence', 'highlight' => true, 'can' => true],
+                    ['route' => 'agences.index', 'label' => 'Agence', 'highlight' => true, 'can' => true],
                 ]);
             }
             
