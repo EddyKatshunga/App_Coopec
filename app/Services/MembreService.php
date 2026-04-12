@@ -101,6 +101,8 @@ class MembreService
                 'membre_id' => $membre->id,
                 'user_id' => $membre->user->id,
                 'numero_compte' => $numero_compte,
+                'solde_cdf' => $data['solde_cdf'] ?? 0.00,
+                'solde_usd' => $data['solde_usd'] ?? 0.00,
             ]);
 
             return $membre;

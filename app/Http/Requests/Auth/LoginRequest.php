@@ -20,7 +20,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'numero_identification' => ['required', 'string'],
+            'login' => ['required', 'string'], // 🔥 email OU numéro
             'password' => ['required', 'string'],
         ];
     }
@@ -29,28 +29,50 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $membre = Membre::where('numero_identification', $this->numero_identification)
-            ->with('user')
-            ->first();
+        $login = $this->input('login');
 
-        if (! $membre || ! $membre->user) {
-            RateLimiter::hit($this->throttleKey());
+        // 🔍 CAS 1 : EMAIL (Admin, agents, etc.)
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
 
-            throw ValidationException::withMessages([
-                'numero_identification' => 'Numéro d’identification invalide.',
-            ]);
+            if (! Auth::attempt([
+                'email' => $login,
+                'password' => $this->password,
+            ], false)) {
+
+                RateLimiter::hit($this->throttleKey());
+
+                throw ValidationException::withMessages([
+                    'login' => 'Identifiants incorrects.',
+                ]);
+            }
         }
 
-        if (! Auth::attempt([
-            'email' => $membre->user->email,
-            'password' => $this->password,
-        ], false)) { // 🔒 remember FORCÉ À FALSE
+        // 🔍 CAS 2 : NUMÉRO D’IDENTIFICATION (Membre)
+        else {
 
-            RateLimiter::hit($this->throttleKey());
+            $membre = Membre::where('numero_identification', $login)
+                ->with('user')
+                ->first();
 
-            throw ValidationException::withMessages([
-                'password' => 'Mot de passe incorrect.',
-            ]);
+            if (! $membre || ! $membre->user) {
+                RateLimiter::hit($this->throttleKey());
+
+                throw ValidationException::withMessages([
+                    'login' => 'Numéro d’identification invalide.',
+                ]);
+            }
+
+            if (! Auth::attempt([
+                'email' => $membre->user->email,
+                'password' => $this->password,
+            ], false)) {
+
+                RateLimiter::hit($this->throttleKey());
+
+                throw ValidationException::withMessages([
+                    'login' => 'Mot de passe incorrect.',
+                ]);
+            }
         }
 
         RateLimiter::clear($this->throttleKey());
@@ -67,7 +89,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'numero_identification' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -76,6 +98,6 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::lower($this->numero_identification).'|'.$this->ip();
+        return Str::lower($this->input('login')) . '|' . $this->ip();
     }
 }

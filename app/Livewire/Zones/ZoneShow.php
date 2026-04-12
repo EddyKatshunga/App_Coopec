@@ -17,7 +17,6 @@ class ZoneShow extends Component
     public function mount(Zone $zone)
     {
         $this->authorize('view', $zone);
-        // On charge les crédits avec les remboursements pour les calculs de performance
         $this->zone = $zone->load(['gerant', 'credits.remboursements', 'credits.membre']);
     }
 
@@ -25,23 +24,29 @@ class ZoneShow extends Component
     {
         $credits = $this->zone->credits;
         
-        // Calculs de performance pour le Dashboard
-        $stats = [
-            'total_capital' => $credits->sum('capital'),
-            'total_interet' => $credits->sum('interet'),
-            'total_encours' => $credits->sum(fn($c) => $c->reste_du),
-            'total_penalites' => $credits->sum(fn($c) => $c->penalites_courantes),
-            'nb_credits_actifs' => $credits->whereIn('statut', ['en_cours', 'en_retard'])->count(),
-            'nb_retards' => $credits->where('statut', 'en_retard')->count(),
-        ];
+        // On initialise les stats pour les deux monnaies
+        $statsParMonnaie = [];
 
-        // Calcul du taux de recouvrement (Capital + Intérêt payé / Total attendu)
-        $totalAttendu = $stats['total_capital'] + $stats['total_interet'];
-        $totalPaye = $credits->sum(fn($c) => $c->total_rembourse);
-        $stats['taux_recouvrement'] = $totalAttendu > 0 ? ($totalPaye / $totalAttendu) * 100 : 0;
+        foreach (['USD', 'CDF'] as $monnaie) {
+            $creditsMonnaie = $credits->where('monnaie', $monnaie);
+            
+            $totalCapital = $creditsMonnaie->sum('capital');
+            $totalInteret = $creditsMonnaie->sum('interet');
+            $totalAttendu = $totalCapital + $totalInteret;
+            $totalPaye = $creditsMonnaie->sum(fn($c) => $c->total_rembourse);
+
+            $statsParMonnaie[$monnaie] = [
+                'capital' => $totalCapital,
+                'encours' => $creditsMonnaie->sum(fn($c) => $c->reste_du),
+                'penalites' => $creditsMonnaie->sum(fn($c) => $c->penalites_courantes),
+                'taux_recouvrement' => $totalAttendu > 0 ? ($totalPaye / $totalAttendu) * 100 : 0,
+                'nb_credits' => $creditsMonnaie->count(),
+                'nb_retards' => $creditsMonnaie->where('statut', 'en_retard')->count(),
+            ];
+        }
 
         return view('livewire.zones.zone-show', [
-            'stats' => $stats,
+            'stats' => $statsParMonnaie,
             'credits_list' => $credits->sortByDesc('created_at')
         ]);
     }

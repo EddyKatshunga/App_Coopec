@@ -219,21 +219,7 @@
                 </div>
             </div>
 
-            {{-- Suggestion : Liste des Transactions à valider ou en attente --}}
-            <div class="bg-amber-50 rounded-[2rem] border border-amber-100 p-8 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-amber-200/50 text-amber-700 rounded-2xl flex items-center justify-center">
-                        <x-heroicon-o-clock class="w-6 h-6"/>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black text-amber-900">En attente de versement</h4>
-                        <p class="text-xs text-amber-700/70 font-medium">Vous avez 4 collectes non déposées en caisse centrale.</p>
-                    </div>
-                </div>
-                <button class="px-5 py-2.5 bg-amber-600 text-white text-xs font-black rounded-xl hover:bg-amber-700 shadow-md shadow-amber-200 transition">
-                    Déposer tout
-                </button>
-            </div>
+            
         </div>
     </div>
 </div>

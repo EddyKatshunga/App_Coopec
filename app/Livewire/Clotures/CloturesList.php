@@ -19,7 +19,7 @@ class CloturesList extends Component
 
     public function mount()
     {
-        $this->agenceId = auth()->user()->agence_id ?? null;
+        $this->agenceId = auth()->user()->agence_id ?? Agence::first()->id ?? null;
         // Optionnel : Par défaut les 30 derniers jours
         $this->dateDebut = now()->subDays(30)->format('Y-m-d');
         $this->dateFin = now()->format('Y-m-d');

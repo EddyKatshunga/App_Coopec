@@ -19,7 +19,7 @@ class AgentList extends Component
     public function mount()
     {
         // Par défaut, l'agence de l'utilisateur connecté
-        $this->agence_id = auth()->user()->agence_id ?? null;
+        $this->agence_id = auth()->user()->agence_id ?? Agence::first()->id ?? null;
     }
 
     public function render()

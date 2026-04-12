@@ -1,5 +1,5 @@
 <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
-    {{-- Header avec Fil d'ariane --}}
+    {{-- Header --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <nav class="flex text-sm text-gray-500 mb-2">
@@ -29,126 +29,129 @@
 
     {{-- Grille de Statistiques (KPIs) --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {{-- Card 1: Portefeuille --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-sm font-medium text-gray-500 mb-1">Capital Octroyé</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_capital'], 0, ',', ' ') }} <span class="text-xs text-gray-400">USD/CDF</span></p>
-                <div class="mt-2 flex items-center text-xs text-green-600 font-semibold">
-                    <x-heroicon-m-arrow-trending-up class="w-4 h-4 mr-1" />
-                    +{{ $zone->credits->count() }} Crédits au total
+        
+        {{-- Card 1: Capital Octroyé --}}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Capital Octroyé</p>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-gray-900">{{ number_format($stats['USD']['capital'], 0, ',', ' ') }}</span>
+                    <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded">USD</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-gray-50 pt-2">
+                    <span class="text-lg font-bold text-gray-900">{{ number_format($stats['CDF']['capital'], 0, ',', ' ') }}</span>
+                    <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">CDF</span>
                 </div>
             </div>
-            <x-heroicon-o-banknotes class="absolute -right-2 -bottom-2 w-24 h-24 text-gray-50 opacity-50" />
         </div>
 
-        {{-- Card 2: Encours --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-sm font-medium text-gray-500 mb-1">Encours Actuel</p>
-            <p class="text-2xl font-bold text-indigo-600">{{ number_format($stats['total_encours'], 0, ',', ' ') }}</p>
-            <p class="text-xs text-gray-400 mt-2">Principal + Intérêts restants</p>
-        </div>
-
-        {{-- Card 3: Performance --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-sm font-medium text-gray-500 mb-1">Taux Recouvrement</p>
-            <div class="flex items-end justify-between">
-                <p class="text-2xl font-bold text-gray-900">{{ round($stats['taux_recouvrement'], 1) }}%</p>
-                <span class="text-xs font-bold {{ $stats['taux_recouvrement'] > 80 ? 'text-green-500' : 'text-orange-500' }}">
-                    Objectif 95%
-                </span>
+        {{-- Card 2: Encours (Principal + Intérêts) --}}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Encours Actuel</p>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-indigo-600">
+                    <span class="text-lg font-bold">{{ number_format($stats['USD']['encours'], 0, ',', ' ') }}</span>
+                    <span class="text-[10px] font-bold border border-indigo-200 px-2 py-0.5 rounded">USD</span>
+                </div>
+                <div class="flex justify-between items-center text-indigo-600 border-t border-gray-50 pt-2">
+                    <span class="text-lg font-bold">{{ number_format($stats['CDF']['encours'], 0, ',', ' ') }}</span>
+                    <span class="text-[10px] font-bold border border-indigo-200 px-2 py-0.5 rounded">CDF</span>
+                </div>
             </div>
-            <div class="w-full bg-gray-100 rounded-full h-2 mt-3">
-                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ $stats['taux_recouvrement'] }}%"></div>
+        </div>
+
+        {{-- Card 3: Performance (Taux moyen combiné ou par devise) --}}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Recouvrement</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">USD</p>
+                    <p class="text-xl font-black text-gray-900">{{ round($stats['USD']['taux_recouvrement'], 1) }}%</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">CDF</p>
+                    <p class="text-xl font-black text-gray-900">{{ round($stats['CDF']['taux_recouvrement'], 1) }}%</p>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-3 overflow-hidden flex">
+                <div class="bg-green-500 h-full shadow-sm" style="width: {{ $stats['USD']['taux_recouvrement'] }}%"></div>
             </div>
         </div>
 
         {{-- Card 4: Risque --}}
-        <div class="bg-red-50 p-6 rounded-2xl shadow-sm border border-red-100">
-            <p class="text-sm font-medium text-red-600 mb-1">Portefeuille à Risque</p>
-            <p class="text-2xl font-bold text-red-700">{{ $stats['nb_retards'] }} Dossiers</p>
-            <p class="text-xs text-red-500 mt-2 font-medium">Pénalités : {{ number_format($stats['total_penalites'], 2) }} USD</p>
+        <div class="bg-red-50 p-5 rounded-2xl shadow-sm border border-red-100">
+            <p class="text-xs font-black uppercase text-red-400 mb-3 tracking-wider">Portefeuille à Risque</p>
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-2xl font-black text-red-700">{{ $stats['USD']['nb_retards'] + $stats['CDF']['nb_retards'] }}</span>
+                <span class="text-[10px] font-bold text-red-500 uppercase">Dossiers</span>
+            </div>
+            <div class="text-[10px] text-red-600 font-bold space-y-1">
+                <p>Pén. USD : {{ number_format($stats['USD']['penalites'], 2) }}</p>
+                <p>Pén. CDF : {{ number_format($stats['CDF']['penalites'], 0) }}</p>
+            </div>
         </div>
     </div>
 
-    {{-- Liste des crédits de la zone --}}
+    {{-- Liste des crédits --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-50 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-gray-900 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                Détails des Engagements
-            </h3>
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
+            <h3 class="text-lg font-bold text-gray-900">Engagements de la zone</h3>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">Total : {{ $credits_list->count() }}</span>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-50/50 text-xs uppercase font-bold text-gray-500">
-                        <th class="px-6 py-4">Membre & N° Crédit</th>
+                    <tr class="bg-gray-50/50 text-[10px] uppercase font-black text-gray-400 tracking-widest">
+                        <th class="px-6 py-4">Membre & N°</th>
                         <th class="px-6 py-4">Statut</th>
                         <th class="px-6 py-4 text-right">Capital</th>
-                        <th class="px-6 py-4 text-right">Reste à payer</th>
+                        <th class="px-6 py-4 text-right text-indigo-600">Reste à payer</th>
                         <th class="px-6 py-4 text-center">Retard</th>
-                        <th class="px-6 py-4 text-center">Actions</th>
+                        <th class="px-6 py-4 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($credits_list as $credit)
-                        <tr class="hover:bg-indigo-50/30 transition-colors group">
+                        <tr class="hover:bg-gray-50 transition-colors group">
                             <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="h-8 w-8 rounded bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-white transition-colors">
-                                        <x-heroicon-o-user class="w-4 h-4 text-gray-400" />
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-900 leading-none mb-1">{{ $credit->membre->nom }} {{ $credit->membre->prenom }}</p>
-                                        <p class="text-xs font-mono text-gray-400">{{ $credit->numero_credit }}</p>
-                                    </div>
-                                </div>
+                                <p class="text-sm font-bold text-gray-900 leading-none mb-1">{{ $credit->membre->nom }}</p>
+                                <p class="text-[10px] font-mono text-gray-400 uppercase">{{ $credit->numero_credit }}</p>
                             </td>
                             <td class="px-6 py-4">
-                                @php
-                                    $statutClasses = [
-                                        'en_cours' => 'bg-blue-100 text-blue-700',
-                                        'en_retard' => 'bg-red-100 text-red-700 animate-pulse',
-                                        'termine' => 'bg-green-100 text-green-700',
-                                        'termine_en_retard' => 'bg-orange-100 text-orange-700',
-                                    ][$credit->statut] ?? 'bg-gray-100 text-gray-700';
-                                @endphp
-                                <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider {{ $statutClasses }}">
+                                <span class="px-2 py-1 rounded text-[10px] font-black uppercase {{ 
+                                    $credit->statut == 'en_retard' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600' 
+                                }}">
                                     {{ str_replace('_', ' ', $credit->statut) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-right font-semibold text-sm">
-                                {{ number_format($credit->capital, 0) }} <span class="text-[10px] text-gray-400">{{ $credit->monnaie }}</span>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-sm font-bold text-gray-900">{{ number_format($credit->capital, 0) }}</span>
+                                <span class="text-[9px] font-black text-gray-400 ml-1">{{ $credit->monnaie }}</span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <p class="text-sm font-bold text-gray-900">{{ number_format($credit->reste_du, 0) }}</p>
+                                <p class="text-sm font-black text-indigo-600">{{ number_format($credit->reste_du, 0) }} <span class="text-[9px]">{{ $credit->monnaie }}</span></p>
                                 @if($credit->penalites_courantes > 0)
-                                    <p class="text-[10px] text-red-500">+{{ number_format($credit->penalites_courantes, 2) }} pen.</p>
+                                    <p class="text-[9px] text-red-500 font-bold">+{{ number_format($credit->penalites_courantes, 0) }} pen.</p>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
                                 @if($credit->jours_retard > 0)
-                                    <span class="text-sm font-bold text-red-600">{{ $credit->jours_retard }} j</span>
+                                    <span class="inline-block px-2 py-1 bg-red-50 text-red-600 rounded-md text-xs font-black">{{ $credit->jours_retard }} j</span>
                                 @else
                                     <span class="text-gray-300">—</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <a href="{{ route('credit.show', $credit) }}" class="inline-flex items-center justify-center p-2 rounded-lg bg-gray-50 text-gray-400 hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
-                                    <x-heroicon-o-eye class="w-5 h-5" />
+                                <a href="{{ route('credit.show', $credit) }}" class="text-gray-400 hover:text-indigo-600 transition-colors">
+                                    <x-heroicon-o-arrow-right-circle class="w-6 h-6 inline" />
                                 </a>
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center">
-                                    <x-heroicon-o-document-magnifying-glass class="w-12 h-12 text-gray-200 mb-2" />
-                                    <p class="text-gray-400 italic">Aucun crédit enregistré dans cette zone.</p>
-                                </div>
-                            </td>
-                        </tr>
+                        {{-- ... (vide) --}}
                     @endforelse
                 </tbody>
             </table>

@@ -24,7 +24,7 @@ class PermissionSeeder extends Seeder
             'can.level4', //Gestion des membres, Superviseur de l'agence
             'can.level5', //Gestion de l'agence, chef d'Agence
             'can.level6', //Gestion de plusieurs agences, direction générale
-            'can.level7', //Administration générale
+            'can.level7', //PCA
             'can.level8', //Super-admin
         ];
 

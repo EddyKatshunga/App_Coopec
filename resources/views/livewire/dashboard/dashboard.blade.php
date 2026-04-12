@@ -16,9 +16,6 @@
         </div>
     </div>
 
-    {{-- 2. ACTIONS DYNAMIQUES (Le composant qu'on vient de créer) --}}
-    <livewire:dashboard.actions />
-
     {{-- 3. ZONE DE STATISTIQUES (Optionnel, selon le niveau) --}}
     @if(auth()->user()->agent)
         <livewire:dashboard.stats-agent-mini />

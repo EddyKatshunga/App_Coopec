@@ -85,6 +85,7 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @can('can.level0')
+                @if(auth()->user()->membre)
                 <x-dashboard.action
                     title="Mon Dossier & Comptes"
                     icon="user-circle"
@@ -92,6 +93,7 @@
                     :routeParams="['membre' => auth()->user()->membre->uuid ?? '']"
                     color="blue"
                 />
+                @endif
             @endcan
             @if(auth()->user()->agent)
                 <x-dashboard.action
