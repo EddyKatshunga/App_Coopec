@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
         $this->createUserWithRole(
             userData: [
                 'name' => 'admin',
-                'email' => 'admin@example.com',
+                'email' => 'admin@coopec.com',
                 'password' => 'password123',
             ],
             roleName: 'niveau 8',
