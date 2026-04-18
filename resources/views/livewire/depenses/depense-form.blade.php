@@ -1,97 +1,128 @@
-<div class="max-w-4xl mx-auto py-8">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-800">Enregistrer une nouvelle dépense</h2>
-            <p class="text-sm text-gray-600">Les fonds seront déduits du coffre dès la validation.</p>
-             @if (auth()->user()->journee_ouverte)
-                <h3 class="text-gray-600 font-bold text-lg"> 📅 Date d'opération : {{ auth()->user()->journee_ouverte->date_cloture->isoFormat('dddd D MMMM YYYY') }}</h3>
-            @else
-                <h5>Opération Impossible, pas de date disponible</h5>
-            @endif
+<div class="max-w-4xl mx-auto py-6 px-4 sm:py-10">
+    <div class="bg-white shadow-xl rounded-[2rem] overflow-hidden border border-slate-100">
+        
+        {{-- Header Dynamique --}}
+        <div class="px-6 py-8 sm:px-10 bg-slate-50 border-b border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div class="space-y-1">
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Nouvelle Dépense</h2>
+                    <p class="text-sm text-slate-500 font-medium">Les fonds seront déduits du coffre instantanément.</p>
+                </div>
+
+                @if (auth()->user()->journee_ouverte)
+                    <div class="inline-flex items-center px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-2xl">
+                        <span class="text-indigo-600 mr-2">📅</span>
+                        <span class="text-xs sm:text-sm font-bold text-indigo-700 uppercase tracking-wider">
+                            {{ auth()->user()->journee_ouverte->date_cloture->isoFormat('dddd D MMMM YYYY') }}
+                        </span>
+                    </div>
+                @else
+                    <div class="inline-flex items-center px-4 py-2 bg-rose-50 border border-rose-100 rounded-2xl animate-pulse">
+                        <span class="text-rose-600 font-black text-xs uppercase tracking-widest">⚠️ Pas de journée ouverte</span>
+                    </div>
+                @endif
+            </div>
         </div>
 
-        <form wire:submit.prevent="save" class="p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form wire:submit.prevent="save" class="p-6 sm:p-10 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">Catégorie</label>
+                {{-- Catégorie --}}
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Catégorie de dépense</label>
                     <select wire:model="types_depense_id" 
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('types_depense_id') border-red-500 @enderror">
-                        <option value="">-- Sélectionner la catégorie de la dépense --</option>
+                            class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium transition-all @error('types_depense_id') border-rose-500 ring-rose-50 @enderror">
+                        <option value="">Sélectionner une catégorie...</option>
                         @foreach($types as $type)
                             <option value="{{ $type->id }}">{{ $type->nom }}</option>
                         @endforeach
                     </select>
-                    @error('types_depense_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('types_depense_id') <span class="text-rose-500 text-[10px] font-bold mt-1 uppercase">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">Libellé de la dépense</label>
+                {{-- Libellé --}}
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Libellé / Objet</label>
                     <input type="text" wire:model="libelle" 
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('libelle') border-red-500 @enderror" 
-                           placeholder="Ex: Achat fournitures bureau">
-                    @error('libelle') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                           class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all font-medium @error('libelle') border-rose-500 @enderror" 
+                           placeholder="Ex: Frais de déplacement Kikwit">
+                    @error('libelle') <span class="text-rose-500 text-[10px] font-bold mt-1 uppercase">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Montant</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
+                {{-- Montant --}}
+                <div class="space-y-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Montant</label>
+                    <div class="relative">
                         <input type="number" step="0.01" wire:model.live="montant" 
-                               class="block w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('montant') border-red-500 @enderror" 
+                               class="w-full h-12 pl-4 pr-12 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-black text-lg @error('montant') border-rose-500 @enderror" 
                                placeholder="0.00">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 font-bold text-xs">
+                            {{ $monnaie }}
+                        </div>
                     </div>
-                    <span class="text-gray-700 text-xs mt-1">{{ money_to_words($montant, $monnaie) }}</span>
-                    @error('montant') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @if($montant > 0)
+                        <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                            <p class="text-[10px] leading-tight text-emerald-700 font-bold uppercase italic">
+                                {{ money_to_words($montant, $monnaie) }}
+                            </p>
+                        </div>
+                    @endif
+                    @error('montant') <span class="text-rose-500 text-[10px] font-bold mt-1 uppercase">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Devise --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Devise</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Devise</label>
                     <select wire:model.live="monnaie" 
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option value="USD">USD ($)</option>
-                        <option value="CDF">CDF (FC)</option>
+                            class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold">
+                        <option value="USD">Dollar Américain (USD)</option>
+                        <option value="CDF">Franc Congolais (CDF)</option>
                     </select>
-                    @error('monnaie') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Bénéficiaire (Agent)</label>
+                {{-- Bénéficiaire --}}
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Bénéficiaire</label>
                     <select wire:model="beneficiaire_id" 
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">-- Aucun ou externe --</option>
+                            class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium">
+                        <option value="">-- Externe ou divers --</option>
                         @foreach($agents as $agent)
                             <option value="{{ $agent->id }}">{{ $agent->nom }}</option>
                         @endforeach
                     </select>
-                    @error('beneficiaire_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="col-span-1">
-                    <label class="block text-sm font-medium text-gray-700">Référence Pièce</label>
+                {{-- Référence --}}
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Référence Pièce</label>
                     <input type="text" wire:model="reference" 
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-                           placeholder="N° de facture ou reçu">
+                           class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all font-medium" 
+                           placeholder="Ex: FACT-001">
                 </div>
 
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">Description / Justification</label>
+                {{-- Description --}}
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Justification détaillée</label>
                     <textarea wire:model="description" rows="3" 
-                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-                              placeholder="Détails supplémentaires..."></textarea>
+                              class="w-full p-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all font-medium" 
+                              placeholder="Expliquez brièvement la nature du paiement..."></textarea>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 border-t pt-6">
+            {{-- Actions --}}
+            <div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-4 border-t border-slate-100 pt-8">
                 <a href="{{ route('depenses.index') }}" wire:navigate
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                   class="w-full sm:w-auto px-8 py-4 text-center text-sm font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-all">
                     Annuler
                 </a>
+                
                 <button type="submit" 
                         wire:loading.attr="disabled"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        @if(!auth()->user()->journee_ouverte) disabled @endif
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale">
                     
-                    <span wire:loading wire:target="save" class="mr-2">
-                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <span wire:loading wire:target="save" class="mr-3">
+                        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
