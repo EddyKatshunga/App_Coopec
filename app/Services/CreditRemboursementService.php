@@ -63,6 +63,7 @@ class CreditRemboursementService
             return CreditRemboursement::create([
                 'credit_id' => $credit->id,
                 'montant' => $montant,
+                'monnaie' => $credit->monnaie,
                 'agent_id' => $data['agent_id'],
                 
                 // Ventilation

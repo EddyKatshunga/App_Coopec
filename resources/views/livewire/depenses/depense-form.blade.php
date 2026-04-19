@@ -90,6 +90,7 @@
                             <option value="{{ $agent->id }}">{{ $agent->nom }}</option>
                         @endforeach
                     </select>
+                    @error('beneficiaire_id') <span class="text-rose-500 text-[10px] font-bold mt-1 uppercase">{{ $message }}</span> @enderror
                 </div>
 
                 {{-- Référence --}}

@@ -67,15 +67,19 @@
                                 <span class="block text-[10px] text-gray-400 font-bold uppercase">{{ $r->agence->nom ?? '' }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono font-bold">
-                                        {{ $r->credit->numero_credit }}
-                                    </span>
-                                    <span class="text-sm font-bold text-gray-800">
-                                        {{ $r->credit->user->name }}
-                                    </span>
-                                </div>
-                                <div class="text-[10px] text-gray-400 mt-1 italic">Agent : {{ $r->creator->name ?? 'N/A' }}</div>
+                                <a href="{{ route('credit.show', $r->credit->uuid) }}" class="block hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-mono font-bold">
+                                            {{ $r->credit->numero_credit }}
+                                        </span>
+                                        <span class="text-sm font-bold text-gray-800">
+                                            {{ $r->credit->user->name }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[10px] text-gray-400 mt-1 italic">
+                                        Agent : {{ $r->creator->name ?? 'N/A' }}
+                                    </div>
+                                </a>
                             </td>
                             <td class="px-6 py-4 text-right whitespace-nowrap">
                                 <span class="text-sm font-black text-green-600">

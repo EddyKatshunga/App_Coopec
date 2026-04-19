@@ -8,8 +8,8 @@
     <style>
         @media print {
             @page { 
-                size: A4; 
-                margin: 15mm; 
+                size: A4 landscape; /* Définit l'orientation en paysage */
+                margin: 10mm; /* Marge légèrement réduite pour maximiser l'espace du grand tableau */
             }
             .no-print { display: none !important; }
             body { background-color: white !important; -webkit-print-color-adjust: exact; }
@@ -24,14 +24,14 @@
 <body class="bg-gray-100 print:bg-white" onload="window.print()">
     
     <div class="no-print bg-gray-800 text-white p-4 flex justify-between items-center shadow-lg mb-6">
-        <span class="font-bold">Mode Aperçu avant Impression</span>
+        <span class="font-bold">Mode Aperçu avant Impression (Paysage)</span>
         <div class="space-x-2">
             <button onclick="window.close()" class="bg-gray-600 px-4 py-2 rounded">Fermer</button>
             <button onclick="window.print()" class="bg-blue-500 px-4 py-2 rounded font-bold">Lancer l'impression</button>
         </div>
     </div>
 
-    <div class="print-container max-w-4xl mx-auto bg-white p-8 shadow-sm print:shadow-none print:p-0">
+    <div class="print-container max-w-7xl mx-auto bg-white p-8 shadow-sm print:shadow-none print:p-0">
         
         <div class="flex justify-between items-center mb-8 border-b-2 border-gray-800 pb-4">
             <div class="flex items-center space-x-4">

@@ -88,8 +88,10 @@
                                 <span class="block text-xs text-gray-400">{{ $transaction->created_at->format('H:i') }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-blue-600">{{ $transaction->compte->user->name }}</div>
-                                <div class="text-xs font-mono text-gray-500">{{ $transaction->compte->numero_compte }}</div>
+                                <a href="{{ route('compte.show', $transaction->compte->uuid) }}" class="block hover:bg-gray-50">
+                                    <div class="text-sm font-bold text-blue-600">{{ $transaction->compte->user->name }}</div>
+                                    <div class="text-xs font-mono text-gray-500">{{ $transaction->compte->numero_compte }}</div>
+                                </a>
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black {{ $transaction->type_transaction === 'DEPOT' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">

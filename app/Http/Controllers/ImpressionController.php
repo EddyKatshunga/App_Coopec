@@ -121,14 +121,17 @@ class ImpressionController extends Controller
         $clotures = $query->get();
         $agence = \App\Models\Agence::find($agenceId);
 
-        // Calcul des totaux globaux pour le pied de page du rapport
+        // Calcul des totaux globaux pour le pied de page du rapport (uniquement les flux)
         $totaux = [
             'depot_usd' => $clotures->sum('total_depot_usd'),
             'depot_cdf' => $clotures->sum('total_depot_cdf'),
-            'retrait_usd' => $clotures->sum('total_retrait_usd'),
-            'retrait_cdf' => $clotures->sum('total_retrait_cdf'),
             'rembourse_usd' => $clotures->sum('total_remboursement_usd'),
             'rembourse_cdf' => $clotures->sum('total_remboursement_cdf'),
+            'revenu_usd' => $clotures->sum('total_revenu_usd'), // Ajout
+            'revenu_cdf' => $clotures->sum('total_revenu_cdf'), // Ajout
+            
+            'retrait_usd' => $clotures->sum('total_retrait_usd'),
+            'retrait_cdf' => $clotures->sum('total_retrait_cdf'),
             'credit_usd' => $clotures->sum('total_credit_usd'),
             'credit_cdf' => $clotures->sum('total_credit_cdf'),
             'depense_usd' => $clotures->sum('total_depense_usd'),

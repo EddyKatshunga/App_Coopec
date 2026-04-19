@@ -17,7 +17,6 @@ class CreditCreate extends Component
     use HasAgenceContext;
 
     public Membre $membre;
-    // Formulaire
     public $agent_id;
     public $zone_id;
     public $monnaie = 'CDF';
@@ -44,32 +43,54 @@ class CreditCreate extends Component
         'unite_temps' => 'required|in:jour,semaine,mois,annee',
         'date_fin' => 'required|date|after:date_credit',
         'garant_nom' => 'required|string',
-        'garant_adresse' => 'string',
-        'garant_telephone' => 'string',
-        'observation' => 'string',
+        'garant_adresse' => 'nullable|string',
+        'garant_telephone' => 'nullable|string',
+        'observation' => 'nullable|string',
     ];
+
+    protected function messages()
+    {
+        return [
+            'agent_id.required' => 'Sélectionnez un agent.',
+            'zone_id.required' => 'La zone est obligatoire.',
+            'capital.min' => 'Le montant doit être > 0.',
+            'date_fin.after' => 'La date doit être après le ' . \Carbon\Carbon::parse($this->date_credit)->format('d/m/Y'),
+            'garant_nom.required' => 'Le nom du garant est requis.',
+        ];
+    }
 
     public function mount(Membre $membre)
     {
+        $this->membre = $membre;
         if ($this->membre->hasActiveCredit()) {
-            session()->flash('error', 'Opération impossible : Ce membre possède déjà un crédit actif.');
+            session()->flash('error', 'Ce membre possède déjà un crédit actif.');
             return redirect()->route('membre.show', $membre);
         }
-        $this->membre = $membre;
+        
         $journee = $this->secureJourneeContext();
         $this->date_credit = $journee->date_cloture;
         $this->recalculerDateFin();
         $this->agent_id = Auth::user()->agent?->id;
     }
 
-    public function save(CreditService $service)
+    public function updated($property)
     {
-        $data = $this->validate();
-        $data['date_fin'] = $this->date_fin; // Valeur déjà présente, éventuellement modifiée
-        $service->creerCredit($this->membre, $data);
+        // 1. On recalcule d'abord si nécessaire
+        if (in_array($property, ['unite_temps', 'duree', 'date_credit'])) {
+            // On s'assure que duree est un entier pour éviter les bugs de calcul
+            $this->duree = (int)$this->duree > 0 ? (int)$this->duree : 1;
+            
+            $this->recalculerDateFin();
+        }
 
-        session()->flash('success', 'Crédit créé avec succès.');
-        return redirect()->route('credit.pret.index');
+        // 2. On valide APRES le calcul pour que l'erreur s'affiche sur la nouvelle date
+        $this->validateOnly($property);
+        
+        // Si on a changé l'unité ou la durée, on valide aussi la date_fin 
+        // pour que l'icône de succès/erreur se mette à jour immédiatement
+        if (in_array($property, ['unite_temps', 'duree'])) {
+            $this->validateOnly('date_fin');
+        }
     }
 
     private function recalculerDateFin()
@@ -80,7 +101,9 @@ class CreditCreate extends Component
     private function calculateEndDate()
     {
         $date = \Carbon\Carbon::parse($this->date_credit);
-        for ($i = 1; $i <= $this->duree; $i++) {
+        $dureeInt = (int)$this->duree;
+
+        for ($i = 1; $i <= $dureeInt; $i++) {
             if ($this->unite_temps === 'jour') {
                 $date->addDay();
                 while ($date->isSunday()) { $date->addDay(); }
@@ -88,26 +111,26 @@ class CreditCreate extends Component
                 $date->addWeek();
             } elseif ($this->unite_temps === 'mois') {
                 $date->addMonth();
-            } else {
+            } elseif ($this->unite_temps === 'annee') { // Changement ici
                 $date->addYear();
             }
         }
         return $date->format('Y-m-d');
     }
 
-    public function updated($property)
+    public function save(CreditService $service)
     {
-        // On écoute tout changement sur ces trois propriétés
-        if (in_array($property, ['unite_temps', 'duree', 'date_credit'])) {
-            $this->recalculerDateFin();
-        }
+        $data = $this->validate();
+        $service->creerCredit($this->membre, $data);
+        session()->flash('success', 'Crédit créé avec succès.');
+        return redirect()->route('credit.pret.index');
     }
 
     public function render()
     {
         return view('livewire.credits.credit-create', [
             'agents' => Agent::where('agence_id', Auth::user()->agence_id)->get(),
-            'zones' => Zone::all(),
+            'zones' => Auth::user()->agence->zones()->get(),
         ]);
     }
 }

@@ -182,7 +182,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/membres/imprimer-liste', function() {
-    $membres = \App\Models\Membre::with('user', 'agent')->orderBy('nom')->get();
+    $membres = \App\Models\Membre::with('user', 'agent')->get();
     $statsSexe = $membres->groupBy('sexe')->map->count();
     return view('impressions.liste-membres', [
         'membres' => $membres,

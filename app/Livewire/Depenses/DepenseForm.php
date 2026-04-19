@@ -21,7 +21,7 @@ class DepenseForm extends Component
         'monnaie' => 'required|in:CDF,USD',
         'libelle' => 'required|string|min:3',
         'types_depense_id' => 'required|exists:types_depenses,id',
-        'beneficiaire_id' => 'nullable|exists:agents,id',
+        'beneficiaire_id' => 'required|exists:agents,id',
     ];
 
     public function mount()

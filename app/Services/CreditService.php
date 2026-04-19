@@ -18,7 +18,7 @@ class CreditService
     public function creerCredit(Membre $membre, array $data): Credit
     {
         $nb_credit = $membre->credits()->count() + 1;
-        //Le plus simple 
+        
         return Credit::create([
             'numero_credit' => $nb_credit . "-". $membre->numero_identification, 
             'membre_id' => $membre->id,
