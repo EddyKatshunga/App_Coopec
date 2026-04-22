@@ -52,7 +52,7 @@ class Credit extends Model
 
     public function getDateCalculAttribute()
     {
-        return auth()->user()->journee_ouverte->date_cloture ?? now();
+        return now();
     }
     
     public function remboursements(): HasMany

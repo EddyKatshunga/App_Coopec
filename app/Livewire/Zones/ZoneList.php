@@ -7,7 +7,6 @@ use App\Models\Agence;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
 
 #[Layout('layouts.app')]
 class ZoneList extends Component
@@ -15,59 +14,55 @@ class ZoneList extends Component
     use WithPagination;
 
     public $selectedAgenceId = null;
-    public $date_debut;
-    public $date_fin;
 
     public function mount()
     {
+        // Agence par défaut : celle de l'utilisateur connecté ou la première disponible
         $this->selectedAgenceId = auth()->user()->agence_id ?? Agence::first()->id ?? null;
-
-        //Initialisation des dates
-        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
-        $dateParDefaut = $derniereCloture 
-            ? $derniereCloture->date_cloture->format('Y-m-d') 
-            : now()->format('Y-m-d');
-
-        $this->date_debut = $dateParDefaut;
-        $this->date_fin = $dateParDefaut;
     }
 
     public function render()
     {
-        $agenceId = auth()->user()->can('can.level6') 
-            ? $this->selectedAgenceId 
+        // Détermine l'agence à filtrer
+        $agenceId = auth()->user()->can('can.level6')
+            ? $this->selectedAgenceId
             : auth()->user()->agence_id;
 
+        // Récupération des zones avec leurs indicateurs actifs pré‑agrégés
         $zones = Zone::where('agence_id', $agenceId)
             ->with(['gerant'])
-            // Agrégation des Crédits (Capital et Intérêt) sur la période
-            ->withSum(['credits as total_capital_usd' => function($q) {
-                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
-            }], 'capital')
-            ->withSum(['credits as total_capital_cdf' => function($q) {
-                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
-            }], 'capital')
-            ->withSum(['credits as total_interet_usd' => function($q) {
-                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
-            }], 'interet')
-            ->withSum(['credits as total_interet_cdf' => function($q) {
-                $q->whereBetween('date_credit', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
-            }], 'interet')
-            // Agrégation des Remboursements sur la période
-            ->withSum(['remboursement as total_rembourse_usd' => function($q) {
-                $q->whereBetween('date_paiement', [$this->date_debut, $this->date_fin])->where('monnaie', 'USD');
-            }], 'montant')
-            ->withSum(['remboursement as total_rembourse_cdf' => function($q) {
-                $q->whereBetween('date_paiement', [$this->date_debut, $this->date_fin])->where('monnaie', 'CDF');
-            }], 'montant')
+            ->withPerformance() // scope défini dans le modèle
             ->latest()
             ->paginate(15);
 
-        $agences = auth()->user()->can('can.level6') ? Agence::orderBy('nom')->get() : collect();
+        // Calcul des totaux globaux (somme des indicateurs actifs)
+        $totalCapitalCdf   = $zones->sum(fn($z) => $z->capital_actif_cdf);
+        $totalCapitalUsd   = $zones->sum(fn($z) => $z->capital_actif_usd);
+        $totalExpositionCdf = $zones->sum(fn($z) => $z->exposition_cdf);
+        $totalExpositionUsd = $zones->sum(fn($z) => $z->exposition_usd);
+        $totalCreditsActifs = $zones->sum('credits_actifs_count');
+        $totalRetardsCdf    = $zones->sum(fn($z) => $z->credits_retard_actifs_cdf);
+        $totalRetardsUsd    = $zones->sum(fn($z) => $z->credits_retard_actifs_usd);
+
+        $agences = auth()->user()->can('can.level6')
+            ? Agence::orderBy('nom')->get()
+            : collect();
 
         return view('livewire.zones.zone-list', [
-            'zones' => $zones,
-            'agences' => $agences
+            'zones'   => $zones,
+            'agences' => $agences,
+            'statsGlobales' => [
+                'capital' => [
+                    'CDF' => $totalCapitalCdf,
+                    'USD' => $totalCapitalUsd,
+                ],
+                'exposition' => [
+                    'CDF' => $totalExpositionCdf,
+                    'USD' => $totalExpositionUsd,
+                ],
+                'credits_actifs' => $totalCreditsActifs,
+                'credits_retard' => $totalRetardsCdf + $totalRetardsUsd,
+            ],
         ]);
     }
 }

@@ -55,7 +55,7 @@
             
             if ($user->can('can.level4')) {
                 $caisseItems[] = ['separator' => true];
-                $caisseItems[] = ['route' => 'clotures.index', 'label' => 'Journées précédentes', 'can' => true];
+                $caisseItems[] = ['route' => 'clotures.index', 'label' => 'Rapport périodique', 'can' => true];
                 
                 if ($user->can('canTransact') && $journeeOuverte) {
                     $caisseItems[] = ['route' => 'clotures.show', 'params' => ['cloture' => $journeeOuverte], 'label' => 'Situation de la journée', 'highlight' => true, 'can' => true];
@@ -144,7 +144,7 @@
                 <div class="hidden lg:flex lg:items-center lg:ml-10 lg:space-x-1">
                     
                     <a href="{{ route('dashboard') }}" class="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                        Dashboard
+                        Accueil
                     </a>
 
                     @foreach($menuSections as $section)

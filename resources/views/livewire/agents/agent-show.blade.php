@@ -15,9 +15,11 @@
 
             <div class="mt-6 md:mt-0 md:ml-8 flex-1 text-center md:text-left">
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
-                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">{{ $agent->nom }}</h1>
+                    <a href="{{ route('membre.show', $agent->membre) }}">
+                        <h1 class="text-3xl font-black text-gray-900 tracking-tight">{{ $agent->nom }}</h1>
+                    </a>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-700 uppercase">
-                        {{ $agent->agence->name }}
+                        {{ $agent->agence->nom }}
                     </span>
                 </div>
                 <p class="text-gray-500 font-medium mt-1">{{ $agent->email }} • <span class="italic text-gray-400">Agent depuis {{ $agent->created_at->format('M Y') }}</span></p>

@@ -17,37 +17,26 @@ class ZoneShow extends Component
     public function mount(Zone $zone)
     {
         $this->authorize('view', $zone);
-        $this->zone = $zone->load(['gerant', 'credits.remboursements', 'credits.membre']);
+        
+        // On ne charge que le gérant pour l'affichage de l'en-tête.
+        // Les KPIs sont calculés via les accesseurs du modèle.
+        $this->zone = $zone->load('gerant');
     }
 
     public function render()
     {
-        $credits = $this->zone->credits;
-        
-        // On initialise les stats pour les deux monnaies
-        $statsParMonnaie = [];
+        // Récupération du tableau de bord décisionnel depuis le modèle
+        $dashboard = $this->zone->getDashboardData();
 
-        foreach (['USD', 'CDF'] as $monnaie) {
-            $creditsMonnaie = $credits->where('monnaie', $monnaie);
-            
-            $totalCapital = $creditsMonnaie->sum('capital');
-            $totalInteret = $creditsMonnaie->sum('interet');
-            $totalAttendu = $totalCapital + $totalInteret;
-            $totalPaye = $creditsMonnaie->sum(fn($c) => $c->total_rembourse);
-
-            $statsParMonnaie[$monnaie] = [
-                'capital' => $totalCapital,
-                'encours' => $creditsMonnaie->sum(fn($c) => $c->reste_du),
-                'penalites' => $creditsMonnaie->sum(fn($c) => $c->penalites_courantes),
-                'taux_recouvrement' => $totalAttendu > 0 ? ($totalPaye / $totalAttendu) * 100 : 0,
-                'nb_credits' => $creditsMonnaie->count(),
-                'nb_retards' => $creditsMonnaie->where('statut', 'en_retard')->count(),
-            ];
-        }
+        // Récupération des crédits actifs pour la liste détaillée
+        $creditsActifs = $this->zone->creditsActifs()
+            ->with(['membre', 'remboursements']) // On garde le eager loading pour la liste
+            ->latest()
+            ->get();
 
         return view('livewire.zones.zone-show', [
-            'stats' => $statsParMonnaie,
-            'credits_list' => $credits->sortByDesc('created_at')
+            'dashboard'    => $dashboard,
+            'credits_list' => $creditsActifs,
         ]);
     }
 }

@@ -132,7 +132,7 @@
 
                         <div>
                             <label for="login" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                Email ou Numéro d'identification
+                                Numéro d'identification
                             </label>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

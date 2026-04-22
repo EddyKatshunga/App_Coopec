@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CreditPrintController;
 use App\Http\Controllers\ImpressionController;
 use App\Http\Controllers\Pdf\MembrePdfController;
 use App\Http\Controllers\Pdf\ReleveComptePdfController;
@@ -207,5 +208,10 @@ Route::get('/impressions/membre/{membre}', [ImpressionController::class, 'ficheM
     ->name('impressions.membre.fiche');
 Route::get('/impressions/periodique/{agenceId}/{debut}/{fin}', [ImpressionController::class, 'rapportPeriodique'])
     ->name('impressions.periodique');
+Route::get('/credits/{credit:uuid}/print', function (App\Models\Credit $credit) {
+    return view('impressions.credit-dossier', compact('credit'));
+})->name('credit.print')->middleware(['auth']);
+Route::get('/impressions/zones', [CreditPrintController::class, 'index'])->name('impressions.zones.index');
+Route::get('/impressions/zones/{zone:uuid}', [CreditPrintController::class, 'show'])->name('impressions.zones.show');
     
 require __DIR__.'/auth.php';
