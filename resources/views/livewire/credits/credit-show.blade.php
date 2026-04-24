@@ -25,6 +25,16 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            @if(in_array($credit->statut, ['en_cours', 'en_retard']))
+            <a href="{{ route('remboursement.create', $credit) }}" 
+                class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 shadow-sm transition"
+                title="Encaisser un remboursement">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Encaisser
+            </a>
+            @endif
             {{-- Bouton Impression --}}
             <a href="{{ route('credit.print', $credit->uuid) }}" target="_blank" class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm text-sm">
                 <x-heroicon-o-printer class="w-4 h-4"/>
@@ -77,7 +87,7 @@
         </div>
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 bg-green-50/30">
             <p class="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1">Remboursé</p>
-            <p class="text-lg font-bold text-green-600">{{ number_format_fr($credit->total_rembourse) }}</p>
+            <p class="text-lg font-bold text-green-600">{{ number_format_fr($credit->total_remboursement) }}</p>
         </div>
         <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-orange-200 col-span-2 sm:col-span-1">
             <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-1">Net à Payer</p>

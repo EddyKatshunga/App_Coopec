@@ -81,7 +81,7 @@ class CreditShow extends Component
     {
         return view('livewire.credits.credit-show', [
             'remboursements' => $this->credit->remboursements()
-                ->orderBy('date_paiement', 'asc')
+                ->orderBy('created_at', 'asc')
                 ->get(),
         ]);
     }

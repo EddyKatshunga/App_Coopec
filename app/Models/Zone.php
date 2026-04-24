@@ -6,7 +6,6 @@ use App\Models\Traits\Blameable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 class Zone extends Model
 {
@@ -24,25 +23,13 @@ class Zone extends Model
         'code',
         'gerant_id',
         'agence_id',
-        'nbre_credits_actifs',
-        'capital_actif_cdf',
-        'interet_actif_cdf',
-        'encours_actif_cdf',
-        'rembourse_cdf',
-        'credits_retard_cdf',
-        'penalites_cdf',
-        'capital_actif_usd',
-        'interet_actif_usd',
-        'encours_actif_usd',
-        'rembourse_usd',
-        'credits_retard_usd',
-        'penalites_usd',
-        'derniere_activite_at',
     ];
 
-    // =========================================================
-    // RELATIONS
-    // =========================================================
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
 
     public function gerant(): BelongsTo
     {
@@ -59,258 +46,149 @@ class Zone extends Model
         return $this->hasMany(Credit::class);
     }
 
-    public function remboursements(): HasMany
-    {
-        return $this->hasMany(CreditRemboursement::class);
-    }
-
-    // =========================================================
-    // CONDITIONS SQL POUR STATUT CALCULÉ
-    // =========================================================
-
-    /**
-     * Sous-requête pour le montant total remboursé (capital + intérêt)
-     */
-    protected function subQueryTotalRembourse()
-    {
-        return "(SELECT COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0)
-                 FROM credit_remboursements
-                 WHERE credit_remboursements.credit_id = credits.id)";
-    }
-
-    /**
-     * Condition pour les crédits actifs (en_cours + en_retard)
-     */
-    protected function conditionCreditsActifs()
-    {
-        $subQuery = $this->subQueryTotalRembourse();
-        $today = now()->format('Y-m-d');
-
-        // Actif = pas encore totalement remboursé ET non clôturé forcé
-        return function ($query) use ($subQuery, $today) {
-            $query->whereRaw("{$subQuery} < (capital + interet)")
-                  ->whereNull('date_cloture_forcee');
-        };
-    }
-
-    /**
-     * Condition pour les crédits en retard parmi les actifs
-     */
-    protected function conditionCreditsEnRetard()
-    {
-        $subQuery = $this->subQueryTotalRembourse();
-        $today = now()->format('Y-m-d');
-
-        return function ($query) use ($subQuery, $today) {
-            $query->whereRaw("{$subQuery} < (capital + interet)")
-                  ->whereNull('date_cloture_forcee')
-                  ->whereDate('date_fin_prevue', '<', $today);
-        };
-    }
-
-    // =========================================================
-    // CŒUR DU BUSINESS : CRÉDITS ACTIFS UNIQUEMENT
-    // =========================================================
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES MÉTIER (100% basés sur Credit)
+    |--------------------------------------------------------------------------
+    */
 
     public function creditsActifs()
     {
-        return $this->credits()->where($this->conditionCreditsActifs());
+        return $this->credits()->actif();
     }
 
-    public function creditsTermines()
+    public function creditsEnRetard()
     {
-        $subQuery = $this->subQueryTotalRembourse();
-        return $this->credits()->where(function ($query) use ($subQuery) {
-            $query->whereRaw("{$subQuery} >= (capital + interet)")
-                  ->orWhereNotNull('date_cloture_forcee');
-        });
+        return $this->credits()->enRetard();
     }
 
-    // =========================================================
-    // FILTRES DEVISES
-    // =========================================================
-
-    public function creditsCDF()
+    public function creditsByDevise(string $devise)
     {
-        return $this->creditsActifs()->where('monnaie', 'CDF');
+        return $this->creditsActifs()->where('monnaie', $devise);
     }
 
-    public function creditsUSD()
+    /*
+    |--------------------------------------------------------------------------
+    | KPI TEMPS RÉEL
+    |--------------------------------------------------------------------------
+    */
+
+    public function getKpi(string $devise): array
     {
-        return $this->creditsActifs()->where('monnaie', 'USD');
-    }
+        // 1. Statistiques Globales en une seule passe SQL
+        // On utilise total_remboursement qui est maintenant une colonne réelle
+        $stats = $this->creditsActifs()
+            ->where('monnaie', $devise)
+            ->selectRaw('
+                COUNT(id) as nb_credits,
+                SUM(capital) as sum_capital,
+                SUM(interet) as sum_interet,
+                SUM(capital + interet) as sum_encours,
+                SUM(total_remboursement) as sum_rembourse
+            ')
+            ->first();
 
-    // =========================================================
-    // KPI CDF (ACTIF UNIQUEMENT)
-    // =========================================================
+        // 2. Statistiques des Retards
+        // Le calcul du montant_retard devient extrêmement simple et rapide
+        $retardsStats = $this->creditsEnRetard()
+            ->where('monnaie', $devise)
+            ->selectRaw('
+                COUNT(id) as nb_retard, 
+                SUM((capital + interet) - total_remboursement) as montant_retard
+            ')
+            ->first();
 
-    public function getCapitalActifCdfAttribute()
-    {
-        return $this->creditsCDF()->sum('capital');
-    }
-
-    public function getInteretActifCdfAttribute()
-    {
-        return $this->creditsCDF()->sum('interet');
-    }
-
-    public function getEncoursActifCdfAttribute()
-    {
-        return $this->capital_actif_cdf + $this->interet_actif_cdf;
-    }
-
-    public function getCreditsRetardActifsCdfAttribute()
-    {
-        return $this->credits()
-            ->where('monnaie', 'CDF')
-            ->where($this->conditionCreditsEnRetard())
-            ->count();
-    }
-
-    // =========================================================
-    // KPI USD (ACTIF UNIQUEMENT)
-    // =========================================================
-
-    public function getCapitalActifUsdAttribute()
-    {
-        return $this->creditsUSD()->sum('capital');
-    }
-
-    public function getInteretActifUsdAttribute()
-    {
-        return $this->creditsUSD()->sum('interet');
-    }
-
-    public function getEncoursActifUsdAttribute()
-    {
-        return $this->capital_actif_usd + $this->interet_actif_usd;
-    }
-
-    public function getCreditsRetardActifsUsdAttribute()
-    {
-        return $this->credits()
-            ->where('monnaie', 'USD')
-            ->where($this->conditionCreditsEnRetard())
-            ->count();
-    }
-
-    // =========================================================
-    // INDICATEURS STRATÉGIQUES (DÉCISION)
-    // =========================================================
-
-    public function getExpositionCdfAttribute()
-    {
-        return $this->encours_actif_cdf;
-    }
-
-    public function getExpositionUsdAttribute()
-    {
-        return $this->encours_actif_usd;
-    }
-
-    public function getTauxRisqueCdfAttribute()
-    {
-        $total = $this->creditsCDF()->count();
-        if ($total === 0) return 0;
-
-        return round(
-            ($this->credits_retard_actifs_cdf / $total) * 100,
-            1
-        );
-    }
-
-    public function getTauxRisqueUsdAttribute()
-    {
-        $total = $this->creditsUSD()->count();
-        if ($total === 0) return 0;
-
-        return round(
-            ($this->credits_retard_actifs_usd / $total) * 100,
-            1
-        );
-    }
-
-    // =========================================================
-    // RISK LEVEL
-    // =========================================================
-
-    public function getNiveauRisqueCdfAttribute()
-    {
-        return match (true) {
-            $this->credits_retard_actifs_cdf == 0 => 'faible',
-            $this->credits_retard_actifs_cdf < 5 => 'moyen',
-            default => 'élevé'
-        };
-    }
-
-    public function getNiveauRisqueUsdAttribute()
-    {
-        return match (true) {
-            $this->credits_retard_actifs_usd == 0 => 'faible',
-            $this->credits_retard_actifs_usd < 5 => 'moyen',
-            default => 'élevé'
-        };
-    }
-
-    // =========================================================
-    // DASHBOARD DÉCISIONNEL
-    // =========================================================
-
-    public function getDashboardData(): array
-    {
         return [
-            'zone' => $this->nom,
-            'CDF' => [
-                'exposition' => $this->exposition_cdf,
-                'capital' => $this->capital_actif_cdf,
-                'interet' => $this->interet_actif_cdf,
-                'encours' => $this->encours_actif_cdf,
-                'credits_retard' => $this->credits_retard_actifs_cdf,
-                'taux_risque' => $this->taux_risque_cdf,
-                'niveau_risque' => $this->niveau_risque_cdf,
-            ],
-            'USD' => [
-                'exposition' => $this->exposition_usd,
-                'capital' => $this->capital_actif_usd,
-                'interet' => $this->interet_actif_usd,
-                'encours' => $this->encours_actif_usd,
-                'credits_retard' => $this->credits_retard_actifs_usd,
-                'taux_risque' => $this->taux_risque_usd,
-                'niveau_risque' => $this->niveau_risque_usd,
-            ],
-            'global' => [
-                'total_exposition' => $this->exposition_cdf + $this->exposition_usd,
-                'credits_actifs' => $this->creditsActifs()->count(),
-            ]
+            'capital'        => (float) ($stats->sum_capital ?? 0),
+            'interet'        => (float) ($stats->sum_interet ?? 0),
+            'encours'        => (float) ($stats->sum_encours ?? 0),
+            'rembourse'      => (float) ($stats->sum_rembourse ?? 0),
+            'nb_credits'     => (int) ($stats->nb_credits ?? 0),
+            'nb_retard'      => (int) ($retardsStats->nb_retard ?? 0),
+            'montant_retard' => (float) ($retardsStats->montant_retard ?? 0),
         ];
     }
 
-    // =========================================================
-    // OPTIMISATION SQL (SCOPE)
-    // =========================================================
+    /*
+    |--------------------------------------------------------------------------
+    | KPI RAPIDES (SQL PUR – ULTRA PERFORMANCE)
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeWithPerformance($query)
     {
-        $subQueryRembourse = "(SELECT COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0)
-                               FROM credit_remboursements
-                               WHERE credit_remboursements.credit_id = credits.id)";
-
-        $today = now()->format('Y-m-d');
-
         return $query
             ->withCount([
-                'credits as credits_actifs_count' => function ($q) use ($subQueryRembourse, $today) {
-                    $q->whereRaw("{$subQueryRembourse} < (capital + interet)")
-                      ->whereNull('date_cloture_forcee');
-                }
+                'credits as credits_actifs_count' => fn($q) => $q->actif(),
+                'credits as credits_retard_count' => fn($q) => $q->enRetard(),
             ])
-            ->withSum(['credits as capital_actif' => function ($q) use ($subQueryRembourse, $today) {
-                $q->whereRaw("{$subQueryRembourse} < (capital + interet)")
-                  ->whereNull('date_cloture_forcee');
-            }], 'capital')
-            ->withSum(['credits as interet_actif' => function ($q) use ($subQueryRembourse, $today) {
-                $q->whereRaw("{$subQueryRembourse} < (capital + interet)")
-                  ->whereNull('date_cloture_forcee');
-            }], 'interet');
+            ->withSum([
+                'credits as capital_total' => fn($q) => $q->actif(),
+            ], 'capital')
+            ->withSum([
+                'credits as interet_total' => fn($q) => $q->actif(),
+            ], 'interet');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | INDICATEURS MÉTIER
+    |--------------------------------------------------------------------------
+    */
+
+    public function getTauxRisqueAttribute(): float
+    {
+        $total = $this->credits_actifs_count ?? $this->creditsActifs()->count();
+
+        if ($total === 0) return 0;
+
+        $retard = $this->credits_retard_count ?? $this->creditsEnRetard()->count();
+
+        return round(($retard / $total) * 100, 2);
+    }
+
+    public function getNiveauRisqueAttribute(): string
+    {
+        return match (true) {
+            $this->taux_risque == 0 => 'faible',
+            $this->taux_risque < 10 => 'moyen',
+            default => 'élevé',
+        };
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD DÉCISIONNEL
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDashboardData(): array
+    {
+        $cdf = $this->getKpi('CDF');
+        $usd = $this->getKpi('USD');
+
+        return [
+            'zone' => $this->nom,
+
+            'CDF' => [
+                ...$cdf,
+                'taux_risque' => $cdf['nb_credits'] > 0
+                    ? round(($cdf['nb_retard'] / $cdf['nb_credits']) * 100, 2)
+                    : 0,
+            ],
+
+            'USD' => [
+                ...$usd,
+                'taux_risque' => $usd['nb_credits'] > 0
+                    ? round(($usd['nb_retard'] / $usd['nb_credits']) * 100, 2)
+                    : 0,
+            ],
+
+            'global' => [
+                'exposition' => $cdf['encours'] + $usd['encours'] * 2300,
+                'credits_actifs' => $cdf['nb_credits'] + $usd['nb_credits'],
+                'credits_retard' => $cdf['nb_retard'] + $usd['nb_retard'],
+            ]
+        ];
     }
 }

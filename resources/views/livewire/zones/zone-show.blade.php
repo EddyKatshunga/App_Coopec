@@ -1,218 +1,180 @@
-<div class="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
-    {{-- En-tête --}}
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="space-y-8 pb-10">
+    {{-- En-tête de la Zone (Style Carte de présentation) --}}
+    <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 md:p-8 shadow-lg text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
+        <div class="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <div>
+                <div class="flex items-center space-x-3 mb-1">
+                    <span class="px-3 py-1 bg-slate-700/50 text-slate-300 text-xs font-semibold tracking-wider rounded-full ring-1 ring-slate-600">
+                        ZONE {{ $zone->code }}
+                    </span>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-white">{{ $zone->nom }}</h1>
+            </div>
+            
+            @if($zone->gerant)
+                <div class="flex items-center space-x-3 bg-slate-800/50 p-3 rounded-xl ring-1 ring-slate-700/50 backdrop-blur-sm">
+                    <div class="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-bold">
+                        {{ substr($zone->gerant->nom, 0, 2) }}
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wide">Gérant responsable</p>
+                        <p class="text-sm font-semibold text-slate-100">{{ $zone->gerant->nom }}</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Cartes des KPIs par Devise --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        @foreach(['CDF', 'USD'] as $devise)
+            @php
+                $colorTheme = $devise === 'CDF' ? 'blue' : 'emerald';
+                $ringColor = $devise === 'CDF' ? 'ring-blue-100' : 'ring-emerald-100';
+                $iconBg = $devise === 'CDF' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600';
+            @endphp
+            <div class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-slate-200/60 hover:shadow-md transition-shadow duration-300">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-lg {{ $iconBg }}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Portefeuille {{ $devise }}</h2>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold 
+                        @if(($dashboard[$devise]['niveau_risque'] ?? 'faible') === 'faible') bg-emerald-100 text-emerald-700
+                        @elseif(($dashboard[$devise]['niveau_risque'] ?? 'moyen') === 'moyen') bg-amber-100 text-amber-700
+                        @else bg-rose-100 text-rose-700 @endif">
+                        Risque {{ ucfirst($dashboard[$devise]['niveau_risque'] ?? 'faible') }} ({{ $dashboard[$devise]['taux_risque'] ?? 0 }}%)
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-xs text-slate-500 font-medium mb-1">Dossiers Actifs</p>
+                        <p class="text-2xl font-bold text-slate-800">{{ $dashboard[$devise]['nb_credits'] }}</p>
+                    </div>
+                    <div class="bg-rose-50 p-4 rounded-xl ring-1 ring-rose-100">
+                        <p class="text-xs text-rose-600 font-medium mb-1">Dossiers en Souffrance</p>
+                        <p class="text-2xl font-bold text-rose-700">{{ $dashboard[$devise]['nb_retard'] }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span class="text-sm text-slate-500">Volume engagé (Cap + Int)</span>
+                        <span class="text-sm font-semibold text-slate-800">{{ number_format($dashboard[$devise]['total_octroye'] ?? ($dashboard[$devise]['encours'] ?? 0), 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span class="text-sm text-slate-500">Montants encaissés</span>
+                        <span class="text-sm font-semibold text-emerald-600">{{ number_format($dashboard[$devise]['rembourse'], 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span class="text-sm text-slate-500">Reste à percevoir</span>
+                        <span class="text-sm font-semibold text-slate-800">{{ number_format($dashboard[$devise]['reste_a_recouvrer'] ?? (($dashboard[$devise]['encours'] ?? 0) - $dashboard[$devise]['rembourse']), 2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-sm text-rose-500 font-medium">Créances en retard</span>
+                        <span class="text-sm font-bold text-rose-600">{{ number_format($dashboard[$devise]['montant_retard'], 2) }}</span>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- Synthèse Globale Consolidée --}}
+    <div class="bg-indigo-900 rounded-2xl p-6 shadow-md text-indigo-50 flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
-            <nav class="flex text-sm text-gray-500 mb-2">
-                <a href="{{ url()->previous() }}" class="hover:text-indigo-600" wire:navigate>Retour</a>
-                <span class="mx-2">/</span>
-                <span class="text-gray-900 font-medium">Détails Zone</span>
-            </nav>
-            <h1 class="text-3xl font-extrabold text-gray-900 flex items-center">
-                <x-heroicon-s-map-pin class="w-8 h-8 text-indigo-600 mr-3" />
-                {{ $zone->nom }}
-                <span class="ml-4 text-sm font-mono bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full uppercase">
-                    {{ $zone->code }}
-                </span>
-            </h1>
+            <h2 class="text-lg font-semibold text-indigo-200 mb-1">Exposition Globale du Portefeuille</h2>
+            <p class="text-3xl font-bold text-white">{{ number_format($dashboard['global']['exposition'], 2) }} <span class="text-lg font-medium text-indigo-300">Total</span></p>
         </div>
-
-        <div class="flex items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-            <div class="mr-4 text-right">
-                <p class="text-xs text-gray-500 uppercase font-semibold">Gérant de zone</p>
-                <p class="text-sm font-bold text-gray-900">{{ $zone->gerant->nom ?? 'Non assigné' }}</p>
+        <div class="flex gap-6 w-full md:w-auto">
+            <div class="bg-indigo-800/50 p-4 rounded-xl flex-1 text-center border border-indigo-700/50">
+                <p class="text-xs text-indigo-300 uppercase tracking-wider mb-1">Remboursé</p>
+                <p class="text-xl font-bold text-emerald-400">{{ number_format($dashboard['global']['rembourse'] ?? 0, 2) }}</p>
             </div>
-            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">
-                {{ substr($zone->gerant->nom ?? 'Z', 0, 1) }}
-            </div>
-        </div>
-        <div class="flex items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-            <a href="{{ route('impressions.zones.show', ['zone' => $zone->uuid]) }}" target="_blank" class="...">
-                <x-heroicon-o-printer class="w-5 h-5" /> Imprimer
-            </a>
-        </div>
-    </div>
-
-    {{-- Grille KPIs : Focus sur le Portefeuille Actif --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        
-        {{-- Card 1: Capital Actif --}}
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Capital Actif</p>
-            <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-gray-900">{{ number_format($dashboard['USD']['capital'], 0, ',', ' ') }}</span>
-                    <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded">USD</span>
-                </div>
-                <div class="flex justify-between items-center border-t border-gray-50 pt-2">
-                    <span class="text-lg font-bold text-gray-900">{{ number_format($dashboard['CDF']['capital'], 0, ',', ' ') }}</span>
-                    <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">CDF</span>
-                </div>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-3 font-medium">Crédits en cours & en retard</p>
-        </div>
-
-        {{-- Card 2: Exposition (Encours Actif Total) --}}
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Exposition Actuelle</p>
-            <div class="space-y-2">
-                <div class="flex justify-between items-center text-indigo-600">
-                    <span class="text-lg font-bold">{{ number_format($dashboard['USD']['exposition'], 0, ',', ' ') }}</span>
-                    <span class="text-[10px] font-bold border border-indigo-200 px-2 py-0.5 rounded">USD</span>
-                </div>
-                <div class="flex justify-between items-center text-indigo-600 border-t border-gray-50 pt-2">
-                    <span class="text-lg font-bold">{{ number_format($dashboard['CDF']['exposition'], 0, ',', ' ') }}</span>
-                    <span class="text-[10px] font-bold border border-indigo-200 px-2 py-0.5 rounded">CDF</span>
-                </div>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-3 font-medium">Capital + Intérêts à recouvrer</p>
-        </div>
-
-        {{-- Card 3: Taux de Risque (Crédits en Retard / Total Actif) --}}
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider">Taux de Risque</p>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">USD</p>
-                    <p class="text-xl font-black text-gray-900">{{ $dashboard['USD']['taux_risque'] }}%</p>
-                </div>
-                <div>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">CDF</p>
-                    <p class="text-xl font-black text-gray-900">{{ $dashboard['CDF']['taux_risque'] }}%</p>
-                </div>
-            </div>
-            {{-- Jauge de risque pour USD (exemple) --}}
-            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-3 overflow-hidden">
-                <div class="h-full shadow-sm transition-all @if($dashboard['USD']['taux_risque'] > 50) bg-red-500 @elseif($dashboard['USD']['taux_risque'] > 20) bg-yellow-500 @else bg-green-500 @endif" 
-                     style="width: {{ $dashboard['USD']['taux_risque'] }}%">
-                </div>
-            </div>
-            <p class="text-[10px] text-gray-400 mt-3 font-medium">% de dossiers actifs en retard</p>
-        </div>
-
-        {{-- Card 4: Niveau de Risque & Retards --}}
-        <div class="bg-red-50 p-5 rounded-2xl shadow-sm border border-red-100">
-            <p class="text-xs font-black uppercase text-red-400 mb-3 tracking-wider">Portefeuille à Risque</p>
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-2xl font-black text-red-700">
-                    {{ $dashboard['USD']['credits_retard'] + $dashboard['CDF']['credits_retard'] }}
-                </span>
-                <span class="text-[10px] font-bold text-red-500 uppercase">Dossiers en retard</span>
-            </div>
-            <div class="text-[11px] font-bold space-y-1.5 mt-2">
-                <div class="flex justify-between">
-                    <span>Risque USD :</span>
-                    <span class="uppercase @if($dashboard['USD']['niveau_risque'] == 'élevé') text-red-600 @elseif($dashboard['USD']['niveau_risque'] == 'moyen') text-yellow-600 @else text-green-600 @endif">
-                        {{ $dashboard['USD']['niveau_risque'] }}
-                    </span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Risque CDF :</span>
-                    <span class="uppercase @if($dashboard['CDF']['niveau_risque'] == 'élevé') text-red-600 @elseif($dashboard['CDF']['niveau_risque'] == 'moyen') text-yellow-600 @else text-green-600 @endif">
-                        {{ $dashboard['CDF']['niveau_risque'] }}
-                    </span>
-                </div>
+            <div class="bg-indigo-800/50 p-4 rounded-xl flex-1 text-center border border-indigo-700/50">
+                <p class="text-xs text-indigo-300 uppercase tracking-wider mb-1">Reste Net</p>
+                <p class="text-xl font-bold text-white">{{ number_format($dashboard['global']['reste_a_recouvrer'] ?? 0, 2) }}</p>
             </div>
         </div>
     </div>
 
-    {{-- Synthèse Globale --}}
-    <div class="mb-6 flex flex-wrap items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        <div class="flex items-center gap-4">
-            <div class="px-4 py-2 bg-indigo-50 rounded-lg">
-                <span class="text-xs font-black text-indigo-600 uppercase">Crédits Actifs</span>
-                <p class="text-2xl font-bold text-gray-900">{{ $dashboard['global']['credits_actifs'] }}</p>
-            </div>
-            <div class="px-4 py-2 bg-gray-50 rounded-lg">
-                <span class="text-xs font-black text-gray-500 uppercase">Exposition Totale</span>
-                <p class="text-lg font-bold text-gray-800">
-                    {{ number_format($dashboard['global']['total_exposition'], 0, ',', ' ') }} 
-                    <span class="text-xs font-normal text-gray-500">(CDF + USD)</span>
-                </p>
-            </div>
-        </div>
-        <div class="text-xs text-gray-400">
-            Dernière activité : {{ $zone->derniere_activite_at ? $zone->derniere_activite_at->diffForHumans() : 'Jamais' }}
-        </div>
-    </div>
-
-    {{-- Liste des Crédits Actifs (En cours / En retard) --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
-            <h3 class="text-lg font-bold text-gray-900">Crédits Actifs de la zone</h3>
-            <div class="flex gap-2">
-                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold">
-                    {{ $credits_list->count() }} dossier(s)
-                </span>
-            </div>
+    {{-- Liste des Crédits Actifs --}}
+    <div class="bg-white shadow-sm ring-1 ring-slate-200/60 rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="font-bold text-lg text-slate-800">Registre des Crédits Actifs</h3>
+            <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-full text-xs font-bold">{{ $credits_list->count() }} dossiers</span>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 text-[10px] uppercase font-black text-gray-400 tracking-widest">
-                        <th class="px-6 py-4">Membre & N°</th>
-                        <th class="px-6 py-4">Statut</th>
-                        <th class="px-6 py-4 text-right">Capital</th>
-                        <th class="px-6 py-4 text-right text-indigo-600">Reste à payer</th>
-                        <th class="px-6 py-4 text-center">Retard</th>
-                        <th class="px-6 py-4 text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($credits_list as $credit)
-                        <tr class="hover:bg-gray-50 transition-colors group">
-                            <td class="px-6 py-4">
-                                <p class="text-sm font-bold text-gray-900 leading-none mb-1">{{ $credit->membre->nom }}</p>
-                                <p class="text-[10px] font-mono text-gray-400 uppercase">{{ $credit->numero_credit }}</p>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span @class([
-                                    'px-2 py-1 rounded text-[10px] font-black uppercase',
-                                    'bg-red-100 text-red-700' => $credit->statut === 'en_retard',
-                                    'bg-amber-100 text-amber-700' => $credit->statut === 'en_cours',
-                                ])>
-                                    {{ str_replace('_', ' ', $credit->statut) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="text-sm font-bold text-gray-900">{{ number_format($credit->capital, 0) }}</span>
-                                <span class="text-[9px] font-black text-gray-400 ml-1">{{ $credit->monnaie }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <p class="text-sm font-black text-indigo-600">
-                                    {{ number_format($credit->reste_du, 0) }} 
-                                    <span class="text-[9px]">{{ $credit->monnaie }}</span>
-                                </p>
-                                @if($credit->penalites_courantes > 0)
-                                    <p class="text-[9px] text-red-500 font-bold">
-                                        +{{ number_format($credit->penalites_courantes, 0) }} pen.
-                                    </p>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($credit->jours_retard > 0)
-                                    <span class="inline-block px-2 py-1 bg-red-50 text-red-600 rounded-md text-xs font-black">
-                                        {{ $credit->jours_retard }} j
-                                    </span>
-                                @else
-                                    <span class="text-gray-300">—</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <a href="{{ route('credit.show', $credit) }}" class="text-gray-400 hover:text-indigo-600 transition-colors">
-                                    <x-heroicon-o-arrow-right-circle class="w-6 h-6 inline" />
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
+        @if($credits_list->isEmpty())
+            <div class="p-8 text-center text-slate-500">
+                <svg class="mx-auto h-12 w-12 text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>Aucun crédit actif enregistré pour cette zone.</p>
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left whitespace-nowrap">
+                    <thead class="bg-slate-50/80 text-slate-500 uppercase tracking-wider text-xs font-semibold">
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-                                Aucun crédit actif (en cours ou en retard) dans cette zone.
-                            </td>
+                            <th scope="col" class="px-6 py-4">N° Dossier</th>
+                            <th scope="col" class="px-6 py-4">Membre</th>
+                            <th scope="col" class="px-6 py-4 text-right">Capital</th>
+                            <th scope="col" class="px-6 py-4 text-right">Remboursé</th>
+                            <th scope="col" class="px-6 py-4 text-right">Reste dû</th>
+                            <th scope="col" class="px-6 py-4 text-center">Statut</th>
+                            <th scope="col" class="px-6 py-4 text-right">Retard (Jrs)</th>
+                            <th scope="col" class="px-6 py-4"></th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($credits_list as $credit)
+                            {{-- Ligne cliquable avec pointeur et micro-interaction --}}
+                            <tr 
+                                onclick="window.location.href='{{ route('credit.show', $credit->uuid) }}'" 
+                                class="hover:bg-slate-50 transition-colors duration-150 cursor-pointer group"
+                            >
+                                <td class="px-6 py-4 font-medium text-slate-900">
+                                    {{ $credit->numero_credit }}
+                                    <span class="ml-2 text-xs text-slate-400 font-normal">{{ $credit->monnaie }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600">{{ $credit->membre?->nom }}</td>
+                                <td class="px-6 py-4 text-right font-medium text-slate-700">{{ number_format($credit->capital, 2) }}</td>
+                                <td class="px-6 py-4 text-right text-emerald-600 font-medium">{{ number_format($credit->total_rembourse, 2) }}</td>
+                                <td class="px-6 py-4 text-right font-bold text-slate-800">{{ number_format($credit->reste_du, 2) }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                                        @switch($credit->statut)
+                                            @case('en_cours') bg-blue-50 text-blue-700 border-blue-200 @break
+                                            @case('en_retard') bg-rose-50 text-rose-700 border-rose-200 shadow-sm shadow-rose-100 @break
+                                            @default bg-slate-100 text-slate-700 border-slate-200
+                                        @endswitch">
+                                        @if($credit->statut === 'en_cours') En cours
+                                        @elseif($credit->statut === 'en_retard') En souffrance
+                                        @else {{ ucfirst(str_replace('_', ' ', $credit->statut)) }}
+                                        @endif
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    @if($credit->jours_retard > 0)
+                                        <span class="text-rose-600 font-bold">{{ $credit->jours_retard }} jrs</span>
+                                    @else
+                                        <span class="text-slate-300">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right text-slate-400 group-hover:text-blue-600 transition-colors">
+                                    <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 </div>

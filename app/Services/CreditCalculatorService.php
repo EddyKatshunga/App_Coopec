@@ -16,7 +16,7 @@ class CreditCalculatorService
         $reliquat = $montantTotal;
 
         // 1. Récupération de la situation (Pénalités générées à cette date)
-        $situation = $credit->getSituationActuelle($datePaiement);
+        $situation = $credit->getSituationActuelle();
         
         /* ================= PRIORITÉ 1 : PÉNALITÉS ================= */
         $penalitesDues = $situation['penalites_courantes'];
