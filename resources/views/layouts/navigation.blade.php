@@ -8,6 +8,15 @@
         $agence = $user->agent?->agence;
         $journeeOuverte = $user->journee_ouverte;
         
+        // Calcul de l'état de la journée ouverte
+        $outdatedOpenDay = false;
+        $openDateFormatted = '';
+        if ($journeeOuverte) {
+            $openDate = \Carbon\Carbon::parse($journeeOuverte->date_cloture);
+            $openDateFormatted = $openDate->format('d/m/Y');
+            $outdatedOpenDay = !$openDate->isToday();
+        }
+        
         // Construction du tableau de menus (une seule source de vérité)
         $menuSections = [];
         
@@ -185,19 +194,47 @@
             {{-- RIGHT SECTION : STATUS & PROFILE --}}
             <div class="flex items-center space-x-3 sm:space-x-5">
                 
-                {{-- STATUS BADGE --}}
+                {{-- STATUS BADGE AVEC ALERTE DE CLÔTURE --}}
                 @if (!$user->hasRole('niveau 0'))
                 <div class="flex items-center">
                     @if($journeeOuverte)
-                        <div class="flex items-center space-x-2 bg-emerald-50/80 px-3 py-1.5 rounded-xl border border-emerald-100/50 backdrop-blur-sm shadow-sm">
-                            <span class="relative flex h-2.5 w-2.5">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                            </span>
-                            <span class="hidden lg:inline text-xs font-bold text-emerald-700 uppercase tracking-wide">Ouvert - {{ \Carbon\Carbon::parse($journeeOuverte->date_cloture)->format('d/m/Y') }}</span>
-                            <span class="lg:hidden text-xs font-bold text-emerald-700">{{ \Carbon\Carbon::parse($journeeOuverte->date_cloture)->format('d/m/Y') }}</span>
-                        </div>
+                        @if($outdatedOpenDay)
+                            {{-- BADGE D'AVERTISSEMENT : journée non clôturée --}}
+                            <div class="group relative flex items-center gap-2 bg-amber-50/90 px-3 py-1.5 rounded-xl border border-amber-200/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-xs font-black text-amber-800 uppercase tracking-wide whitespace-nowrap lg:whitespace-normal">
+                                        ⚠️ Clôture requise
+                                    </span>
+                                    <span class="text-[11px] font-semibold text-amber-700 lg:hidden">
+                                        {{ $openDateFormatted }}
+                                    </span>
+                                </div>
+                                <span class="hidden lg:inline text-xs font-semibold text-amber-700 px-1.5 py-0.5 bg-amber-100/50 rounded-md">
+                                    {{ $openDateFormatted }}
+                                </span>
+                                {{-- Tooltip avec message complet --}}
+                                <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                                    Attention, cette journée du {{ $openDateFormatted }} doit être clôturée
+                                </div>
+                            </div>
+                        @else
+                            {{-- BADGE NORMAL : journée ouverte à jour --}}
+                            <div class="flex items-center space-x-2 bg-emerald-50/80 px-3 py-1.5 rounded-xl border border-emerald-100/50 backdrop-blur-sm shadow-sm">
+                                <span class="relative flex h-2.5 w-2.5">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
+                                <span class="hidden lg:inline text-xs font-bold text-emerald-700 uppercase tracking-wide">Ouvert - {{ $openDateFormatted }}</span>
+                                <span class="lg:hidden text-xs font-bold text-emerald-700">{{ $openDateFormatted }}</span>
+                            </div>
+                        @endif
                     @else
+                        {{-- BADGE FERMÉ --}}
                         <div class="flex items-center space-x-2 bg-rose-50/80 px-3 py-1.5 rounded-xl border border-rose-100/50 backdrop-blur-sm shadow-sm">
                             <span class="w-2.5 h-2.5 bg-rose-500 rounded-full shadow-[0_0_5px_rgba(244,63,94,0.5)]"></span>
                             <span class="hidden lg:inline text-xs font-bold text-rose-700 uppercase tracking-wide">Aucune journée</span>
