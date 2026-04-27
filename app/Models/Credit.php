@@ -95,7 +95,7 @@ class Credit extends Model
     public function getSituationActuelle(?Carbon $dateConsultation = null): array
     {
         $dateRef = $dateConsultation ?? $this->date_calcul;
-        $resteDu = $this->total; 
+        $resteDu = $this->total; //Au départ, le total puis il va décroitre après chaque paiement
         $dateDernierCalcul = clone $this->date_fin_prevue;
 
         // Optimisation N+1 : Filtrer la collection en mémoire si chargée
@@ -140,7 +140,7 @@ class Credit extends Model
 
     public function getResteDuAttribute(): float
     {
-        return (float) $this->getSituationActuelle()['reste_du_base'];
+        return (float) $this->total - $this->total_remboursement;
     }
 
     public function getPenalitesCourantesAttribute(): float

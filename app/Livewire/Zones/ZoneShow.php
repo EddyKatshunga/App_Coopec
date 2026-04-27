@@ -38,7 +38,7 @@ class ZoneShow extends Component
         // L'attribut Computed empêche la sérialisation dans Livewire
         return $this->zone->credits()
             ->actif()
-            ->with(['membre']) // Ne chargez 'remboursements' ici que si vous les affichez dans le tableau Blade !
+            ->with(['membre'])
             ->orderByDesc('date_credit')
             ->paginate(15);
     }

@@ -6,6 +6,7 @@ use App\Models\Traits\Blameable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Zone extends Model
 {
@@ -115,19 +116,85 @@ class Zone extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function scopeWithPerformance($query)
+    /**
+     * Scope pour charger toutes les statistiques détaillées par devise
+     * (capital, exposition, nombres de crédits actifs, retards)
+     */
+    public function scopeWithDetailedStats($query)
     {
         return $query
+            ->with('gerant')
             ->withCount([
-                'credits as credits_actifs_count' => fn($q) => $q->actif(),
-                'credits as credits_retard_count' => fn($q) => $q->enRetard(),
+                'credits as credits_actifs_usd_count' => fn($q) => $q->actif()->where('monnaie', 'USD'),
+                'credits as credits_actifs_cdf_count' => fn($q) => $q->actif()->where('monnaie', 'CDF'),
+                'credits as credits_retard_usd_count' => fn($q) => $q->enRetard()->where('monnaie', 'USD'),
+                'credits as credits_retard_cdf_count' => fn($q) => $q->enRetard()->where('monnaie', 'CDF'),
             ])
-            ->withSum([
-                'credits as capital_total' => fn($q) => $q->actif(),
-            ], 'capital')
-            ->withSum([
-                'credits as interet_total' => fn($q) => $q->actif(),
-            ], 'interet');
+            ->withSum(['credits as capital_usd_sum' => fn($q) => $q->actif()->where('monnaie', 'USD')], 'capital')
+            ->withSum(['credits as capital_cdf_sum' => fn($q) => $q->actif()->where('monnaie', 'CDF')], 'capital')
+            // Utilisation de withAggregate pour l'addition des colonnes
+            ->withAggregate(['credits as exposition_usd_sum' => function($q) {
+                $q->actif()->where('monnaie', 'USD');
+            }], DB::raw('SUM(capital + interet)'))
+            ->withAggregate(['credits as exposition_cdf_sum' => function($q) {
+                $q->actif()->where('monnaie', 'CDF');
+            }], DB::raw('SUM(capital + interet)'));
+    }
+
+
+    // Attributs calculés (utilisés dans la vue)
+    public function getCapitalActifUsdAttribute()
+    {
+        return (float) ($this->attributes['capital_usd_sum'] ?? 0);
+    }
+
+    public function getCapitalActifCdfAttribute()
+    {
+        return (float) ($this->attributes['capital_cdf_sum'] ?? 0);
+    }
+
+    public function getExpositionUsdAttribute()
+    {
+        return (float) ($this->attributes['exposition_usd_sum'] ?? 0);
+    }
+
+    public function getExpositionCdfAttribute()
+    {
+        return (float) ($this->attributes['exposition_cdf_sum'] ?? 0);
+    }
+
+    public function getCreditsRetardActifsUsdAttribute()
+    {
+        return (int) ($this->attributes['credits_retard_usd_count'] ?? 0);
+    }
+
+    public function getCreditsRetardActifsCdfAttribute()
+    {
+        return (int) ($this->attributes['credits_retard_cdf_count'] ?? 0);
+    }
+
+    public function getCreditsActifsUsdAttribute()
+    {
+        return (int) ($this->attributes['credits_actifs_usd_count'] ?? 0);
+    }
+
+    public function getCreditsActifsCdfAttribute()
+    {
+        return (int) ($this->attributes['credits_actifs_cdf_count'] ?? 0);
+    }
+
+    public function getTauxRisqueUsdAttribute(): float
+    {
+        $total = $this->credits_actifs_usd;
+        if ($total === 0) return 0;
+        return round(($this->credits_retard_actifs_usd / $total) * 100, 2);
+    }
+
+    public function getTauxRisqueCdfAttribute(): float
+    {
+        $total = $this->credits_actifs_cdf;
+        if ($total === 0) return 0;
+        return round(($this->credits_retard_actifs_cdf / $total) * 100, 2);
     }
 
     /*

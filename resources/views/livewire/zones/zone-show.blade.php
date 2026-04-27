@@ -122,7 +122,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-4">N° Dossier</th>
                             <th scope="col" class="px-6 py-4">Membre</th>
-                            <th scope="col" class="px-6 py-4 text-right">Capital</th>
+                            <th scope="col" class="px-6 py-4 text-right">Cap + Int.</th>
                             <th scope="col" class="px-6 py-4 text-right">Remboursé</th>
                             <th scope="col" class="px-6 py-4 text-right">Reste dû</th>
                             <th scope="col" class="px-6 py-4 text-center">Statut</th>
@@ -142,9 +142,14 @@
                                     <span class="ml-2 text-xs text-slate-400 font-normal">{{ $credit->monnaie }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-slate-600">{{ $credit->membre?->nom }}</td>
-                                <td class="px-6 py-4 text-right font-medium text-slate-700">{{ number_format($credit->capital, 2) }}</td>
-                                <td class="px-6 py-4 text-right text-emerald-600 font-medium">{{ number_format($credit->total_rembourse, 2) }}</td>
-                                <td class="px-6 py-4 text-right font-bold text-slate-800">{{ number_format($credit->reste_du, 2) }}</td>
+                                <td class="px-6 py-4 text-right font-medium text-slate-700">{{ number_format($credit->total, 2) }}</td>
+                                <td class="px-6 py-4 text-right text-emerald-600 font-medium">{{ number_format($credit->total_remboursement, 2) }}</td>
+                                <td class="px-6 py-4 text-right font-bold text-slate-800">
+                                    <div>{{ number_format($credit->reste_du, 2) }}</div>
+                                    <div class="text-xs text-red-600 font-normal">
+                                        + {{ $credit->penalites_courantes }}
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
                                         @switch($credit->statut)

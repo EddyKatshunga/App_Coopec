@@ -72,26 +72,52 @@
     @endif
 
     {{-- ================= RÉSUMÉ FINANCIER (Grid responsive) ================= --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 italic">Échéance</p>
-            <p class="text-lg font-bold text-gray-900">{{ $credit->date_fin_prevue->format('d/m/Y') }}</p>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Échéance -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Échéance</p>
+                <p class="text-xl font-bold text-slate-700">{{ $credit->date_fin_prevue->format('d/m/Y') }}</p>
+            </div>
+            <div class="mt-2 h-1 w-8 bg-slate-100 rounded"></div>
         </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Attendu</p>
-            <p class="text-lg font-bold text-gray-900">{{ number_format_fr($credit->total) }} <small class="text-[10px]">{{ $credit->monnaie }}</small></p>
+
+        <!-- Total Attendu -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Attendu</p>
+                <p class="text-xl font-bold text-slate-700">
+                    {{ number_format_fr($credit->total) }} 
+                    <span class="text-xs font-medium text-slate-400 uppercase">{{ $credit->monnaie }}</span>
+                </p>
+            </div>
         </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">Pénalités</p>
-            <p class="text-lg font-bold text-red-600">{{ number_format_fr($penaliteCourante) }}</p>
+
+        <!-- Remboursé (Style Succès) -->
+        <div class="bg-emerald-50/50 p-5 rounded-2xl shadow-sm border border-emerald-100">
+            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Remboursé</p>
+            <p class="text-xl font-bold text-emerald-700">{{ number_format_fr($credit->total_remboursement) }}</p>
+            <div class="mt-2 flex items-center gap-1">
+                <span class="text-[10px] text-emerald-500 font-medium italic">Paiement reçu</span>
+            </div>
         </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 bg-green-50/30">
-            <p class="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1">Remboursé</p>
-            <p class="text-lg font-bold text-green-600">{{ number_format_fr($credit->total_remboursement) }}</p>
-        </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-orange-200 col-span-2 sm:col-span-1">
-            <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-1">Net à Payer</p>
-            <p class="text-xl font-black text-orange-600">{{ number_format_fr($resteDu, 0) }}</p>
+
+        <!-- Net à Payer (Accentuation sur la dette) -->
+        <div class="bg-orange-50/30 p-5 rounded-2xl shadow-sm border-2 border-orange-200 col-span-2 sm:col-span-1">
+            <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-1">Net à Payer</p>
+            <div class="flex items-baseline gap-1">
+                <p class="text-2xl font-black text-orange-600">{{ number_format_fr($credit->reste_du, 0) }}</p>
+                <span class="text-xs font-bold text-orange-600 uppercase">{{ $credit->monnaie }}</span>
+            </div>
+            
+            @if($penaliteCourante > 0)
+            <div class="mt-3 pt-3 border-t border-orange-200/50">
+                <p class="text-xs font-semibold text-red-600 flex items-center gap-1">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                    Inclut {{ number_format_fr($penaliteCourante) }} de pénalités
+                </p>
+            </div>
+            @endif
         </div>
     </div>
 

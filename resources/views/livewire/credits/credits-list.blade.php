@@ -107,8 +107,8 @@
                         <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Zone / Agence</th>
                         <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Capital initial / Intérêt</th>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Échéance</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Déja payé</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total dû (pénalités)</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Remboursé</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Reste à payer</th>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
                         <th scope="col" class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -164,7 +164,7 @@
                                 @endif
                             </td>
 
-                            {{-- Total déjà restant --}}
+                            {{-- Total déjà payé --}}
                             <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-gray-900">
                                 {{ number_format($credit->total_remboursement, 2, ',', ' ') }}
                                 <span class="text-gray-400 text-xs">{{ $credit->monnaie }}</span>
@@ -173,7 +173,7 @@
                             {{-- Total dû (avec pénalités) --}}
                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <div class="text-sm font-black text-gray-900">
-                                    {{ number_format($situation['total_a_payer'], 2, ',', ' ') }}
+                                    {{ number_format($credit->reste_du, 2, ',', ' ') }}
                                     <span class="text-gray-400 text-xs font-normal">{{ $credit->monnaie }}</span>
                                 </div>
                                 @if($situation['penalites_courantes'] > 0)
