@@ -45,10 +45,6 @@ class CreditRemboursementService
                 throw new \InvalidArgumentException('Le montant du remboursement doit être supérieur à zéro.');
             }
 
-            /* ================= ÉTAT AVANT ================= */ 
-            // Le report est la somme de tous les paiements précédents (comme exigé)
-            $reportAvant = $credit->remboursements()->sum('montant');
-
             /* ================= VENTILATION ================= */
             $repartition = $this->calculator->repartitionRemboursement($credit, $montant, $datePaiement);
 
@@ -56,7 +52,7 @@ class CreditRemboursementService
             // Le reste dû baisse uniquement grâce à la part du paiement allouée au capital et aux intérêts.
             $resteDuApres = max(
                 0,
-                $repartition['reste_du_base_avant'] - $repartition['interet_payee'] - $repartition['capital_payee']
+                $credit->reste_du - $repartition['interet_payee'] - $repartition['capital_payee']
             );
 
             /* ================= ENREGISTREMENT ================= */
@@ -73,7 +69,7 @@ class CreditRemboursementService
                 'reste_penalite'  => $repartition['reste_penalite'],
                 
                 // Snapshots comptables
-                'report_avant' => round($reportAvant, 5),
+                'report_avant' => $credit->reste_du,
                 'reste_du_apres' => round($resteDuApres, 5),
 
                 'mode_paiement' => $data['mode_paiement'],

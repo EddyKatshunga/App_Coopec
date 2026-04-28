@@ -70,6 +70,30 @@ class Zone extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | SCOPES DE RECHERCHE
+    |--------------------------------------------------------------------------
+    */
+    public function scopeWithDetailedStats($query)
+    {
+        return $query->withCount(['credits as nb_credits_actifs' => function ($q) {
+            $q->actif();
+        }])
+        ->withSum(['credits as sum_engage_usd' => function ($q) {
+            $q->actif()->where('monnaie', 'USD');
+        }], DB::raw('capital + interet'))
+        ->withSum(['credits as sum_rembourse_usd' => function ($q) {
+            $q->actif()->where('monnaie', 'USD');
+        }], 'total_remboursement')
+        ->withSum(['credits as sum_engage_cdf' => function ($q) {
+            $q->actif()->where('monnaie', 'CDF');
+        }], DB::raw('capital + interet'))
+        ->withSum(['credits as sum_rembourse_cdf' => function ($q) {
+            $q->actif()->where('monnaie', 'CDF');
+        }], 'total_remboursement');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | KPI TEMPS RÉEL
     |--------------------------------------------------------------------------
     */
@@ -77,7 +101,6 @@ class Zone extends Model
     public function getKpi(string $devise): array
     {
         // 1. Statistiques Globales en une seule passe SQL
-        // On utilise total_remboursement qui est maintenant une colonne réelle
         $stats = $this->creditsActifs()
             ->where('monnaie', $devise)
             ->selectRaw('
@@ -108,79 +131,6 @@ class Zone extends Model
             'nb_retard'      => (int) ($retardsStats->nb_retard ?? 0),
             'montant_retard' => (float) ($retardsStats->montant_retard ?? 0),
         ];
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | KPI RAPIDES (SQL PUR – ULTRA PERFORMANCE)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Scope pour charger toutes les statistiques détaillées par devise
-     * (capital, exposition, nombres de crédits actifs, retards)
-     */
-    public function scopeWithDetailedStats($query)
-    {
-        return $query
-            ->with('gerant')
-            ->withCount([
-                'credits as credits_actifs_usd_count' => fn($q) => $q->actif()->where('monnaie', 'USD'),
-                'credits as credits_actifs_cdf_count' => fn($q) => $q->actif()->where('monnaie', 'CDF'),
-                'credits as credits_retard_usd_count' => fn($q) => $q->enRetard()->where('monnaie', 'USD'),
-                'credits as credits_retard_cdf_count' => fn($q) => $q->enRetard()->where('monnaie', 'CDF'),
-            ])
-            ->withSum(['credits as capital_usd_sum' => fn($q) => $q->actif()->where('monnaie', 'USD')], 'capital')
-            ->withSum(['credits as capital_cdf_sum' => fn($q) => $q->actif()->where('monnaie', 'CDF')], 'capital')
-            // Utilisation de withAggregate pour l'addition des colonnes
-            ->withAggregate(['credits as exposition_usd_sum' => function($q) {
-                $q->actif()->where('monnaie', 'USD');
-            }], DB::raw('SUM(capital + interet)'))
-            ->withAggregate(['credits as exposition_cdf_sum' => function($q) {
-                $q->actif()->where('monnaie', 'CDF');
-            }], DB::raw('SUM(capital + interet)'));
-    }
-
-
-    // Attributs calculés (utilisés dans la vue)
-    public function getCapitalActifUsdAttribute()
-    {
-        return (float) ($this->attributes['capital_usd_sum'] ?? 0);
-    }
-
-    public function getCapitalActifCdfAttribute()
-    {
-        return (float) ($this->attributes['capital_cdf_sum'] ?? 0);
-    }
-
-    public function getExpositionUsdAttribute()
-    {
-        return (float) ($this->attributes['exposition_usd_sum'] ?? 0);
-    }
-
-    public function getExpositionCdfAttribute()
-    {
-        return (float) ($this->attributes['exposition_cdf_sum'] ?? 0);
-    }
-
-    public function getCreditsRetardActifsUsdAttribute()
-    {
-        return (int) ($this->attributes['credits_retard_usd_count'] ?? 0);
-    }
-
-    public function getCreditsRetardActifsCdfAttribute()
-    {
-        return (int) ($this->attributes['credits_retard_cdf_count'] ?? 0);
-    }
-
-    public function getCreditsActifsUsdAttribute()
-    {
-        return (int) ($this->attributes['credits_actifs_usd_count'] ?? 0);
-    }
-
-    public function getCreditsActifsCdfAttribute()
-    {
-        return (int) ($this->attributes['credits_actifs_cdf_count'] ?? 0);
     }
 
     public function getTauxRisqueUsdAttribute(): float

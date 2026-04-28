@@ -50,8 +50,7 @@ class CreditCalculatorService
             'interet_payee'       => round($interetPayee, 2),
             'capital_payee'       => round($capitalPayee, 2),
             'reste_penalite'      => round($restePenalite, 2),
-            'reste_non_alloue'    => round($reliquat, 2), 
-            'reste_du_base_avant' => $situation['reste_du_base']
+            'reste_non_alloue'    => round($reliquat, 2),
         ];
     }
 }

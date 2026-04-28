@@ -76,7 +76,7 @@ class CloturesForm extends Component
             $service->ouvrirJournee($agence);
             
             session()->flash('success', 'La journée a été ouverte avec succès.');
-            return redirect()->route('clotures.index'); // Ou vers le dashboard
+            return redirect()->route('agence.show', $agence);
             
         } catch (\Exception $e) {
             session()->flash('error', $e->getMessage());

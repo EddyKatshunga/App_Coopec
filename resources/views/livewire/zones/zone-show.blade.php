@@ -42,12 +42,6 @@
                         </div>
                         <h2 class="text-xl font-bold text-slate-800">Portefeuille {{ $devise }}</h2>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-bold 
-                        @if(($dashboard[$devise]['niveau_risque'] ?? 'faible') === 'faible') bg-emerald-100 text-emerald-700
-                        @elseif(($dashboard[$devise]['niveau_risque'] ?? 'moyen') === 'moyen') bg-amber-100 text-amber-700
-                        @else bg-rose-100 text-rose-700 @endif">
-                        Risque {{ ucfirst($dashboard[$devise]['niveau_risque'] ?? 'faible') }} ({{ $dashboard[$devise]['taux_risque'] ?? 0 }}%)
-                    </span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-6">
@@ -74,37 +68,15 @@
                         <span class="text-sm text-slate-500">Reste à percevoir</span>
                         <span class="text-sm font-semibold text-slate-800">{{ number_format($dashboard[$devise]['reste_a_recouvrer'] ?? (($dashboard[$devise]['encours'] ?? 0) - $dashboard[$devise]['rembourse']), 2) }}</span>
                     </div>
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-sm text-rose-500 font-medium">Créances en retard</span>
-                        <span class="text-sm font-bold text-rose-600">{{ number_format($dashboard[$devise]['montant_retard'], 2) }}</span>
-                    </div>
                 </div>
             </div>
         @endforeach
     </div>
 
-    {{-- Synthèse Globale Consolidée --}}
-    <div class="bg-indigo-900 rounded-2xl p-6 shadow-md text-indigo-50 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div>
-            <h2 class="text-lg font-semibold text-indigo-200 mb-1">Exposition Globale du Portefeuille</h2>
-            <p class="text-3xl font-bold text-white">{{ number_format($dashboard['global']['exposition'], 2) }} <span class="text-lg font-medium text-indigo-300">Total</span></p>
-        </div>
-        <div class="flex gap-6 w-full md:w-auto">
-            <div class="bg-indigo-800/50 p-4 rounded-xl flex-1 text-center border border-indigo-700/50">
-                <p class="text-xs text-indigo-300 uppercase tracking-wider mb-1">Remboursé</p>
-                <p class="text-xl font-bold text-emerald-400">{{ number_format($dashboard['global']['rembourse'] ?? 0, 2) }}</p>
-            </div>
-            <div class="bg-indigo-800/50 p-4 rounded-xl flex-1 text-center border border-indigo-700/50">
-                <p class="text-xs text-indigo-300 uppercase tracking-wider mb-1">Reste Net</p>
-                <p class="text-xl font-bold text-white">{{ number_format($dashboard['global']['reste_a_recouvrer'] ?? 0, 2) }}</p>
-            </div>
-        </div>
-    </div>
-
     {{-- Liste des Crédits Actifs --}}
     <div class="bg-white shadow-sm ring-1 ring-slate-200/60 rounded-2xl overflow-hidden">
         <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="font-bold text-lg text-slate-800">Registre des Crédits Actifs</h3>
+            <h3 class="font-bold text-lg text-slate-800">Registre des Crédits Actifs de la Zone</h3>
             <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-full text-xs font-bold">{{ $credits_list->count() }} dossiers</span>
         </div>
 
@@ -124,9 +96,8 @@
                             <th scope="col" class="px-6 py-4">Membre</th>
                             <th scope="col" class="px-6 py-4 text-right">Cap + Int.</th>
                             <th scope="col" class="px-6 py-4 text-right">Remboursé</th>
-                            <th scope="col" class="px-6 py-4 text-right">Reste dû</th>
+                            <th scope="col" class="px-6 py-4 text-right">Reste A Payer</th>
                             <th scope="col" class="px-6 py-4 text-center">Statut</th>
-                            <th scope="col" class="px-6 py-4 text-right">Retard (Jrs)</th>
                             <th scope="col" class="px-6 py-4"></th>
                         </tr>
                     </thead>
@@ -162,13 +133,6 @@
                                         @else {{ ucfirst(str_replace('_', ' ', $credit->statut)) }}
                                         @endif
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    @if($credit->jours_retard > 0)
-                                        <span class="text-rose-600 font-bold">{{ $credit->jours_retard }} jrs</span>
-                                    @else
-                                        <span class="text-slate-300">-</span>
-                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-right text-slate-400 group-hover:text-blue-600 transition-colors">
                                     <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">

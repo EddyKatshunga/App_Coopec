@@ -178,7 +178,7 @@
                                 </div>
                                 @if($situation['penalites_courantes'] > 0)
                                     <div class="text-[10px] text-red-600 font-medium">
-                                        dont {{ number_format($situation['penalites_courantes'], 2, ',', ' ') }} pén.
+                                        + {{ number_format($situation['penalites_courantes'], 2, ',', ' ') }} pén.
                                     </div>
                                 @else
                                     <div class="text-[10px] text-gray-400">—</div>

@@ -68,11 +68,6 @@ class Credit extends Model
     {
         return 'date_credit';
     }
-
-    public function getDateCalculAttribute(): Carbon
-    {
-        return now();
-    }
     
     public function isAddition(): bool 
     {
@@ -92,20 +87,17 @@ class Credit extends Model
         return $this->duree > 0 ? (float) ($this->total / $this->duree) : $this->total;
     }
 
-    public function getSituationActuelle(?Carbon $dateConsultation = null): array
+    public function getSituationActuelle(): array
     {
-        $dateRef = $dateConsultation ?? $this->date_calcul;
-        $resteDu = $this->total; //Au départ, le total puis il va décroitre après chaque paiement
+        $dateRef = now();
         $dateDernierCalcul = clone $this->date_fin_prevue;
 
         // Optimisation N+1 : Filtrer la collection en mémoire si chargée
         if ($this->relationLoaded('remboursements')) {
             $remboursements = $this->remboursements
-                ->where('date_paiement', '<=', $dateRef)
                 ->sortBy('date_paiement');
         } else {
             $remboursements = $this->remboursements()
-                ->where('date_paiement', '<=', $dateRef)
                 ->orderBy('date_paiement', 'asc') 
                 ->get();
         }
@@ -113,8 +105,6 @@ class Credit extends Model
         $restePenalite = 0.0;
         
         foreach ($remboursements as $paiement) {
-            $montantAffecteALaBase = $paiement->montant_capital_payee + $paiement->montant_interet_payee;
-            $resteDu -= $montantAffecteALaBase;
             $restePenalite = (float) $paiement->reste_penalite;
 
             if ($paiement->date_paiement->gt($this->date_fin_prevue)) {
@@ -125,15 +115,13 @@ class Credit extends Model
         $penalitesCourantes = $restePenalite;
         $joursRetardCourants = 0;
         
-        if ($dateRef->gt($dateDernierCalcul) && $dateRef->gt($this->date_fin_prevue) && $resteDu > 0) {
+        if ($dateRef->gt($dateDernierCalcul) && $dateRef->gt($this->date_fin_prevue) && $this->reste_du > 0) {
             $joursRetardCourants = (int) $dateRef->diffInDays($dateDernierCalcul, true);
-            $penalitesCourantes += $joursRetardCourants * $resteDu * ($this->taux_penalite_journalier / 100);
+            $penalitesCourantes += $joursRetardCourants * $this->reste_du * ($this->taux_penalite_journalier / 100);
         }
 
         return [
-            'reste_du_base' => max(0, round($resteDu, 2)),
             'penalites_courantes' => round($penalitesCourantes, 2),
-            'total_a_payer' => round(max(0, $resteDu) + $penalitesCourantes, 2),
             'jours_retard_courants' => $joursRetardCourants,
         ];
     }
@@ -148,6 +136,16 @@ class Credit extends Model
         return (float) $this->getSituationActuelle()['penalites_courantes'];
     }
 
+    public function getJoursRetardsAttribute(): float
+    {
+        return (int) $this->getSituationActuelle()['jours_retard_courants'];
+    }
+
+    public function getResteGlobalAttribute(): float
+    {
+        return (float) $this->reste_du + $this->penalites_courantes;
+    }
+
     public function getStatutAttribute(): string
     {
         if ($this->date_cloture_forcee && $this->negocie) {
@@ -156,7 +154,7 @@ class Credit extends Model
 
         $situation = $this->getSituationActuelle();
         
-        if ($situation['total_a_payer'] <= 0) {
+        if ($this->reste_global <= 0) {
             // Optimisation : Prendre le dernier paiement de la collection si chargée
             $dernierPaiement = $this->relationLoaded('remboursements') 
                 ? $this->remboursements->sortByDesc('date_paiement')->first()
@@ -167,7 +165,7 @@ class Credit extends Model
             return $dateFinEffective->gt($this->date_fin_prevue) ? 'termine_en_retard' : 'termine';
         }
 
-        if ($this->date_calcul->gt($this->date_fin_prevue)) {
+        if (now()->gt($this->date_fin_prevue)) {
             return 'en_retard';
         }
 
@@ -229,17 +227,6 @@ class Credit extends Model
         }
 
         return collect($historique);
-    }
-
-    /**
-     * Scope pour calculer le montant payé via une sous-requête (très performant)
-     */
-    public function scopeWithSommesPayees($query)
-    {
-        return $query->addSelect(['total_paye' => \App\Models\CreditRemboursement::selectRaw(
-            'COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0)'
-        )
-        ->whereColumn('credit_id', 'credits.id')]);
     }
 
     /**
