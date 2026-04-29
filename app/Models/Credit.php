@@ -30,7 +30,7 @@ class Credit extends Model
         'taux_penalite_journalier', 'unite_temps', 'duree',
         'date_fin_prevue', 'garant_nom', 'garant_adresse',
         'garant_telephone', 'negocie', 'note_negociation',
-        'date_cloture_forcee', 'observation',
+        'date_cloture_forcee', 'observation', 'statut'
     ];
 
     protected $casts = [

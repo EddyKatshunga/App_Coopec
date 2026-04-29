@@ -139,14 +139,14 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="text-sm {{ $credit->date_fin_prevue->isPast() && $credit->statut === 'en_cours' ? 'text-red-600 font-bold' : 'text-gray-700' }}">
+                                <span class="text-sm {{ $credit->estEnRetard() ? 'text-red-600 font-bold' : 'text-gray-700' }}">
                                     {{ $credit->date_fin_prevue->format('d/m/Y') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
                                 @if($credit->statut === 'en_cours')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                        En cours
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $credit->estEnRetard() ? 'bg-red-100' : 'bg-emerald-100' }} text-emerald-800">
+                                        {{ $credit->estEnRetard() ? 'En Retard' : 'En Cours' }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
