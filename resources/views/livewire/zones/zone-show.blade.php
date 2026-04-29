@@ -1,18 +1,4 @@
 <div class="p-4 md:p-8 bg-gray-50 min-h-screen">
-    {{-- Fil d'Ariane & En-tête --}}
-    <nav class="flex mb-6" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm font-medium">
-            <li class="inline-flex items-center">
-                <a href="{{ route('agences.zones.index') }}" class="text-gray-500 hover:text-blue-600 transition-colors">Zones</a>
-            </li>
-            <li>
-                <div class="flex items-center">
-                    <svg class="w-3 h-3 text-gray-400 mx-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/></svg>
-                    <span class="text-gray-800 font-bold">{{ $zone->nom }}</span>
-                </div>
-            </li>
-        </ol>
-    </nav>
 
     <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
         <div>

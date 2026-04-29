@@ -42,12 +42,14 @@ class ZoneShow extends Component
     {
         return $this->zone->credits()
             ->enCours()
-            ->with(['membre', 'agent'])
+            ->with(['membre.user', 'agent']) // Optionnel : eager load user si besoin
             ->where(function($q) {
                 $q->where('numero_credit', 'like', "%{$this->search}%")
-                  ->orWhereHas('membre', fn($query) => $query->where('nom', 'like', "%{$this->search}%"));
+                ->orWhereHas('membre.user', function($query) {
+                    $query->where('name', 'like', "%{$this->search}%");
+                });
             })
-            ->orderByRaw('date_fin_prevue < ? DESC', [now()]) // Met les retards en haut
+            ->orderByRaw('date_fin_prevue < ? DESC', [now()]) 
             ->paginate(15);
     }
 

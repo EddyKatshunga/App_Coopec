@@ -58,8 +58,8 @@
             $caisseItems = [];
             
             if ($user->can('can.level4')) {
-                $caisseItems[] = ['route' => 'depenses.index', 'label' => 'Dépenses', 'can' => true];
-                $caisseItems[] = ['route' => 'revenus.index', 'label' => 'Revenus', 'can' => true];
+                $caisseItems[] = ['route' => 'depenses.index', 'label' => 'Journal Dépenses', 'can' => true];
+                $caisseItems[] = ['route' => 'revenus.index', 'label' => 'Journal Revenus', 'can' => true];
             }
             
             if ($user->can('can.level4')) {
@@ -90,8 +90,8 @@
             
             if ($user->can('can.level1')) {
                 $terrainItems[] = ['route' => 'comptes.index', 'label' => 'Comptes Epargnes', 'can' => true];
-                $terrainItems[] = ['route' => 'epargne.transactions.index', 'label' => 'Epargnes', 'can' => true];
-                $terrainItems[] = ['route' => 'remboursements.index', 'label' => 'Remboursements', 'can' => true];
+                $terrainItems[] = ['route' => 'epargne.transactions.index', 'label' => 'Journal Epargnes', 'can' => true];
+                $terrainItems[] = ['route' => 'remboursements.index', 'label' => 'Jounral Remboursements', 'can' => true];
                 
                 if ($user->can('can.level2')) {
                     $terrainItems[] = ['route' => 'credit.pret.index', 'label' => 'Repertoire Credits', 'can' => true];
@@ -119,6 +119,23 @@
         }
         if ($user->agent) {
             $personnelItems[] = ['route' => 'agent.show', 'params' => ['agent' => $user->agent], 'label' => 'Mes performances', 'can' => true];
+        }
+
+        $agent = $user->agent;
+        if ($user->hasRole('niveau 2') && $user->agent->zone_dirige) {
+            // On récupère la zone qu'il dirige
+            $zoneDirigee = $agent->zone_dirige;
+
+            $personnelItems = array_merge($personnelItems, [
+                ['separator' => true],
+                [
+                    'route' => 'agences.zones.show', 
+                    'params' => ['zone' => $zoneDirigee], 
+                    'label' => 'Ma Zone', 
+                    'highlight' => true, 
+                    'can' => true
+                ],
+            ]);
         }
         
         $menuSections[] = [
