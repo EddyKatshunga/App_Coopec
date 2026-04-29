@@ -9,79 +9,122 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 #[Layout('layouts.app')]
 class CreditsList extends Component
 {
     use WithPagination;
 
-    public $search = '';
-    public $zone_id, $statut, $devise, $actif, $date_debut, $date_fin;
-    public $selected_agence_id, $all_agents = false;
+    // Filtres
+    public string $search = '';
+    public string $statut = 'en_cours';
+    public ?string $selected_agence_id = null;
+    public ?string $selected_zone_id = null;
+    public string $monnaie = '';
+
+    // Pagination
+    protected $paginationTheme = 'tailwind';
 
     public function mount()
     {
         if (!Auth::user()->can('can.level6')) {
-            $this->selected_agence_id = Auth::user()->agence_id;
+            $this->selected_agence_id = (string) Auth::user()->agence_id;
         }
     }
 
-    public function updating() { $this->resetPage(); }
+    /**
+     * Réinitialiser la pagination à chaque changement de filtre
+     */
+    public function updated($property)
+    {
+        if (in_array($property, ['search', 'statut', 'selected_agence_id', 'selected_zone_id', 'monnaie'])) {
+            $this->resetPage();
+        }
+    }
 
     /**
-     * Construit la requête de base partagée entre la liste et les stats
+     * Construire la requête des crédits avec les filtres
      */
-    private function getFilteredQuery()
+    protected function getCreditsQuery(): Builder
     {
-        $user = Auth::user();
-        
-        return Credit::query()
-            ->when(!$user->can('can.level6'), fn($q) => $q->where('agence_id', $user->agence_id))
-            ->when($user->can('can.level6') && $this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id))
-            ->when(!$user->can('can.level4') || !$this->all_agents, function($q) use ($user) {
-                if (!$user->can('can.level6')) $q->where('created_by', $user->id);
-            })
-            ->when($this->search, function($q) {
-                $q->where(fn($sub) => $sub->where('numero_credit', 'like', "%{$this->search}%")
-                  ->orWhereHas('user', fn($sq) => $sq->where('name', 'like', "%{$this->search}%")));
-            })
-            ->when($this->zone_id, fn($q) => $q->where('zone_id', $this->zone_id))
-            ->when($this->devise, fn($q) => $q->where('monnaie', $this->devise))
-            ->when($this->date_debut, fn($q) => $q->whereDate('date_credit', '>=', $this->date_debut))
-            ->when($this->date_fin, fn($q) => $q->whereDate('date_credit', '<=', $this->date_fin))
-            ->when(!is_null($this->actif), fn($q) => $q->actif($this->actif == '1'))
-            ->when($this->statut, fn($q) => $q->statut($this->statut));
+        $query = Credit::query()
+            ->with(['membre', 'agent', 'zone'])
+            ->select([
+                'credits.id',
+                'credits.uuid',
+                'credits.numero_credit',
+                'credits.monnaie',
+                'credits.capital',
+                'credits.interet',
+                'credits.total_remboursement',
+                'credits.duree',
+                'credits.unite_temps',
+                'credits.date_fin_prevue',
+                'credits.statut',
+                'credits.membre_id',
+                'credits.agent_id',
+                'credits.zone_id',
+                'credits.agence_id'
+            ]);
+
+        // Filtre par statut (en_cours, termine)
+        if (!empty($this->statut)) {
+            $query->where('statut', $this->statut);
+        }
+
+        // Filtre par agence (pour super admin ou admin)
+        if (!empty($this->selected_agence_id)) {
+            $query->where('agence_id', $this->selected_agence_id);
+        }
+
+        // Filtre par zone
+        if (!empty($this->selected_zone_id)) {
+            $query->where('zone_id', $this->selected_zone_id);
+        }
+
+        // Filtre par devise
+        if (!empty($this->monnaie)) {
+            $query->where('monnaie', $this->monnaie);
+        }
+
+        // Recherche par numéro de crédit ou nom du membre
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('numero_credit', 'LIKE', '%' . $this->search . '%')
+                  ->orWhereHas('membre', function ($sub) {
+                      $sub->where('nom', 'LIKE', '%' . $this->search . '%');
+                  });
+            });
+        }
+
+        // Tri par date de création décroissante (les plus récents d'abord)
+        $query->latest('created_at');
+
+        return $query;
+    }
+
+    /**
+     * Récupérer les zones disponibles en fonction de l'agence sélectionnée
+     */
+    public function getZonesProperty()
+    {
+        if (empty($this->selected_agence_id)) {
+            return collect();
+        }
+        return Zone::where('agence_id', $this->selected_agence_id)->get();
     }
 
     public function render()
     {
-        // 1. Récupération des données paginées
-        $credits = $this->getFilteredQuery()
-            ->with(['user', 'zone', 'agence', 'creator'])
-            ->latest('date_credit')
-            ->paginate(12);
+        $credits = $this->getCreditsQuery()->paginate(15);
 
-        // 2. Requête agrégée (Stats globales sans charger les modèles)
-        // Note: Le calcul des pénalités exactes en pur SQL est complexe, 
-        // on se concentre sur le capital restant dû en base.
-        $stats = $this->getFilteredQuery()
-            ->selectRaw('
-                COUNT(*) as count,
-                SUM(capital + interet) as total_initial,
-                SUM((SELECT COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0) 
-                     FROM credit_remboursements WHERE credit_id = credits.id)) as total_deja_paye
-            ')
-            ->first();
+        $agences = Auth::user()->can('can.level6') ? Agence::all() : [];
 
         return view('livewire.credits.credits-list', [
             'credits' => $credits,
-            'zones' => Zone::orderBy('nom')->get(),
-            'agences' => Auth::user()->can('can.level6') ? Agence::all() : [],
-            'stats' => [
-                'total' => $stats->count ?? 0,
-                'total_capital_restant' => ($stats->total_initial ?? 0) - ($stats->total_deja_paye ?? 0),
-            ]
+            'agences' => $agences,
+            'zones' => $this->zones,
         ]);
     }
 }

@@ -12,7 +12,7 @@
                         <x-heroicon-s-exclamation-triangle class="w-8 h-8"/>
                     </div>
 
-                    <h3 class="text-xl font-black text-gray-900 mb-2 text-center">Clôture exceptionnelle</h3>
+                    <h3 class="text-xl font-black text-gray-900 mb-2 text-center">Clôturer le dossier</h3>
                     <p class="text-sm text-gray-500 text-center mb-6">Cette opération annulera définitivement le solde restant et les pénalités.</p>
 
                     <div class="space-y-4">

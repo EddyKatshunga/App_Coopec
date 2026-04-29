@@ -42,7 +42,7 @@ class CreditService
     }
 
     /**
-     * Force la clôture d'un crédit (souvent après une négociation ou un recouvrement spécial).
+     * Cloturer un dossier.
      * * @param Credit $credit
      * @param string|null $motif
      * @param bool $estNegocie
@@ -54,7 +54,8 @@ class CreditService
             'date_cloture_forcee' => now(),
             'negocie'             => $estNegocie,
             'note_negociation'    => $motif ?? 'Clôture forcée par l\'administration.',
-            'observation'         => $credit->observation . " [Clôturé manuellement par " . auth()->user()->name . "]"
+            'observation'         => $credit->observation . " [Clôturé manuellement par " . Auth::user()->name . "]",
+            'statut'              => "termine"
         ]);
 
         // Sauvegarde sans déclencher d'événements
@@ -62,7 +63,4 @@ class CreditService
 
         return $credit;
     }
-
-
-
 }

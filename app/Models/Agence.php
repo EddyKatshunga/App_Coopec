@@ -93,4 +93,50 @@ class Agence extends Model
     {
         return $this->cloturesComptables()->where('statut', 'ouverte')->first();
     }
+
+    /* ================= RELATIONS FILTRÉES ================= */
+
+    /**
+     * Accès direct aux crédits en cours de toutes les zones de l'agence.
+     */
+    public function creditsEnCours(): HasMany
+    {
+        return $this->hasMany(Credit::class)->enCours();
+    }
+
+    /**
+     * Accès direct aux crédits en retard de l'agence.
+     */
+    public function creditsEnRetard(): HasMany
+    {
+        return $this->hasMany(Credit::class)->enRetard();
+    }
+
+    /* ================= CONSOLIDATION FINANCIÈRE ================= */
+
+    /**
+     * Consolidation de toutes les zones pour une devise.
+     * Répond à : "Quel est l'état global de mon agence ?"
+     */
+    public function getBilanCredits(string $devise): object
+    {
+        $stats = $this->creditsEnCours()
+            ->devise($devise)
+            ->selectRaw('
+                SUM(capital + interet) as total_dehors,
+                SUM(total_remboursement) as total_encaisse
+            ')
+            ->first();
+
+        $totalDehors = (float) $stats->total_dehors;
+        $totalEncaisse = (float) $stats->total_encaisse;
+
+        return (object) [
+            'capital_interet_total' => $totalDehors,
+            'montant_recupere'      => $totalEncaisse,
+            'reste_a_recouvrer'     => $totalDehors - $totalEncaisse,
+            'nombre_credits_actifs' => $this->creditsEnCours()->devise($devise)->count(),
+            'nombre_retards'        => $this->creditsEnRetard()->devise($devise)->count(),
+        ];
+    }
 }

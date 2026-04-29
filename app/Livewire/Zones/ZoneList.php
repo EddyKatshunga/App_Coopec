@@ -20,6 +20,7 @@ class ZoneList extends Component
     public function mount()
     {
         $user = auth()->user();
+        // Si l'utilisateur n'est pas SuperAdmin (Level 6), on force son agence
         if (!$user->can('can.level6')) {
             $this->selectedAgenceId = $user->agence_id;
         }
@@ -29,34 +30,44 @@ class ZoneList extends Component
     {
         $user = auth()->user();
         $isSuperAdmin = $user->can('can.level6');
+        
+        // Déterminer l'ID de l'agence à afficher
         $agenceId = $isSuperAdmin ? $this->selectedAgenceId : $user->agence_id;
 
-        // 1. Liste des zones paginée (avec stats par zone)
-        $zones = Zone::query()
-            ->when($agenceId, fn($q) => $q->where('agence_id', $agenceId))
-            ->withDetailedStats()
-            ->with(['gerant'])
-            ->latest()
-            ->paginate(15);
+        $agence = null;
+        $zones = collect();
+        $statsGlobales = null;
 
-        // 2. Calcul des totaux globaux (pour le tfoot)
-        // On interroge directement la table Credit pour la précision globale
-        $totals = Credit::query()
-            ->actif()
-            ->when($agenceId, fn($q) => $q->where('agence_id', $agenceId))
-            ->selectRaw('
-                COUNT(*) as total_nb,
-                SUM(CASE WHEN monnaie = "USD" THEN (capital + interet) ELSE 0 END) as vol_usd,
-                SUM(CASE WHEN monnaie = "USD" THEN total_remboursement ELSE 0 END) as enc_usd,
-                SUM(CASE WHEN monnaie = "CDF" THEN (capital + interet) ELSE 0 END) as vol_cdf,
-                SUM(CASE WHEN monnaie = "CDF" THEN total_remboursement ELSE 0 END) as enc_cdf
-            ')
-            ->first();
+        if ($agenceId) {
+            $agence = Agence::with('chefAgence')->find($agenceId);
+            
+            if ($agence) {
+                // 1. Statistiques consolidées de l'agence (USD et CDF)
+                $statsGlobales = [
+                    'USD' => $agence->getBilanCredits('USD'),
+                    'CDF' => $agence->getBilanCredits('CDF'),
+                    'termine' => $agence->credits()->termine()->count()
+                ];
+
+                // 2. Liste des zones avec Eager Loading pour éviter le problème N+1
+                // On charge les zones et on pourra appeler les stats par devise dans la vue
+                $zones = Zone::parAgence($agenceId)
+                    ->withCount([
+                        'credits as total_credits_count',
+                        'credits as actifs_count' => fn($q) => $q->enCours(),
+                        'credits as retards_count' => fn($q) => $q->enRetard()
+                    ])
+                    ->with('gerant')
+                    ->orderBy('nom')
+                    ->paginate(10);
+            }
+        }
 
         return view('livewire.zones.zone-list', [
-            'zones' => $zones,
-            'totals' => $totals,
             'agences' => $isSuperAdmin ? Agence::orderBy('nom')->get() : collect(),
+            'agenceActuelle' => $agence,
+            'statsGlobales' => $statsGlobales,
+            'zones' => $zones,
             'isSuperAdmin' => $isSuperAdmin
         ]);
     }

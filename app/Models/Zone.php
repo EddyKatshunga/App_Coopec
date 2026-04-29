@@ -6,7 +6,6 @@ use App\Models\Traits\Blameable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 class Zone extends Model
 {
@@ -20,192 +19,113 @@ class Zone extends Model
     }
 
     protected $fillable = [
-        'nom',
-        'code',
-        'gerant_id',
-        'agence_id',
+        'nom', 'code', 'gerant_id', 'agence_id',
     ];
 
     /*
     |--------------------------------------------------------------------------
-    | RELATIONS
+    | RELATIONS & SCOPES FILTRÉS
     |--------------------------------------------------------------------------
     */
 
-    public function gerant(): BelongsTo
-    {
-        return $this->belongsTo(Agent::class, 'gerant_id');
-    }
+    public function gerant(): BelongsTo { return $this->belongsTo(Agent::class, 'gerant_id'); }
+    public function agence(): BelongsTo { return $this->belongsTo(Agence::class); }
 
-    public function agence(): BelongsTo
-    {
-        return $this->belongsTo(Agence::class);
-    }
-
+    /**
+     * Relation de base vers tous les crédits.
+     */
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPES MÉTIER (100% basés sur Credit)
-    |--------------------------------------------------------------------------
-    */
-
-    public function creditsActifs()
+    /**
+     * Uniquement les crédits dont le dossier est encore ouvert.
+     */
+    public function creditsEnCours(): HasMany
     {
-        return $this->credits()->actif();
+        return $this->hasMany(Credit::class)->enCours();
     }
 
-    public function creditsEnRetard()
+    /**
+     * Uniquement les crédits en retard.
+     */
+    public function creditsEnRetard(): HasMany
     {
-        return $this->credits()->enRetard();
-    }
-
-    public function creditsByDevise(string $devise)
-    {
-        return $this->creditsActifs()->where('monnaie', $devise);
+        return $this->hasMany(Credit::class)->enRetard();
     }
 
     /*
     |--------------------------------------------------------------------------
-    | SCOPES DE RECHERCHE
-    |--------------------------------------------------------------------------
-    */
-    public function scopeWithDetailedStats($query)
-    {
-        return $query->withCount(['credits as nb_credits_actifs' => function ($q) {
-            $q->actif();
-        }])
-        ->withSum(['credits as sum_engage_usd' => function ($q) {
-            $q->actif()->where('monnaie', 'USD');
-        }], DB::raw('capital + interet'))
-        ->withSum(['credits as sum_rembourse_usd' => function ($q) {
-            $q->actif()->where('monnaie', 'USD');
-        }], 'total_remboursement')
-        ->withSum(['credits as sum_engage_cdf' => function ($q) {
-            $q->actif()->where('monnaie', 'CDF');
-        }], DB::raw('capital + interet'))
-        ->withSum(['credits as sum_rembourse_cdf' => function ($q) {
-            $q->actif()->where('monnaie', 'CDF');
-        }], 'total_remboursement');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | KPI TEMPS RÉEL
+    | ANALYSE DU PORTEFEUILLE (Calculs par Devise)
     |--------------------------------------------------------------------------
     */
 
-    public function getKpi(string $devise): array
+    /**
+     * Calcule les statistiques financières pour une devise donnée (uniquement sur crédits en cours).
+     * Retourne un objet contenant : prêté, remboursé, reste à recouvrer.
+     */
+    public function getStatsPortefeuille(string $devise): object
     {
-        // 1. Statistiques Globales en une seule passe SQL
-        $stats = $this->creditsActifs()
-            ->where('monnaie', $devise)
+        // On utilise les colonnes réelles de la DB pour la performance (SUM SQL)
+        $data = $this->creditsEnCours()
+            ->devise($devise)
             ->selectRaw('
-                COUNT(id) as nb_credits,
-                SUM(capital) as sum_capital,
-                SUM(interet) as sum_interet,
-                SUM(capital + interet) as sum_encours,
-                SUM(total_remboursement) as sum_rembourse
+                SUM(capital + interet) as total_prete, 
+                SUM(total_remboursement) as total_recupere
             ')
             ->first();
 
-        // 2. Statistiques des Retards
-        // Le calcul du montant_retard devient extrêmement simple et rapide
-        $retardsStats = $this->creditsEnRetard()
-            ->where('monnaie', $devise)
-            ->selectRaw('
-                COUNT(id) as nb_retard, 
-                SUM((capital + interet) - total_remboursement) as montant_retard
-            ')
-            ->first();
+        $prete = (float) $data->total_prete;
+        $recupere = (float) $data->total_recupere;
 
-        return [
-            'capital'        => (float) ($stats->sum_capital ?? 0),
-            'interet'        => (float) ($stats->sum_interet ?? 0),
-            'encours'        => (float) ($stats->sum_encours ?? 0),
-            'rembourse'      => (float) ($stats->sum_rembourse ?? 0),
-            'nb_credits'     => (int) ($stats->nb_credits ?? 0),
-            'nb_retard'      => (int) ($retardsStats->nb_retard ?? 0),
-            'montant_retard' => (float) ($retardsStats->montant_retard ?? 0),
+        return (object) [
+            'devise'            => strtoupper($devise),
+            'total_prete'       => $prete,
+            'total_recupere'    => $recupere,
+            'reste_a_recouvrer' => $prete - $recupere,
+            'taux_recouvrement' => $prete > 0 ? round(($recupere / $prete) * 100, 2) : 0,
+            'nombre_dossiers'   => $this->creditsEnCours()->devise($devise)->count(),
+            'nombre_retards'    => $this->creditsEnRetard()->devise($devise)->count(),
         ];
-    }
-
-    public function getTauxRisqueUsdAttribute(): float
-    {
-        $total = $this->credits_actifs_usd;
-        if ($total === 0) return 0;
-        return round(($this->credits_retard_actifs_usd / $total) * 100, 2);
-    }
-
-    public function getTauxRisqueCdfAttribute(): float
-    {
-        $total = $this->credits_actifs_cdf;
-        if ($total === 0) return 0;
-        return round(($this->credits_retard_actifs_cdf / $total) * 100, 2);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | INDICATEURS MÉTIER
+    | ATTRIBUTS DYNAMIQUES (Helpers pour les vues)
     |--------------------------------------------------------------------------
+    | Note : Ces attributs peuvent être gourmands si utilisés dans une boucle 
+    | sur beaucoup de zones. Privilégiez getStatsPortefeuille() pour un rapport.
     */
 
-    public function getTauxRisqueAttribute(): float
+    public function getStatsUsdAttribute(): object
     {
-        $total = $this->credits_actifs_count ?? $this->creditsActifs()->count();
-
-        if ($total === 0) return 0;
-
-        $retard = $this->credits_retard_count ?? $this->creditsEnRetard()->count();
-
-        return round(($retard / $total) * 100, 2);
+        return $this->getStatsPortefeuille('USD');
     }
 
-    public function getNiveauRisqueAttribute(): string
+    public function getStatsCdfAttribute(): object
     {
-        return match (true) {
-            $this->taux_risque == 0 => 'faible',
-            $this->taux_risque < 10 => 'moyen',
-            default => 'élevé',
-        };
+        return $this->getStatsPortefeuille('CDF');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD DÉCISIONNEL
-    |--------------------------------------------------------------------------
-    */
+    /* ================= QUERY SCOPES ================= */
 
-    public function getDashboardData(): array
+    /**
+     * Filtre les zones appartenant à une agence spécifique.
+     */
+    public function scopeParAgence($query, $agenceId)
     {
-        $cdf = $this->getKpi('CDF');
-        $usd = $this->getKpi('USD');
+        return $query->where('agence_id', $agenceId);
+    }
 
-        return [
-            'zone' => $this->nom,
-
-            'CDF' => [
-                ...$cdf,
-                'taux_risque' => $cdf['nb_credits'] > 0
-                    ? round(($cdf['nb_retard'] / $cdf['nb_credits']) * 100, 2)
-                    : 0,
-            ],
-
-            'USD' => [
-                ...$usd,
-                'taux_risque' => $usd['nb_credits'] > 0
-                    ? round(($usd['nb_retard'] / $usd['nb_credits']) * 100, 2)
-                    : 0,
-            ],
-
-            'global' => [
-                'exposition' => $cdf['encours'] + $usd['encours'] * 2300,
-                'credits_actifs' => $cdf['nb_credits'] + $usd['nb_credits'],
-                'credits_retard' => $cdf['nb_retard'] + $usd['nb_retard'],
-            ]
-        ];
+    /**
+     * Filtre les zones qui ont au moins un crédit en retard.
+     * Utilisation : Zone::ayantDesRetards()->get();
+     */
+    public function scopeAyantDesRetards($query)
+    {
+        return $query->whereHas('credits', function ($q) {
+            $q->enRetard(); // On réutilise le scope du modèle Credit
+        });
     }
 }

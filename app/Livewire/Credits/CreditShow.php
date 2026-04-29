@@ -26,6 +26,7 @@ class CreditShow extends Component
     public float $penaliteCourante = 0;
     public int $joursRetard = 0;
     public float $resteDu = 0;
+    public float $resteGlobal = 0;
 
     protected $listeners = [
         'remboursementAdded' => 'rafraichirEtat',
@@ -40,11 +41,12 @@ class CreditShow extends Component
     public function rafraichirEtat(): void
     {
         $this->credit->load('remboursements');
-        $situation = $this->credit->getSituationActuelle();
-
-        $this->penaliteCourante = $situation['penalites_courantes'];
-        $this->joursRetard = $situation['jours_retard_courants'];
-        $this->resteDu = $situation['total_a_payer'];
+        
+        // Utilisation des attributs du modèle au lieu de getSituationActuelle()
+        $this->penaliteCourante = $this->credit->penalites_courantes;
+        $this->joursRetard = $this->credit->jours_retards;
+        $this->resteDu = $this->credit->reste_du;
+        $this->resteGlobal = $this->credit->reste_global;
     }
 
     // Ouvre/Ferme le modal et réinitialise les champs
@@ -79,10 +81,20 @@ class CreditShow extends Component
 
     public function render()
     {
+        // Tri des remboursements par date de paiement (ASC)
+        $remboursements = $this->credit->remboursements()
+            ->orderBy('date_paiement', 'asc')
+            ->get();
+            
+        // Calcul du capital restant dynamique pour chaque remboursement
+        $resteApres = $this->credit->total;
+        foreach ($remboursements as $remb) {
+            $resteApres -= ($remb->montant_capital_payee + $remb->montant_interet_payee);
+            $remb->reste_du_apres = max(0, $resteApres);
+        }
+
         return view('livewire.credits.credit-show', [
-            'remboursements' => $this->credit->remboursements()
-                ->orderBy('created_at', 'asc')
-                ->get(),
+            'remboursements' => $remboursements,
         ]);
     }
 }

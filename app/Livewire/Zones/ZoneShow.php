@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models; // Rappel : Assurez-vous d'avoir les scopes dans Credit
+
 namespace App\Livewire\Zones;
 
 use App\Models\Zone;
@@ -15,39 +17,42 @@ class ZoneShow extends Component
     use AuthorizesRequests, WithPagination;
 
     public Zone $zone;
-    
-    // Le dashboard peut rester public s'il est petit (quelques scalaires)
-    // Mais on l'initialise vide, il sera calculé au mount
-    public array $dashboard = [];
+    public $search = '';
 
     public function mount(Zone $zone): void
     {
         $this->authorize('view', $zone);
-        
-        // La zone charge uniquement ses infos de base
-        $this->zone = $zone->load('gerant');
-        
-        // Le dashboard est généré 100% via le Modèle (SQL) sans charger les relations lourdes
-        $this->dashboard = $this->zone->getDashboardData();
+        $this->zone = $zone->load(['gerant', 'agence']);
     }
 
     #[Computed]
-    public function creditsList()
+    public function statsUsd()
     {
-        // On pagine la requête au lieu de faire un ->get() massif
-        // L'attribut Computed empêche la sérialisation dans Livewire
+        return $this->zone->getStatsPortefeuille('USD');
+    }
+
+    #[Computed]
+    public function statsCdf()
+    {
+        return $this->zone->getStatsPortefeuille('CDF');
+    }
+
+    #[Computed]
+    public function credits()
+    {
         return $this->zone->credits()
-            ->actif()
-            ->with(['membre'])
-            ->orderByDesc('date_credit')
+            ->enCours()
+            ->with(['membre', 'agent'])
+            ->where(function($q) {
+                $q->where('numero_credit', 'like', "%{$this->search}%")
+                  ->orWhereHas('membre', fn($query) => $query->where('nom', 'like', "%{$this->search}%"));
+            })
+            ->orderByRaw('date_fin_prevue < ? DESC', [now()]) // Met les retards en haut
             ->paginate(15);
     }
 
     public function render()
     {
-        return view('livewire.zones.zone-show', [
-            // On appelle la propriété computed via $this->creditsList
-            'credits_list' => $this->creditsList, 
-        ]);
+        return view('livewire.zones.zone-show');
     }
 }

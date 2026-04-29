@@ -126,8 +126,74 @@ class Credit extends Model
         ];
     }
 
+    /**
+     * Somme totale du capital déjà remboursé.
+     */
+    public function getTotalCapitalPayeAttribute(): float
+    {
+        return (float) $this->remboursements->sum('montant_capital_payee');
+    }
+
+    /**
+     * Somme totale des intérêts déjà remboursés.
+     */
+    public function getTotalInteretPayeAttribute(): float
+    {
+        return (float) $this->remboursements->sum('montant_interet_payee');
+    }
+
+    /**
+     * Vérifie si ce crédit spécifique est en retard.
+     */
+    public function estEnRetard(): bool
+    { 
+        // Doit être "en cours" ET la date de fin doit être passée.
+        return $this->statut === 'en_cours' && $this->date_fin_prevue->isPast();
+    }
+
+    /**
+     * Détermine le type de retard précis (Dynamique).
+     */
+    public function getTypeRetardAttribute(): ?string
+    {
+        if ($this->statut === 'termine' || now()->lessThanOrEqualTo($this->date_fin_prevue)) {
+            return null;
+        }
+
+        $resteCapital = $this->capital - $this->total_capital_paye;
+        $resteInteret = $this->interet - $this->total_interet_paye;
+        $aDesPenalites = $this->penalites_courantes > 0;
+
+        if ($resteCapital > 0.01 && $resteInteret > 0.01 && $aDesPenalites) {
+            return 'retard_capital_interet_penalite';
+        }
+        if ($resteCapital > 0.01 && $resteInteret > 0.01) {
+            return 'retard_capital_interet';
+        }
+        if ($resteCapital > 0.01) {
+            return 'retard_capital';
+        }
+        if ($aDesPenalites) {
+            return 'retard_penalites';
+        }
+
+        return 'retard';
+    }
+
+    /**
+     * Suggère à l'agent si le dossier est prêt pour la clôture manuelle.
+     */
+    public function getPeutEtreClotureAttribute(): bool
+    {
+        if ($this->statut === 'termine') return false;
+
+        // Prêt à clore si : reste du (cap+int) <= 0 ET pénalités <= 0
+        return $this->reste_du <= 0.01 && $this->penalites_courantes <= 0.01;
+    }
+
     public function getResteDuAttribute(): float
     {
+        if ($this->statut === 'termine') return 0.00;
         return (float) $this->total - $this->total_remboursement;
     }
 
@@ -144,37 +210,6 @@ class Credit extends Model
     public function getResteGlobalAttribute(): float
     {
         return (float) $this->reste_du + $this->penalites_courantes;
-    }
-
-    public function getStatutAttribute(): string
-    {
-        if ($this->date_cloture_forcee && $this->negocie) {
-            return 'termine_negocie';
-        }
-
-        $situation = $this->getSituationActuelle();
-        
-        if ($this->reste_global <= 0) {
-            // Optimisation : Prendre le dernier paiement de la collection si chargée
-            $dernierPaiement = $this->relationLoaded('remboursements') 
-                ? $this->remboursements->sortByDesc('date_paiement')->first()
-                : $this->remboursements()->latest('date_paiement')->first();
-
-            $dateFinEffective = $dernierPaiement ? $dernierPaiement->date_paiement : $this->date_calcul;
-
-            return $dateFinEffective->gt($this->date_fin_prevue) ? 'termine_en_retard' : 'termine';
-        }
-
-        if (now()->gt($this->date_fin_prevue)) {
-            return 'en_retard';
-        }
-
-        return 'en_cours';
-    }
-
-    public function getActifAttribute(): bool
-    {
-        return in_array($this->statut, ['en_cours', 'en_retard'], true);
     }
 
     public function getHistoriquePenalites(): Collection
@@ -229,45 +264,51 @@ class Credit extends Model
         return collect($historique);
     }
 
-    /**
-     * Scope pour filtrer par actif/inactif
-     */
-    public function scopeActif($query, $bool = true)
-    {
-        $subQuery = "((SELECT COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0) 
-                    FROM credit_remboursements WHERE credit_id = credits.id) < (capital + interet))";
+    /* ================= QUERY SCOPES ================= */
 
-        return $bool 
-            ? $query->whereRaw($subQuery)->whereNull('date_cloture_forcee')
-            : $query->where(fn($q) => $q->whereRaw("NOT $subQuery")->orWhereNotNull('date_cloture_forcee'));
+    /**
+     * Filtre par devise (USD ou CDF).
+     * Utilisation : Credit::devise('USD')->...
+     */
+    public function scopeDevise($query, string $monnaie)
+    {
+        return $query->where('monnaie', strtoupper($monnaie));
     }
 
     /**
-     * Scope pour les statuts spécifiques
+     * Filtre les crédits dont le dossier est encore ouvert.
      */
-    public function scopeStatut($query, $statut)
+    public function scopeEnCours($query)
     {
-        $today = now()->format('Y-m-d');
-        $subPaye = "(SELECT COALESCE(SUM(montant_capital_payee + montant_interet_payee), 0) 
-                    FROM credit_remboursements WHERE credit_id = credits.id)";
-
-        return match ($statut) {
-            'en_cours' => $query->whereRaw("$subPaye < (capital + interet)")
-                                ->whereDate('date_fin_prevue', '>=', $today)
-                                ->whereNull('date_cloture_forcee'),
-            'en_retard' => $query->whereRaw("$subPaye < (capital + interet)")
-                                ->whereDate('date_fin_prevue', '<', $today)
-                                ->whereNull('date_cloture_forcee'),
-            'termine' => $query->whereRaw("$subPaye >= (capital + interet)"),
-            'termine_negocie' => $query->whereNotNull('date_cloture_forcee')->where('negocie', true),
-            default => $query,
-        };
+        return $query->where('statut', 'en_cours');
     }
 
+    /**
+     * Filtre les crédits dont le dossier est officiellement fermé.
+     */
+    public function scopeTermine($query)
+    {
+        return $query->where('statut', 'termine');
+    }
+
+    /**
+     * Filtre les crédits en retard (En cours ET date fin dépassée).
+     */
     public function scopeEnRetard($query)
     {
-        return $query->actif()->whereDate('date_fin_prevue', '<', now());
+        return $query->enCours()
+                    ->where('date_fin_prevue', '<', now()->startOfDay());
     }
+
+    /**
+     * Filtre par zone spécifique.
+     */
+    public function scopeParZone($query, $zoneId)
+    {
+        return $query->where('zone_id', $zoneId);
+    }
+
+
 
     /* ================= STATISTIQUES ================= */
 

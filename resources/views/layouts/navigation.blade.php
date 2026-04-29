@@ -67,7 +67,7 @@
                 $caisseItems[] = ['route' => 'clotures.index', 'label' => 'Rapport périodique', 'can' => true];
                 
                 if ($user->can('canTransact') && $journeeOuverte) {
-                    $caisseItems[] = ['route' => 'clotures.show', 'params' => ['cloture' => $journeeOuverte], 'label' => 'Situation de la journée', 'highlight' => true, 'can' => true];
+                    $caisseItems[] = ['route' => 'clotures.show', 'params' => ['cloture' => $journeeOuverte], 'label' => 'Voir la Journée en cours', 'highlight' => true, 'can' => true];
                 }
             }
             
@@ -94,7 +94,7 @@
                 $terrainItems[] = ['route' => 'remboursements.index', 'label' => 'Remboursements', 'can' => true];
                 
                 if ($user->can('can.level2')) {
-                    $terrainItems[] = ['route' => 'credit.pret.index', 'label' => 'Credits', 'can' => true];
+                    $terrainItems[] = ['route' => 'credit.pret.index', 'label' => 'Repertoire Credits', 'can' => true];
                 }
                 
                 if ($user->can('can.level4')) {
