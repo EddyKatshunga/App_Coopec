@@ -5,7 +5,7 @@
         <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Tableau de bord</h1>
             <p class="text-gray-500 font-medium">
-                {{ auth()->user()->hasRole('membre') ? 'Portail Membre' : 'Console de Gestion' }} 
+                Bienvenue
                 • {{ auth()->user()->name }}
             </p>
         </div>

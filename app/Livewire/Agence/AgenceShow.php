@@ -66,14 +66,21 @@ class AgenceShow extends Component
 
     public function render()
     {
+        $bilanCdf = $this->agence->getBilanCredits('CDF');
+        $bilanUsd = $this->agence->getBilanCredits('USD');
         $agents = $this->agence->agents()->whereDoesntHave('zone_dirige')
                             ->whereDoesntHave('agence_dirige')
                             ->get();
-        $clotures_journalieres = $this->agence->cloturesComptables()->latest('date_cloture')->get();
+        $clotures_journalieres = $this->agence->cloturesComptables()
+                                        ->latest('date_cloture')
+                                        ->take(7)
+                                        ->get();
 
         return view('livewire.agence.agence-show', [
             'clotures_journalieres' => $clotures_journalieres,
-            'agents' => $agents,
+            'agents'                => $agents,
+            'bilanCdf'              => $bilanCdf,
+            'bilanUsd'              => $bilanUsd,
         ]);
     }
 }

@@ -29,7 +29,7 @@
                 
                 {{-- Catégorie --}}
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Catégorie de dépense</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Catégorie de dépense (*)</label>
                     <select wire:model="types_depense_id" 
                             class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium transition-all @error('types_depense_id') border-rose-500 ring-rose-50 @enderror">
                         <option value="">Sélectionner une catégorie...</option>
@@ -42,7 +42,7 @@
 
                 {{-- Libellé --}}
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Libellé / Objet</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Libellé / Objet (*)</label>
                     <input type="text" wire:model="libelle" 
                            class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all font-medium @error('libelle') border-rose-500 @enderror" 
                            placeholder="Ex: Frais de déplacement Kikwit">
@@ -51,7 +51,7 @@
 
                 {{-- Montant --}}
                 <div class="space-y-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Montant</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Montant (*)</label>
                     <div class="relative">
                         <input type="number" step="0.01" wire:model.live="montant" 
                                class="w-full h-12 pl-4 pr-12 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-black text-lg @error('montant') border-rose-500 @enderror" 
@@ -72,7 +72,7 @@
 
                 {{-- Devise --}}
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Devise</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Devise (*)</label>
                     <select wire:model.live="monnaie" 
                             class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-bold">
                         <option value="USD">Dollar Américain (USD)</option>
@@ -82,7 +82,7 @@
 
                 {{-- Bénéficiaire --}}
                 <div class="md:col-span-1">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Bénéficiaire</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Bénéficiaire (*)</label>
                     <select wire:model="beneficiaire_id" 
                             class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium">
                         <option value="">-- Externe ou divers --</option>

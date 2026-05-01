@@ -90,6 +90,84 @@
         </div>
     </div>
 
+    {{-- CARTE : SITUATION DES CRÉDITS --}}
+    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl relative overflow-hidden">
+        <div class="relative z-10">
+            <div class="flex justify-between items-start">
+                <span class="text-slate-500 text-xs font-bold uppercase tracking-widest text-amber-600">Portefeuille Crédit</span>
+                
+                <a href="{{ route('agences.zones.index') }}" class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-amber-600 transition-colors group">
+                    <span>Voir tous les détails</span>
+                    <svg xmlns="http://w3.org" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform">
+                        <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+
+            {{-- Devise CDF --}}
+            <div class="mt-6 space-y-3">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">CDF</p>
+                    <div class="flex justify-between text-sm">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">
+                                {{ number_format_fr($bilanCdf->capital_interet_total, 'CDF') }}
+                                <span class="text-xs text-slate-400">déhors</span>
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                Recouvré : {{ number_format_fr($bilanCdf->montant_recupere, 'CDF') }}
+                            </p>
+                            <p class="text-xs text-red-500 font-medium">
+                                Reste : {{ number_format_fr($bilanCdf->reste_a_recouvrer, 'CDF') }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                                {{ $bilanCdf->nombre_credits_actifs }} actif(s)
+                            </span>
+                            @if($bilanCdf->nombre_retards > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 mt-1">
+                                    {{ $bilanCdf->nombre_retards }} retard(s)
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Devise USD --}}
+                <div class="pt-4 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">USD</p>
+                    <div class="flex justify-between text-sm">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800">
+                                {{ number_format_fr($bilanUsd->capital_interet_total, 'USD') }}
+                                <span class="text-xs text-slate-400">déhors</span>
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                Recouvré : {{ number_format_fr($bilanUsd->montant_recupere, 'USD') }}
+                            </p>
+                            <p class="text-xs text-red-500 font-medium">
+                                Reste : {{ number_format_fr($bilanUsd->reste_a_recouvrer, 'USD') }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                                {{ $bilanUsd->nombre_credits_actifs }} actif(s)
+                            </span>
+                            @if($bilanUsd->nombre_retards > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 mt-1">
+                                    {{ $bilanUsd->nombre_retards }} retard(s)
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- Décoration en fond --}}
+        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-amber-50 rounded-full opacity-50"></div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- COLONNE GAUCHE : DIRECTION ET AGENTS --}}
         <div class="lg:col-span-1 space-y-8">
@@ -152,17 +230,19 @@
         <div class="lg:col-span-2">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white">
-                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Historique des Journées</h3>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Flux Comptable</span>
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight">Historique de l'Agence</h3>
+                    <a href="{{ route('clotures.index') }}" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+                        Tout voir
+                    </a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
                             <tr class="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50/50">
                                 <th class="px-8 py-4">Date</th>
-                                <th class="px-4 py-4">Report Coffre</th>
-                                <th class="px-4 py-4 text-blue-600">Report Épargne</th>
-                                <th class="px-4 py-4">Solde Journée</th>
+                                <th class="px-4 py-4">Entrées (+)</th>
+                                <th class="px-4 py-4 text-blue-600">Sortie (-)</th>
+                                <th class="px-4 py-4">Reste Coffre</th>
                                 <th class="px-8 py-4 text-right">Action</th>
                             </tr>
                         </thead>
@@ -170,17 +250,35 @@
                             @forelse($clotures_journalieres as $item)
                                 <tr class="group hover:bg-blue-50/30 transition">
                                     <td class="px-8 py-5">
-                                        <span class="text-sm font-bold text-slate-700">{{ $item->date_cloture->isoFormat('dddd D MMMM YYYY') }}</span>
+                                        <span class="text-sm font-bold text-slate-700">{{ $item->date_cloture->isoFormat('ddd D MMMM YYYY') }}</span>
                                     </td>
-                                    <td class="px-4 py-5 font-mono text-xs font-semibold text-slate-600">
-                                        {{ number_format_fr($item->report_coffre_cdf, 'CDF') }}
-                                    </td>
-                                    <td class="px-4 py-5 font-mono text-xs font-semibold text-blue-500">
-                                        {{ number_format_fr($item->report_epargne_cdf, 'CDF') }}
-                                    </td>
+                                    {{-- Total Entrée --}}
                                     <td class="px-4 py-5">
-                                        <div class="text-sm font-black text-slate-800">{{ number_format_fr($item->solde_coffre_cdf, 'CDF') }}</div>
-                                        <div class="text-[10px] text-slate-400 italic">{{ $item->statut }}</div>
+                                        <div class="text-xs font-semibold text-emerald-700">
+                                            CDF {{ number_format_fr($item->total_entre_cdf, 'CDF') }}
+                                        </div>
+                                        <div class="text-xs font-semibold text-emerald-600">
+                                            USD {{ number_format_fr($item->total_entre_usd, 'USD') }}
+                                        </div>
+                                    </td>
+                                    {{-- Total Sortie --}}
+                                    <td class="px-4 py-5">
+                                        <div class="text-xs font-semibold text-red-700">
+                                            CDF {{ number_format_fr($item->total_sortie_cdf, 'CDF') }}
+                                        </div>
+                                        <div class="text-xs font-semibold text-red-600">
+                                            USD {{ number_format_fr($item->total_sortie_usd, 'USD') }}
+                                        </div>
+                                    </td>
+                                    {{-- Solde Journée --}}
+                                    <td class="px-4 py-5">
+                                        <div class="text-sm font-black text-slate-800">
+                                            CDF {{ number_format_fr($item->solde_coffre_cdf, 'CDF') }}
+                                        </div>
+                                        <div class="text-xs font-semibold text-slate-600">
+                                            USD {{ number_format_fr($item->solde_coffre_usd, 'USD') }}
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 italic mt-1">{{ $item->statut }}</div>
                                     </td>
                                     <td class="px-8 py-5 text-right">
                                         <a href="{{ route('clotures.show', $item) }}" wire:navigate class="inline-flex items-center px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:border-blue-500 hover:text-blue-600 transition">

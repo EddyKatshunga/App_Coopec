@@ -172,10 +172,10 @@
 
             {{-- SECTION EPARGNES --}}
             <section>
-                <h2 class="text-xl font-black text-gray-900 mb-4 tracking-tight">Portefeuille Epargne</h2>
+                <h2 class="text-xl font-black text-gray-900 mb-4 tracking-tight">Comptes Epargnes</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach ($membre->comptes as $compte)
-                        <a href="{{ route('compte.show', $compte) }}" wire:navigate class="group bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-blue-500 transition">
+                        <a href="{{ route('compte.show', $compte) }}" class="group bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-blue-800 transition">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition">
                                     <x-heroicon-o-credit-card class="w-5 h-5"/>

@@ -161,22 +161,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="bg-gradient-to-br from-blue-900 to-indigo-950 rounded-[2rem] shadow-xl p-8 text-white relative overflow-hidden">
-                <div class="relative z-10">
-                    <h3 class="text-lg font-black mb-4">Objectif Collecte</h3>
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-3xl font-black">78%</span>
-                        <span class="text-xs font-bold text-blue-300">1.2M / 1.5M</span>
-                    </div>
-                    <div class="w-full bg-blue-800/50 h-3 rounded-full overflow-hidden">
-                        <div class="bg-blue-400 h-full w-[78%] rounded-full shadow-[0_0_15px_rgba(96,165,250,0.5)]"></div>
-                    </div>
-                    <p class="mt-4 text-[10px] text-blue-200 uppercase font-black tracking-widest leading-relaxed">
-                        Encore 300,000 pour atteindre <br>votre bonus de performance.
-                    </p>
-                </div>
-            </div>
         </div>
 
         {{-- COLONNE DROITE : ACTIVITÉ RÉCENTE --}}

@@ -54,7 +54,7 @@
         }
         
         // Caisse & Flux
-        if ($user->can('can.level3')) {
+        if ($user->can('can.level4')) {
             $caisseItems = [];
             
             if ($user->can('can.level4')) {

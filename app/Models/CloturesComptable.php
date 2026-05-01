@@ -54,6 +54,54 @@ class CloturesComptable extends Model
         'solde_coffre_usd' => 'decimal:2',
     ];
 
+    /**
+     * Total des entrées CDF (dépôts + remboursements crédits + revenus)
+     */
+    protected function totalEntreCdf(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->total_depot_cdf 
+                        + (float) $this->total_remboursement_cdf 
+                        + (float) $this->total_revenu_cdf
+        );
+    }
+
+    /**
+     * Total des entrées USD (dépôts + remboursements crédits + revenus)
+     */
+    protected function totalEntreUsd(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->total_depot_usd 
+                        + (float) $this->total_remboursement_usd 
+                        + (float) $this->total_revenu_usd
+        );
+    }
+
+    /**
+     * Total des sorties CDF (retraits + crédits octroyés + dépenses)
+     */
+    protected function totalSortieCdf(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->total_retrait_cdf 
+                        + (float) $this->total_credit_cdf 
+                        + (float) $this->total_depense_cdf
+        );
+    }
+
+    /**
+     * Total des sorties USD (retraits + crédits octroyés + dépenses)
+     */
+    protected function totalSortieUsd(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (float) $this->total_retrait_usd 
+                        + (float) $this->total_credit_usd 
+                        + (float) $this->total_depense_usd
+        );
+    }
+
     // --- RELATIONS ---
 
     public function agence(): BelongsTo { return $this->belongsTo(Agence::class); }

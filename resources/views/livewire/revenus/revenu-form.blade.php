@@ -29,7 +29,7 @@
 
                 {{-- Source du Revenu --}}
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Source / Type de revenu</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Source / Type de revenu (*)</label>
                     <select wire:model="types_revenu_id" 
                             class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium transition-all @error('types_revenu_id') border-rose-500 @enderror">
                         <option value="">-- Sélectionner la source --</option>
@@ -42,7 +42,7 @@
 
                 {{-- Libellé --}}
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Libellé du revenu</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Libellé du revenu (*)</label>
                     <input type="text" wire:model="libelle" 
                            class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium @error('libelle') border-rose-500 @enderror" 
                            placeholder="Ex: Versement cotisation annuelle / Vente service">
@@ -51,7 +51,7 @@
 
                 {{-- Montant --}}
                 <div class="space-y-2">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Montant à encaisser</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Montant à encaisser (*)</label>
                     <div class="relative">
                         <input type="number" step="0.01" wire:model.live="montant" 
                                class="w-full h-12 pl-4 pr-12 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-black text-lg text-emerald-700 @error('montant') border-rose-500 @enderror" 
@@ -72,7 +72,7 @@
 
                 {{-- Devise --}}
                 <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Devise</label>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Devise (*)</label>
                     <select wire:model.live="monnaie" 
                             class="w-full h-12 px-4 bg-slate-50 border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold">
                         <option value="USD">Dollar Américain (USD)</option>
