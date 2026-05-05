@@ -30,7 +30,7 @@ class InitializeAccountingSeeder extends Seeder
                 'date_cloture' => $dateOuverture,
             ],
             [
-                'uuid' => (string) Str::uuid(),
+                'uuid' => (string) Str::ulid(),
                 'statut' => 'ouverte',
                 'created_by' => 1,
                 'updated_by' => 1,
