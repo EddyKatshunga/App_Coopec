@@ -33,6 +33,7 @@ class InitializeAccountingSeeder extends Seeder
                 'uuid' => (string) Str::uuid(),
                 'statut' => 'ouverte',
                 'created_by' => 1,
+                'updated_by' => 1,
             ]
         );
 
