@@ -31,7 +31,7 @@ return new class extends Migration
                   ->onDelete('restrict'); 
 
             // Ajout de la colonne agence_id
-            $table->foreignId('agence_id')->after('zone_id')
+            $table->foreignId('agence_id')
                   ->nullable()
                   ->constrained('agences')
                   ->onDelete('restrict');
