@@ -42,6 +42,7 @@ class MembreCsvSeeder extends Seeder
                 
                 $numeroIdentification = trim($data[3] ?? '');
                 $nom = trim($data[4] ?? '');
+                $plainPassword = (string) rand(100000, 999999);
 
                 // On ignore les lignes vides ou l'entête
                 if (empty($numeroIdentification) || $numeroIdentification === 'N° ID' || empty($nom)) {
@@ -53,20 +54,14 @@ class MembreCsvSeeder extends Seeder
                     continue;
                 }
 
-                // Gestion de l'email
-                $email = trim($data[11] ?? '');
-                if (empty($email)) {
-                    $email = $numeroIdentification . '@coopec-kwilu.com';
-                }
-
                 // Conversion des dates (du format 15/10/2002 vers 2002-10-15)
                 $dateNaissance = $this->formatDate(trim($data[8] ?? ''), '1970-01-01');
                 $dateAdhesion = $this->formatDate(trim($data[2] ?? ''), now()->format('Y-m-d'));
 
                 $membreData = [
                     'nom_complet'           => $nom,
-                    'email'                 => $email,
-                    'password'              => 'password123',
+                    'email'                 => trim($data[11] ?? null),
+                    'password'              => $plainPassword, // le service le hachera
                     'numero_identification' => $numeroIdentification,
                     'qualite'               => stripos($data[5] ?? '', 'effectif') !== false ? 'Effectif' : 'Auxiliaire',
                     'sexe'                  => (mb_substr(strtolower(trim($data[6] ?? '')), 0, 1) === 'h') ? 'M' : 'F',
@@ -82,6 +77,7 @@ class MembreCsvSeeder extends Seeder
                 ];
 
                 $membreService->createMembre($membreData);
+
                 $count++;
             }
 

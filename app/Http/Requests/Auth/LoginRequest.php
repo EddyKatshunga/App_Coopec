@@ -6,6 +6,7 @@ use App\Models\Membre;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -50,9 +51,7 @@ class LoginRequest extends FormRequest
         // 🔍 CAS 2 : NUMÉRO D’IDENTIFICATION (Membre)
         else {
 
-            $membre = Membre::where('numero_identification', $login)
-                ->with('user')
-                ->first();
+            $membre = Membre::where('numero_identification', $login)->first();
 
             if (! $membre || ! $membre->user) {
                 RateLimiter::hit($this->throttleKey());
@@ -62,17 +61,17 @@ class LoginRequest extends FormRequest
                 ]);
             }
 
-            if (! Auth::attempt([
-                'email' => $membre->user->email,
-                'password' => $this->password,
-            ], false)) {
-
+            // Vérification manuelle du mot de passe
+            if (!Hash::check($this->password, $membre->user->password)) {
                 RateLimiter::hit($this->throttleKey());
 
                 throw ValidationException::withMessages([
                     'login' => 'Mot de passe incorrect.',
                 ]);
             }
+
+            // Connexion manuelle de l'utilisateur
+            Auth::login($membre->user, false);
         }
 
         RateLimiter::clear($this->throttleKey());

@@ -36,13 +36,15 @@ class MembrePolicy
         return false;
     }
 
-    /**
+        /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Membre $membre): bool
     {
-        return false;
+        // Autorise si c'est son propre compte OU s'il a la permission level4
+        return $user->id === $membre->user_id || $user->can('can.level4');
     }
+
 
     /**
      * Determine whether the user can delete the model.

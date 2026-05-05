@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Models\Traits\AffectsCoffre;
+use App\Helpers\AccountingHelper;
 use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
+use App\Services\AccountingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+//GESTION DES TRANSACTIONS EPARGNES
 class Transaction extends Model
 {
     use ManageClotureComptable;
     Use Blameable;
-    use AffectsCoffre;
     
     protected $hidden = ['id'];
     
@@ -29,8 +30,53 @@ class Transaction extends Model
         'monnaie',
         'solde_avant',
         'solde_apres',
-        'status',    
+        'status',
+        'journal_entry_id',    
     ];
+
+    // --------------------------------------------------------------
+    // Génération automatique de l'écriture comptable
+    // --------------------------------------------------------------
+    protected static function booted()
+    {
+        static::created(function (Transaction $transaction) {
+            $compteCaisseNumero = '57';
+            $compteCaisse = Account::where('numero', $compteCaisseNumero)->firstOrFail();
+            $compteEpargneNumero = '41';
+            $compteEpargne = Account::where('numero', $compteEpargneNumero)->firstOrFail();
+
+            if (!$compteEpargne) {
+                throw new \RuntimeException("Le compte épargne #{$transaction->compte->id} n'est pas lié à un compte comptable.");
+            }
+
+            // Construction des lignes selon le type de transaction
+            if ($transaction->type_transaction === 'DEPOT') {
+                // Dépôt : on débite la caisse, on crédite le compte épargne
+                $debit  = AccountingHelper::debit($compteCaisse->id, $transaction->montant, $transaction->monnaie);
+                $credit = AccountingHelper::credit($compteEpargne->id, $transaction->montant, $transaction->monnaie);
+                $libelle = "Dépôt épargne : compte #{$transaction->compte->numero_compte}";
+            } else { // RETRAIT
+                // Retrait : on débite le compte épargne, on crédite la caisse
+                $debit  = AccountingHelper::debit($compteEpargne->id, $transaction->montant, $transaction->monnaie);
+                $credit = AccountingHelper::credit($compteCaisse->id, $transaction->montant, $transaction->monnaie);
+                $libelle = "Retrait épargne : compte #{$transaction->compte->numero_compte}";
+            }
+
+            app(AccountingService::class)->record(
+                [$debit, $credit],
+                $libelle,
+                $transaction
+            );
+        });
+    }
+
+    /**
+     * L'écriture comptable associée à cette opération.
+     */
+    public function journalEntry(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(JournalEntry::class, 'journal_entry_id');
+    }
 
     public function journeeComptable(): BelongsTo
     {

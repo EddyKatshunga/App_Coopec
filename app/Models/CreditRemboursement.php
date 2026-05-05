@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\Traits\AffectsCoffre;
+use App\Helpers\AccountingHelper;
 use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
+use App\Services\AccountingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CreditRemboursement extends Model
 {
     use ManageClotureComptable;
-    use AffectsCoffre;
     use Blameable;
     
     protected $hidden = ['id'];
@@ -28,7 +28,6 @@ class CreditRemboursement extends Model
         'montant',
         'monnaie',
         // ventilation financière
-        'montant_penalite_payee',
         'montant_interet_payee',
         'montant_capital_payee',
         // snapshot comptable
@@ -39,7 +38,7 @@ class CreditRemboursement extends Model
         'agent_id',
         'zone_id',
         'mode_paiement',
-        'reste_penalite',
+        'journal_entry_id',
     ];
 
     /* ================= CASTS ================= */
@@ -48,7 +47,6 @@ class CreditRemboursement extends Model
         'date_paiement' => 'date',
 
         'montant' => 'decimal:2',
-        'montant_penalite_payee' => 'decimal:2',
         'montant_interet_payee' => 'decimal:2',
         'montant_capital_payee' => 'decimal:2',
 
@@ -56,8 +54,67 @@ class CreditRemboursement extends Model
         'reste_du_apres' => 'decimal:2',
     ];
 
+    protected static function booted()
+    {
+        static::created(function (CreditRemboursement $remboursement) {
+            $compteCaisseNumero    = '57';
+            $compteCapitalNumero   = '46';
+            $compteInteretsNumero  = '47';
+
+            $compteCaisse   = Account::where('numero', $compteCaisseNumero)->firstOrFail();
+            $compteCapital  = Account::where('numero', $compteCapitalNumero)->firstOrFail();
+            $compteInterets = Account::where('numero', $compteInteretsNumero)->firstOrFail();
+
+            $capitalPaye = (float) $remboursement->montant_capital_payee;
+            $interetPaye = (float) $remboursement->montant_interet_payee;
+            $totalPaye   = $capitalPaye + $interetPaye;
+
+            // Protection : si le total est nul ou négatif, ne rien faire
+            if ($totalPaye <= 0) {
+                return;
+            }
+
+            $lignes = [];
+            $details = [];
+
+            // Débit : toujours la caisse pour le total payé
+            $lignes[] = AccountingHelper::debit($compteCaisse->id, $totalPaye, $remboursement->monnaie);
+            $details[] = "Caisse";
+
+            // Crédit : capital (seulement si > 0)
+            if ($capitalPaye > 0) {
+                $lignes[] = AccountingHelper::credit($compteCapital->id, $capitalPaye, $remboursement->monnaie);
+                $details[] = "Capital";
+            }
+
+            // Crédit : intérêts (seulement si > 0)
+            if ($interetPaye > 0) {
+                $lignes[] = AccountingHelper::credit($compteInterets->id, $interetPaye, $remboursement->monnaie);
+                $details[] = "Intérêts";
+            }
+
+            // Libellé adapté selon la répartition
+            $ventilation = implode(' + ', $details);
+            $libelle = "Remboursement crédit #{$remboursement->credit->numero_credit} ({$ventilation})";
+
+            app(AccountingService::class)->record(
+                $lignes,
+                $libelle,
+                $remboursement
+            );
+        });
+    }
+
     /* ================= RELATIONS ================= */
 
+    /**
+     * L'écriture comptable associée à cette opération.
+     */
+    public function journalEntry(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(JournalEntry::class, 'journal_entry_id');
+    }
+    
     public function journeeComptable(): BelongsTo
     {
         return $this->belongsTo(CloturesComptable::class, 'journee_comptable_id');
@@ -115,14 +172,6 @@ class CreditRemboursement extends Model
     {
         return $this->credit
             && $this->date_paiement->gt($this->credit->date_fin_prevue);
-    }
-
-    /**
-     * Remboursement affectant des pénalités ?
-     */
-    public function getContientPenaliteAttribute(): bool
-    {
-        return $this->montant_penalite_payee > 0;
     }
 
     /**

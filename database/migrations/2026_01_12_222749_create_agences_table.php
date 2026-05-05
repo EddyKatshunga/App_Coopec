@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('nom')->unique();
             $table->string('code')->unique()->nullable();
-            $table->string('ville')->unique()->nullable();
-            $table->string('pays')->unique()->nullable();
+            $table->string('ville')->nullable();
+            $table->string('pays')->nullable();
+            $table->foreignId('chef_agence_id')
+                  ->nullable()
+                  ->constrained('agents')
+                  ->onDelete('set null');
 
              // Audit
             $table->foreignId('created_by')->nullable()->constrained('users');

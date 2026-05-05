@@ -44,6 +44,7 @@ class AddCompte extends Component
                 'user_id' => $membre->user->id,
                 'intitule'      => $this->intitule,
                 'numero_compte' => $numero_compte,
+                'agence_id'     => Auth::user()->agence_id,
                 'solde_cdf'     => 0,
                 'solde_usd'     => 0,
             ]);

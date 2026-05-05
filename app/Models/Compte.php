@@ -22,6 +22,7 @@ class Compte extends Model
         'membre_id',
         'user_id',
         'numero_compte',
+        'agence_id', //Agence d'affiliation
         'solde_cdf',
         'solde_usd',
     ];
@@ -29,6 +30,11 @@ class Compte extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function agence(): BelongsTo
+    {
+        return $this->belongsTo(Agence::class);
     }
 
     public function membre(): BelongsTo

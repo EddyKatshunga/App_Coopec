@@ -25,14 +25,14 @@
             </a>
 
             {{-- CONDITION : Uniquement si l'utilisateur connecté est le propriétaire du compte --}}
-            @if(auth()->id() === $membre->user_id)
+            @can('update', $membre)
                 <a href="{{ route('membres.change-password', $membre) }}" 
                 wire:navigate
                 class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition">
                     <x-heroicon-o-key class="w-5 h-5"/>
                     Sécurité
                 </a>
-            @endif
+            @endcan
 
             {{-- Actions d'Administration --}}
             @can('can.level4')

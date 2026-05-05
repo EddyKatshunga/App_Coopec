@@ -51,18 +51,6 @@
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                @can('can.level8')
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                        Mot de passe
-                    </label>
-                    <input type="password" wire:model.defer="password"
-                        class="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                    @error('password')
-                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                @endcan
 
             </div>
         </div>
@@ -102,7 +90,6 @@
                     </label>
                     <select wire:model.defer="sexe"
                         class="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">-- Choisir --</option>
                         <option value="M">Masculin</option>
                         <option value="F">Féminin</option>
                     </select>
@@ -202,8 +189,11 @@
                     <label class="block text-sm font-medium text-gray-700">
                         Qualité
                     </label>
-                    <input type="text" wire:model.defer="qualite"
+                    <select wire:model.defer="qualite"
                         class="mt-1 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="M">Auxiliaire</option>
+                        <option value="F">Effectif</option>
+                    </select>
                 </div>
 
                 <div>

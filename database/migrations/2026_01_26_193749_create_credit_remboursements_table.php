@@ -15,18 +15,33 @@ return new class extends Migration
             $table->id();
 
             /* ================= RELATIONS ================= */
+            $table->foreignId('journee_comptable_id')
+                    ->constrained('clotures_comptables')
+                    ->onDelete('restrict');
             $table->foreignId('credit_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
             $table->foreignId('agent_id')
                 ->constrained()->nullable();
+            
+            $table->foreignId('zone_id')->after('agent_id')
+                  ->nullable()
+                  ->constrained('zones')
+                  ->onDelete('restrict'); 
+
+            // Ajout de la colonne agence_id
+            $table->foreignId('agence_id')->after('zone_id')
+                  ->nullable()
+                  ->constrained('agences')
+                  ->onDelete('restrict');
 
             /* ================= DONNÉES PAIEMENT ================= */
             $table->date('date_paiement');
 
             // Montant total versé par le membre
             $table->decimal('montant', 15, 2);
+            $table->enum('monnaie', ['CDF', 'USD']);
 
             /* ================= VENTILATION FINANCIÈRE ================= */
             // Indispensable pour audit & pénalités
@@ -40,6 +55,8 @@ return new class extends Migration
 
             // État APRÈS paiement (capital + intérêt + pénalités)
             $table->decimal('reste_du_apres', 15, 2);
+            $table->decimal('reste_penalite', 15, 2)->default(0)->after('montant_penalite_payee');
+            $table->decimal('reste_non_alloue', 15, 2)->default(0)->after('montant_capital_payee');
 
             /* ================= MÉTADONNÉES ================= */
             $table->enum('mode_paiement', [
@@ -58,6 +75,8 @@ return new class extends Migration
 
             $table->foreignId('updated_by')
                 ->constrained('users');
+
+            $table->index(['agence_id', 'date_paiement']);
         });
     }
 

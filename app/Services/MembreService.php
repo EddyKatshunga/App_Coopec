@@ -15,44 +15,6 @@ use Spatie\Permission\Models\Role;
 class MembreService
 {
     /**
-     * Récupère les données pour la liste globale des membres (PDF).
-     *
-     * @return array
-     */
-    public function getMembreData(): array
-    {
-        // On récupère tous les membres avec leurs relations pour éviter les requêtes N+1
-        $membres = Membre::with(['user', 'agent', 'comptes'])
-            ->orderBy('numero_identification', 'asc')
-            ->get();
-
-        return [
-            'membres'      => $membres,
-            'total_count'  => $membres->count(),
-            'generated_at' => now()->format('d/m/Y H:i'),
-            // Optionnel : Calcul des soldes totaux cumulés pour tous les membres
-            'global_cdf'   => $membres->sum(fn($m) => $m->comptes->sum('solde_cdf')),
-            'global_usd'   => $membres->sum(fn($m) => $m->comptes->sum('solde_usd')),
-        ];
-    }
-
-    public function getFicheData(Membre $membre): array
-    {
-        $membre->load([
-            'user',
-            'agent',
-            'agentParrain',
-            'comptes'
-        ]);
-
-        return [
-            'membre' => $membre,
-            'total_cdf' => $membre->comptes->sum('solde_cdf'),
-            'total_usd' => $membre->comptes->sum('solde_usd'),
-            'generated_at' => now(),
-        ];
-    }
-    /**
      * Crée un membre avec un utilisateur associé.
      *
      * @param array $data
@@ -93,6 +55,7 @@ class MembreService
                 'telephone' => $data['telephone'] ?? null,
                 'activites' => $data['activites'] ?? 'Vente divers',
                 'adresse_activite' => $data['adresse_activite'] ?? 'Kikwit',
+                'agence_id' => $data['agence_id'] ?? 1,
                 'date_adhesion' => $data['date_adhesion'] ?? now(),
             ]);
 
@@ -101,6 +64,7 @@ class MembreService
                 'membre_id' => $membre->id,
                 'user_id' => $membre->user->id,
                 'numero_compte' => $numero_compte,
+                'agence_id' => $data['agence_id'] ?? 1,
                 'solde_cdf' => $data['solde_cdf'] ?? 0.00,
                 'solde_usd' => $data['solde_usd'] ?? 0.00,
             ]);

@@ -17,7 +17,7 @@ class AddEditMembre extends Component
 
     // Infos utilisateur
     public ?string $nom_complet = '';
-    public ?string $email = '';
+    public ?string $email = null;
     public ?string $password = 'password123';
 
     // Infos membre

@@ -33,7 +33,8 @@
             @endif
         </div>
 
-        <form wire:submit.prevent="save" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form wire:submit.prevent="save" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6"
+            wire:confirm="Etes-vous sur d'enregistrer cette opération ?">
             <div class="col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Montant à payer ({{ $monnaie }})</label>
                 <input type="number" step="0.01" wire:model.live="montant" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">

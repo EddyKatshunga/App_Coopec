@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('comptes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('agence_id')->constrained(); //Agence d'affiliation
+            $table->foreignId('user_id')->constrained()->onDelete('restrict');
             $table->foreignId('membre_id')->constrained()->onDelete('cascade');
             $table->string('intitule', 50)->default('Compte principal');
             $table->string('numero_compte', 15)->unique();
@@ -23,6 +25,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
+
         });
     }
 

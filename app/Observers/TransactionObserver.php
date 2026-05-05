@@ -24,7 +24,6 @@ class TransactionObserver
      */
     private function adjustBalances(Transaction $model, string $action): void
     {
-        $agence = $model->agence;
         $compte = $model->compte;
         $m = $model->monnaie; // CDF ou USD
         
@@ -37,12 +36,8 @@ class TransactionObserver
             : ($isDepot ? 'decrement' : 'increment');
 
         if ($m === 'CDF') {
-            $agence->$method('solde_actuel_coffre_cdf', $model->montant);
-            $agence->$method('solde_actuel_epargne_cdf', $model->montant);
             $compte->$method('solde_cdf', $model->montant);
         } else {
-            $agence->$method('solde_actuel_coffre_usd', $model->montant);
-            $agence->$method('solde_actuel_epargne_usd', $model->montant);
             $compte->$method('solde_usd', $model->montant);
         }
     }

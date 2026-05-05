@@ -33,6 +33,7 @@ class Membre extends Model
         'adresse_activite',
         'date_adhesion',
         'agent_parrain_id',
+        'agence_id', //Agence d'affiliation
     ];
 
     protected $casts = [
@@ -46,6 +47,11 @@ class Membre extends Model
     public function agentParrain(): BelongsTo
     {
         return $this->belongsTo(Agent::class, 'agent_parrain_id');
+    }
+
+    public function agence(): BelongsTo
+    {
+        return $this->belongsTo(Agence::class);
     }
     
     public function user() : BelongsTo

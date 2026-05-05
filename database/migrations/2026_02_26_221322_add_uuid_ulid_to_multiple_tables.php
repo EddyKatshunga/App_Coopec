@@ -17,7 +17,7 @@ return new class extends Migration
 
         foreach ($tables as $table) {
             Schema::table($table, function (Blueprint $table) {
-                $table->ulid('uuid')->unique()->nullable()->after('id');
+                $table->ulid('uuid')->unique()->after('id');
             });
         }
     }

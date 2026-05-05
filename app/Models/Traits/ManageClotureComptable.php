@@ -2,7 +2,6 @@
 
 namespace App\Models\Traits;
 
-use App\Models\CloturesComptable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 
@@ -45,7 +44,7 @@ trait ManageClotureComptable
         $journee = auth()->user()->journee_ouverte;
 
         if (!$journee) {
-            throw new Exception("Aucune journée comptable ouverte pour aujourd'hui. Veuillez contacter le directeur.");
+            throw new Exception("Aucune journée comptable ouverte pour aujourd'hui. Veuillez contacter le Chef d'Agence.");
         }
 
         // Assigner la clé étrangère

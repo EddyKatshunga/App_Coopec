@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id();
             
             // --- RÉFÉRENCES ---
+            $table->foreignId('journee_comptable_id')
+                    ->constrained('clotures_comptables')
+                    ->onDelete('restrict');
             $table->foreignId('compte_id')->constrained('comptes')->onDelete('restrict');
             $table->foreignId('agence_id')->constrained('agences')->onDelete('restrict');
             
@@ -22,9 +25,7 @@ return new class extends Migration
                   ->onDelete('set null');
 
             // --- DATES ---
-            $table->date('date_transaction'); // Date de l'acte (ne peut être antérieure à la dernière date de transaction)
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->date('date_transaction');
 
             // --- CŒUR FINANCIER ---
             $table->enum('type_transaction', ['DEPOT', 'RETRAIT', 'CONTRE_PASSATION']);
@@ -46,11 +47,20 @@ return new class extends Migration
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
+            $table->timestamps();
 
-            // --- INDEXATION ---
-            $table->index(['compte_id', 'created_at']);
-            $table->index(['agent_collecteur_id', 'date_transaction']); // Pour les rapports de performance
-            $table->index(['agence_id', 'monnaie']);
+            // 1. Rapports par Agence (Couvre aussi les recherches par agence seule)
+            $table->index(['agence_id', 'date_transaction']);
+
+            // 2. Relevés de compte (Le plus utilisé par les clients)
+            $table->index(['compte_id', 'date_transaction']); // Mieux que created_at si vous permettez des saisies rétroactives
+
+            // 3. Audit et performance agents
+            $table->index(['created_by', 'date_transaction']);
+
+            // 4. Clôture comptable (Pour valider une journée rapidement)
+            // agence_id est déjà indexé par constrained(), mais on peut l'optimiser :
+            $table->index(['journee_comptable_id', 'statut']); 
         });
     }
 

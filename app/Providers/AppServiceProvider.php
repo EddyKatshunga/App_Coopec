@@ -31,8 +31,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Revenu::observe(RevenuObserver::class);
-        Depense::observe(DepenseObserver::class);
         Transaction::observe(TransactionObserver::class);
         Credit::observe(CreditObserver::class);
         CreditRemboursement::observe(CreditRemboursementObserver::class);

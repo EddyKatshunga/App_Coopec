@@ -106,7 +106,7 @@
                     <div class="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-indigo-100">
                         <span class="text-sm font-medium text-indigo-700">{{ config('app.name') }}</span>
                         <span class="text-indigo-300">•</span>
-                        <span class="text-sm text-indigo-600">{{ config('app.nom_entreprise', 'Notre Entreprise') }}</span>
+                        <span class="text-sm text-indigo-600">{{ config('app.nom_entreprise', 'SYSCO') }}</span>
                     </div>
                 </div>
 
@@ -158,7 +158,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-1 sm:mb-2">
                                 <label for="password" class="block text-xs sm:text-sm font-medium text-gray-700">
-                                    Mot de passe
+                                    Code d'Accès
                                 </label>
                             </div>
                             <div class="relative group">

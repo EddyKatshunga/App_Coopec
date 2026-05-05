@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <form wire:submit.prevent="save" class="p-8">
+    <form wire:submit.prevent="save" class="p-8" wire:confirm="Etes-vous sur d'enregistrer cette opération ?">
         <div class="space-y-8">
             {{-- Section 01 : Attribution --}}
             <section>
@@ -66,11 +66,25 @@
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Capital</label>
                         <input type="number" wire:model.live.debounce.500ms="capital" class="block w-full rounded-lg font-mono font-bold text-lg px-4 py-3 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500">
                         @error('capital') <p class="text-red-500 text-[10px] font-bold uppercase mt-1">{{ $message }}</p> @enderror
+                        @if($capital > 0)
+                            <div class="mt-2 px-2">
+                                <span class="text-xs font-bold italic text-emerald-600">
+                                    {{ money_to_words($capital, $monnaie) }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Intérêt</label>
                         <input type="number" wire:model.live.debounce.500ms="interet" class="block w-full rounded-lg font-mono font-bold text-lg px-4 py-3 border-slate-200 bg-slate-50 text-green-700 focus:ring-2 focus:ring-green-500">
+                        @if($interet > 0)
+                            <div class="mt-2 px-2">
+                                <span class="text-xs font-bold italic text-green-600">
+                                    {{ money_to_words($interet, $monnaie) }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="bg-slate-900 rounded-lg p-4 flex flex-col justify-center shadow-inner">
@@ -78,6 +92,13 @@
                         <div class="text-white text-xl font-black text-center">
                             {{ number_format((float)$capital + (float)$interet, 2) }} <span class="text-emerald-400 text-xs">{{ $monnaie }}</span>
                         </div>
+                        @if(((float)$capital + (float)$interet) > 0)
+                            <div class="mt-2 text-center">
+                                <span class="text-[10px] font-mono text-slate-400 italic block">
+                                    {{ money_to_words((float)$capital + (float)$interet, $monnaie) }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </section>
@@ -117,7 +138,7 @@
                             {{-- Indicateur visuel --}}
                             <div class="absolute right-3 top-1/2 -translate-y-1/2">
                                 @error('date_fin')
-                                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293-1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
                                 @else
                                     <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                 @enderror

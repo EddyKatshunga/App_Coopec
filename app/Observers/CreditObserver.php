@@ -28,41 +28,6 @@ class CreditObserver
 
         if (!$agence) { 
             throw new Exception("Aucune agence associée à l'opération."); 
-        } 
-
-        // Note : Dans votre code, vous utilisez $credit->montant, 
-        // assurez-vous que cette propriété existe ou utilisez $credit->capital
-        $montantA_Debiter = $credit->capital; 
-
-        if ($credit->monnaie === 'CDF') {
-            if ($agence->solde_actuel_coffre_cdf < $montantA_Debiter) {
-                throw new Exception("Opagement impossible : Solde CDF du coffre insuffisant ({$agence->solde_actuel_coffre_cdf}).");
-            }
-        } else {
-            if ($agence->solde_actuel_coffre_usd < $montantA_Debiter) {
-                throw new Exception("Opération impossible : Solde USD du coffre insuffisant ({$agence->solde_actuel_coffre_usd}).");
-            }
-        }
-    }
-
-    public function created(Credit $model): void
-    {
-        $agence = $model->agence;
-        // On décrémente le capital octroyé du coffre
-        if ($model->monnaie === 'CDF') {
-            $agence->decrement('solde_actuel_coffre_cdf', $model->capital);
-        } else {
-            $agence->decrement('solde_actuel_coffre_usd', $model->capital);
-        }
-    }
-
-    public function deleting(Credit $model): void
-    {
-        $agence = $model->agence;
-        if ($model->monnaie === 'CDF') {
-            $agence->increment('solde_actuel_coffre_cdf', $model->capital);
-        } else {
-            $agence->increment('solde_actuel_coffre_usd', $model->capital);
         }
     }
     

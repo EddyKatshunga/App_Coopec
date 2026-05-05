@@ -24,9 +24,6 @@ use App\Livewire\Credits\CreditShow;
 use App\Livewire\Credits\CreditsList;
 use App\Livewire\Transactions\TransactionListing;
 use App\Livewire\Transactions\TransactionsList;
-use App\Livewire\Depenses\TypesDepenseForm;
-use App\Livewire\Depenses\TypesDepenseShow;
-use App\Livewire\Depenses\TypesDepenseList;
 use App\Livewire\Agence\AgenceForm;
 use App\Livewire\Agence\AgenceList;
 use App\Livewire\Agence\AgenceShow;
@@ -35,17 +32,8 @@ use App\Livewire\Agents\AgentShow;
 use App\Livewire\Clotures\CloturesForm;
 use App\Livewire\Clotures\CloturesList;
 use App\Livewire\Clotures\CloturesShow;
-use App\Livewire\Depenses\DepenseForm;
-use App\Livewire\Depenses\DepenseList;
-use App\Livewire\Depenses\DepenseShow;
 use App\Livewire\Historiques\HistoriqueRoleDashboard;
 use App\Livewire\Membres\ChangePassword;
-use App\Livewire\Revenus\RevenuForm;
-use App\Livewire\Revenus\RevenuList;
-use App\Livewire\Revenus\RevenuShow;
-use App\Livewire\Revenus\TypesRevenuForm;
-use App\Livewire\Revenus\TypesRevenuList;
-use App\Livewire\Revenus\TypesRevenuShow;
 use App\Livewire\Zones\ZoneForm;
 use App\Livewire\Zones\ZoneList;
 use App\Livewire\Zones\ZoneShow;
@@ -56,6 +44,7 @@ use App\Livewire\Remboursements\RemboursementShow;
 use App\Livewire\Transactions\TransactionShow;
 use App\Models\CreditRemboursement;
 use App\Models\HistoriqueRole;
+use Livewire\Livewire;
 
 Route::prefix('admin')->group(function () {
     Route::get('/permissions-matrix', PermissionMatrix::class)->name('admin.permissions.matrix.index');
@@ -95,18 +84,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/depenses/create', DepenseForm::class)->name('depenses.create');
-    Route::get('/depenses/{depense}/show', DepenseShow::class)->name('depenses.show');
-    Route::get('/depenses', DepenseList::class)->name('depenses.index');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/revenus/create', RevenuForm::class)->name('revenus.create');
-    Route::get('/revenus/{revenu}/show', RevenuShow::class)->name('revenus.show');
-    Route::get('/revenus', RevenuList::class)->name('revenus.index');
-});
-
-Route::middleware(['auth'])->group(function () {
     Route::get('/membres/export/pdf', [MembrePdfController::class, 'index'])->name('membres.pdf.index');
     Route::get('/membres/{membre}/pdf', [MembrePdfController::class, 'fiche'])->name('membres.pdf.fiche');
     Route::get('/membres', ListeMembres::class)->name('membre.index');
@@ -132,17 +109,24 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/depenses/typesdepense', TypesDepenseList::class)->name('types-depense.index');
-    Route::get('/depenses/typesdepense/add', TypesDepenseForm::class)->name('types-depense.create');
-    Route::get('/depenses/typesdepense/{typesDepense}/edit', TypesDepenseForm::class)->name('types-depense.edit');
-    Route::get('/depenses/typesdepense/{typesDepense}/show', TypesDepenseShow::class)->name('types-depense.show');
+    Route::get('/accounts', App\Livewire\Account\AccountIndex::class)->name('accounts.index');
+    Route::get('/compte-resultat', App\Livewire\Account\IncomeStatement::class)->name('compte.resultat.index');
+    Route::get('/compte-tiers', App\Livewire\Account\TiersDashboard::class)->name('compte.tiers.index');
+    Route::get('/accounts/create', App\Livewire\Account\AccountForm::class)->name('accounts.create');
+    Route::get('/journal', App\Livewire\Account\JournalIndex::class)->name('journal.index');
+    Route::get('/journal/{entry}/show', App\Livewire\Account\JournalShow::class)->name('journal.show');
+    Route::get('/accounts/{account}/edit', App\Livewire\Account\AccountForm::class)->name('accounts.edit');
+    Route::get('/accounts/{account}/show', App\Livewire\Account\AccountShow::class)->name('accounts.show');
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/revenus/typesrevenu', TypesRevenuList::class)->name('types-revenu.index');
-    Route::get('/revenus/typesrevenu/add', TypesRevenuForm::class)->name('types-revenu.create');
-    Route::get('/revenus/typesrevenu/{typesRevenu}/edit', TypesRevenuForm::class)->name('types-revenu.edit');
-    Route::get('/revenus/typesrevenu/{typesRevenu}/show', TypesRevenuShow::class)->name('types-revenu.show');
+Route::middleware(['auth'])->prefix('accounting')->name('accounting.')->group(function () {
+    Route::get('/avance', App\Livewire\Accounting\AvanceSalaireComponent::class)->name('avance');
+    Route::get('/change', App\Livewire\Accounting\ChangeComponent::class)->name('change');
+    Route::get('/immobilisation', App\Livewire\Accounting\ImmobilisationComponent::class)->name('immobilisation');
+    Route::get('/reglement', App\Livewire\Accounting\ReglementTiersComponent::class)->name('reglement');
+    Route::get('/charge', App\Livewire\Accounting\ChargeComponent::class)->name('charge');
+    Route::get('/produit', App\Livewire\Accounting\ProduitComponent::class)->name('produit');
+    Route::get('/transfert', App\Livewire\Accounting\TransfertComponent::class)->name('transfert');
 });
 
 Route::middleware(['auth'])->group(function () {

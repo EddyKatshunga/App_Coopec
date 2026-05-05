@@ -24,13 +24,13 @@ class StoreMembreRequest extends FormRequest
     {
         return [
             'nom_complet' => ['required', 'string', 'min:3'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['nullable', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
 
             'numero_identification' => ['required', 'string', 'unique:membres,numero_identification'],
             'sexe' => ['required', Rule::in(['M', 'F'])],
-            'lieu_de_naissance' => ['required', 'string'],
-            'date_de_naissance' => ['required', 'date'],
+            'lieu_de_naissance' => ['nullable', 'string'],
+            'date_de_naissance' => ['nullable', 'date'],
             'qualite' => ['required', Rule::in(['Effectif', 'Auxiliaire'])],
 
             'adresse' => ['nullable', 'string'],

@@ -15,19 +15,15 @@ return new class extends Migration
             'comptes',
             'credits',
             'credit_remboursements',
-            'depenses',
             'membres',
             'photos',
-            'revenus',
             'transactions',
-            'types_depenses',
-            'types_revenus',
             'zones',
         ];
 
         foreach ($tables as $table) {
             Schema::table($table, function (Blueprint $table) {
-                $table->ulid('uuid')->unique()->nullable()->after('id');
+                $table->ulid('uuid')->unique()->after('id');
             });
         }
     }
@@ -41,13 +37,9 @@ return new class extends Migration
             'comptes',
             'credits',
             'credit_remboursements',
-            'depenses',
             'membres',
             'photos',
-            'revenus',
             'transactions',
-            'types_depenses',
-            'types_revenus',
             'zones',
         ];
 

@@ -5,8 +5,7 @@ namespace App\Models;
 use App\Models\Traits\Blameable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CloturesComptable extends Model
 {
@@ -20,106 +19,59 @@ class CloturesComptable extends Model
     }
 
     protected $fillable = [
-        'agence_id', 'date_cloture', 'report_coffre_cdf', 'report_coffre_usd',
-        'report_epargne_cdf', 'report_epargne_usd', 'total_depot_cdf', 'total_depot_usd',
-        'total_retrait_cdf', 'total_retrait_usd', 'total_credit_cdf', 'total_credit_usd',
-        'total_remboursement_cdf', 'total_remboursement_usd', 'total_depense_cdf',
-        'total_depense_usd', 'total_revenu_cdf', 'total_revenu_usd', 'physique_coffre_usd',
-        'physique_coffre_cdf', 'observation_cloture', 'total_interet_generes_cdf',
-        'total_interet_generes_usd', 'statut', 'solde_epargne_cdf', 'solde_epargne_usd',
-        'solde_coffre_cdf', 'solde_coffre_usd',
+        'agence_id',
+        'date_cloture',
+        'statut',
+        'observation_cloture',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
         'date_cloture' => 'date',
-        'report_coffre_cdf' => 'decimal:2',
-        'report_coffre_usd' => 'decimal:2',
-        'report_epargne_cdf' => 'decimal:2',
-        'report_epargne_usd' => 'decimal:2',
-        'total_depot_cdf' => 'decimal:2',
-        'total_depot_usd' => 'decimal:2',
-        'total_retrait_cdf' => 'decimal:2',
-        'total_retrait_usd' => 'decimal:2',
-        'total_credit_cdf' => 'decimal:2',
-        'total_credit_usd' => 'decimal:2',
-        'total_remboursement_cdf' => 'decimal:2',
-        'total_remboursement_usd' => 'decimal:2',
-        'total_depense_cdf' => 'decimal:2',
-        'total_depense_usd' => 'decimal:2',
-        'total_revenu_cdf' => 'decimal:2',
-        'total_revenu_usd' => 'decimal:2',
-        'solde_epargne_cdf' => 'decimal:2',
-        'solde_epargne_usd' => 'decimal:2',
-        'solde_coffre_cdf' => 'decimal:2',
-        'solde_coffre_usd' => 'decimal:2',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
     ];
 
-    /**
-     * Total des entrées CDF (dépôts + remboursements crédits + revenus)
-     */
-    protected function totalEntreCdf(): Attribute
+    // Relations
+    public function journalEntries(): HasMany
     {
-        return Attribute::make(
-            get: fn () => (float) $this->total_depot_cdf 
-                        + (float) $this->total_remboursement_cdf 
-                        + (float) $this->total_revenu_cdf
-        );
+        return $this->hasMany(JournalEntry::class, 'journee_comptable_id');
     }
 
-    /**
-     * Total des entrées USD (dépôts + remboursements crédits + revenus)
-     */
-    protected function totalEntreUsd(): Attribute
+    public function agence(): BelongsTo
     {
-        return Attribute::make(
-            get: fn () => (float) $this->total_depot_usd 
-                        + (float) $this->total_remboursement_usd 
-                        + (float) $this->total_revenu_usd
-        );
+        return $this->belongsTo(Agence::class);
     }
 
-    /**
-     * Total des sorties CDF (retraits + crédits octroyés + dépenses)
-     */
-    protected function totalSortieCdf(): Attribute
+    public function transactions(): HasMany
     {
-        return Attribute::make(
-            get: fn () => (float) $this->total_retrait_cdf 
-                        + (float) $this->total_credit_cdf 
-                        + (float) $this->total_depense_cdf
-        );
+        return $this->hasMany(Transaction::class, 'journee_comptable_id');
     }
 
-    /**
-     * Total des sorties USD (retraits + crédits octroyés + dépenses)
-     */
-    protected function totalSortieUsd(): Attribute
+    public function credits(): HasMany
     {
-        return Attribute::make(
-            get: fn () => (float) $this->total_retrait_usd 
-                        + (float) $this->total_credit_usd 
-                        + (float) $this->total_depense_usd
-        );
+        return $this->hasMany(Credit::class, 'journee_comptable_id');
     }
 
-    // --- RELATIONS ---
-
-    public function agence(): BelongsTo { return $this->belongsTo(Agence::class); }
-    public function revenus() { return $this->hasMany(Revenu::class, 'journee_comptable_id'); }
-    public function depenses() { return $this->hasMany(Depense::class, 'journee_comptable_id'); }
-    public function credits() { return $this->hasMany(Credit::class, 'journee_comptable_id'); }
-    public function remboursements() { return $this->hasMany(CreditRemboursement::class, 'journee_comptable_id'); }
-    public function transactionsEpargne() { return $this->hasMany(Transaction::class, 'journee_comptable_id'); }
-    
-    public function depots() {
-        return $this->hasMany(Transaction::class, 'journee_comptable_id')->whereIn('type_transaction', ['depot', 'DEPOT']);
+    public function remboursements(): HasMany
+    {
+        return $this->hasMany(CreditRemboursement::class, 'journee_comptable_id');
     }
 
-    public function retraits() {
-        return $this->hasMany(Transaction::class, 'journee_comptable_id')->whereIn('type_transaction', ['retrait', 'RETRAIT']);
+    // Méthodes d'état
+    public function isOuverte(): bool
+    {
+        return $this->statut === 'ouverte';
     }
 
-    public function estCloturee(): bool {
+    public function isCloturee(): bool
+    {
         return $this->statut === 'cloturee';
+    }
+
+    public function isVerrouillee(): bool
+    {
+        return $this->statut === 'verouillee';
     }
 }

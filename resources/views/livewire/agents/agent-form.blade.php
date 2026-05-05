@@ -6,7 +6,11 @@
         <p class="text-sm text-gray-600">Membre : <strong>{{ $membre->nom ?? 'N/A' }}</strong></p>
     </div>
 
-    <form wire:submit.prevent="save" class="space-y-5">
+    <form 
+        wire:submit="save" 
+        wire:confirm="Êtes-vous sûr de vouloir enregistrer ces modifications ?"
+        class="space-y-5"
+    >
         
         <div>
             <label class="block text-sm font-medium text-gray-700">Agence d'affectation</label>

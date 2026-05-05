@@ -63,10 +63,8 @@ class CreditRemboursementService
                 'agent_id' => $data['agent_id'],
                 
                 // Ventilation
-                'montant_penalite_payee' => $repartition['penalite_payee'],
                 'montant_interet_payee'  => $repartition['interet_payee'],
                 'montant_capital_payee'  => $repartition['capital_payee'],
-                'reste_penalite'  => $repartition['reste_penalite'],
                 
                 // Snapshots comptables
                 'report_avant' => $credit->reste_du,

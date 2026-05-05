@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Traits\AffectsCoffre;
+use App\Helpers\AccountingHelper;
 use App\Models\Traits\Blameable;
 use App\Models\Traits\ManageClotureComptable;
+use App\Services\AccountingService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,6 @@ use Illuminate\Support\Collection;
 class Credit extends Model
 {
     use ManageClotureComptable;
-    use AffectsCoffre;
     use Blameable;
     
     protected $hidden = ['id'];
@@ -30,7 +30,7 @@ class Credit extends Model
         'taux_penalite_journalier', 'unite_temps', 'duree',
         'date_fin_prevue', 'garant_nom', 'garant_adresse',
         'garant_telephone', 'negocie', 'note_negociation',
-        'date_cloture_forcee', 'observation', 'statut'
+        'date_cloture_forcee', 'observation', 'statut', 'journal_entry_id',
     ];
 
     protected $casts = [
@@ -44,7 +44,50 @@ class Credit extends Model
         'taux_penalite_journalier' => 'decimal:2',
     ];
 
+    /**
+     * Actions automatiques au cycle de vie du modèle.
+     */
+    protected static function booted()
+    {
+        static::created(function (Credit $credit) {
+            $compteCaisseNumero    = '57';
+            $compteCapitalNumero   = '46';
+            $compteInteretsNumero  = '47';
+
+            $compteCaisse   = Account::where('numero', $compteCaisseNumero)->firstOrFail();
+            $compteCapital  = Account::where('numero', $compteCapitalNumero)->firstOrFail();
+            $compteInterets = Account::where('numero', $compteInteretsNumero)->firstOrFail();
+            $compteProduit  = Account::where('numero', '71')->firstOrFail(); // Intérêts perçus
+
+            $capital = (float) $credit->capital;
+            $interet = (float) $credit->interet;
+
+            $lignes = [
+                // Débits : créances distinctes
+                AccountingHelper::debit($compteCapital->id, $capital, $credit->monnaie),
+                AccountingHelper::debit($compteInterets->id, $interet, $credit->monnaie),
+                // Crédits : caisse (capital seulement) et produit (intérêts)
+                AccountingHelper::credit($compteCaisse->id, $capital, $credit->monnaie),
+                AccountingHelper::credit($compteProduit->id, $interet, $credit->monnaie),
+            ];
+
+            app(AccountingService::class)->record(
+                $lignes,
+                "Octroi crédit #{$credit->numero_credit}",
+                $credit
+            );
+        });
+    }
+
     /* ================= RELATIONS ================= */
+
+    /**
+     * L'écriture comptable associée à cette opération.
+     */
+    public function journalEntry(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(JournalEntry::class, 'journal_entry_id');
+    }
     
     public function journeeComptable(): BelongsTo
     {

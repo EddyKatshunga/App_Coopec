@@ -14,25 +14,30 @@ return new class extends Migration
         Schema::create('membres', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
-            $table->string('numero_identification')->unique(); // Le numéro d'identification, doit être unique
-            $table->enum('qualite', ['Effectif', 'Auxiliaire']);
+            $table->foreignId('agence_id')->constrained(); //Agence d'affiliation
+            $table->string('numero_identification')->unique();
+            $table->string('qualite')->default('Auxiliaire'); //Auxiliaire ou Effectif
             $table->enum('sexe', ['M', 'F']);
-            
-            $table->string('lieu_de_naissance');
-            $table->date('date_de_naissance');
-            $table->text('adresse');
+            $table->string('lieu_de_naissance')->nullable();
+            $table->date('date_de_naissance')->nullable();
+            $table->text('adresse')->nullable();
             $table->string('telephone')->nullable();
-            $table->string('activites');
-            $table->string('adresse_activite');
-            $table->date('date_adhesion');
+            $table->string('activites')->nullable();
+            $table->string('adresse_activite')->nullable();
+            $table->date('date_adhesion')->nullable();
             $table->unsignedBigInteger('agent_parrain_id')->nullable();
 
             // 🔐 Audit
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
-			
-			$table->index('agent_parrain_id');
+
+            $table->index(['agence_id', 'qualite', 'sexe']); // Filtres multiples
+            
+            $table->index('qualite');
+            
+            // Index pour les recherches par date d'adhésion (souvent utilisé avec les filtres)
+            $table->index('date_adhesion');
         });
     }
 

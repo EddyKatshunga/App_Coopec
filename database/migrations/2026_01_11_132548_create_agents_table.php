@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('agents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('membre_id')->unique()->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->unique()->constrained()->onDelete('restrict');
+            $table->foreignId('membre_id')->unique()->constrained()->onDelete('restrict');
             $table->foreignId('agence_id')->nullable();
+            $table->string('statut')->nullable(); // ['actif', 'inactif']
 
             // Audit
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
-			$table->index('membre_id');
-            $table->index('agence_id');
         });
     }
 

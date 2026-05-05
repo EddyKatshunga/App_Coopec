@@ -21,6 +21,14 @@ return new class extends Migration
             $table->boolean('is_profile')->default(false); // Si c'est la photo de profil
             $table->string('disk')->default('public'); // Disque de stockage (public, s3, etc.)
             $table->text('caption')->nullable(); // Légende/description
+
+            $table->foreignId('created_by')
+                  ->constrained('users')
+                  ->onDelete('restrict');
+                  
+            $table->foreignId('updated_by')
+                  ->constrained('users')
+                  ->onDelete('restrict');
             $table->timestamps();
             
             // Index pour optimiser les recherches

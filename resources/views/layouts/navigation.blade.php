@@ -25,14 +25,14 @@
             $adminItems = [
                 ['route' => 'agents.index', 'label' => 'Agents', 'can' => true],
                 ['route' => 'agences.zones.index', 'label' => 'Zones de Crédits', 'can' => true],
+                ['route' => 'accounts.index', 'label' => 'Plan comptables', 'can' => true],
+                ['route' => 'compte.resultat.index', 'label' => 'Compte de Résultat', 'can' => true],
             ];
             
             if ($user->can('can.level8')) {
                 $adminItems = array_merge($adminItems, [
                     ['separator' => true],
                     ['route' => 'agences.index', 'label' => 'Agences', 'can' => true],
-                    ['route' => 'types-depense.index', 'label' => 'Types Dépenses', 'can' => true],
-                    ['route' => 'types-revenu.index', 'label' => 'Types Revenus', 'can' => true],
                     ['route' => 'historiquesroles.index', 'label' => 'Historique Rôles', 'can' => true],
                 ]);
             }
@@ -58,14 +58,15 @@
             $caisseItems = [];
             
             if ($user->can('can.level4')) {
-                $caisseItems[] = ['route' => 'depenses.index', 'label' => 'Journal Dépenses', 'can' => true];
-                $caisseItems[] = ['route' => 'revenus.index', 'label' => 'Journal Revenus', 'can' => true];
+                $caisseItems[] = ['route' => 'journal.index', 'label' => 'Journal Comptable', 'can' => true];
             }
             
             if ($user->can('can.level4')) {
                 $caisseItems[] = ['separator' => true];
                 $caisseItems[] = ['route' => 'clotures.index', 'label' => 'Rapport périodique', 'can' => true];
-                
+                $caisseItems[] = ['route' => 'accounts.show', 'params' => ['account' => \App\Models\Account::where('numero', '57')->first()], 'label' => 'Journal Caisse', 'can' => true];
+                $caisseItems[] = ['route' => 'compte.tiers.index', 'label' => 'Dettes & Creances', 'can' => true];
+
                 if ($user->can('canTransact') && $journeeOuverte) {
                     $caisseItems[] = ['route' => 'clotures.show', 'params' => ['cloture' => $journeeOuverte], 'label' => 'Voir la Journée en cours', 'highlight' => true, 'can' => true];
                 }

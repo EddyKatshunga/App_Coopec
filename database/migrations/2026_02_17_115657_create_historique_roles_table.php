@@ -20,8 +20,14 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             // Détails du rôle
-            $table->string('ancien_role')->nullable();
-            $table->string('nouveau_role');
+            $table->foreignId('ancien_role')
+                  ->nullable()
+                  ->constrained('roles')  // clé étrangère vers roles
+                  ->onDelete('restrict');
+
+            $table->foreignId('nouveau_role')
+                  ->constrained('roles')
+                  ->onDelete('restrict');
 
             $table->foreignId('created_by')
                 ->constrained('users');
