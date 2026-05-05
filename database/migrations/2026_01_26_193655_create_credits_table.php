@@ -19,7 +19,6 @@ return new class extends Migration
             $table->date('date_credit');
             $table->string('numero_credit')->unique();
             $table->foreignId('user_id')
-                  ->after('membre_id')
                   ->constrained()
                   ->onDelete('restrict');
             $table->foreignId('membre_id')->constrained()->cascadeOnDelete();
