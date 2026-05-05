@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('agent_id')
                 ->constrained()->nullable();
             
-            $table->foreignId('zone_id')->after('agent_id')
+            $table->foreignId('zone_id')
                   ->nullable()
                   ->constrained('zones')
                   ->onDelete('restrict'); 
