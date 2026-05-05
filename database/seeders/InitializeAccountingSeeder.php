@@ -93,7 +93,7 @@ class InitializeAccountingSeeder extends Seeder
         });
 
         // 6. Clôturer la journée (passer le statut à 'cloturee')
-        $cloture->update(['statut' => 'cloturee']);
+        $cloture->update(['statut' => 'cloturee', 'updated_by' => 1]);
 
         $this->command->info('✅ Initialisation comptable terminée : journée du ' . $dateOuverture . ' clôturée avec soldes initiaux.');
     }
