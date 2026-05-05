@@ -19,8 +19,8 @@ return new class extends Migration
                   ->onDelete('restrict'); 
         });
 
-        // Ajout de la contrainte sur la table comptes
-        Schema::table('comptes', function (Blueprint $table) {
+        // Ajout de la contrainte sur la table agents
+        Schema::table('agents', function (Blueprint $table) {
             $table->foreign('agence_id')
                   ->references('id')
                   ->on('agences')
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->dropForeign(['agence_id']);
         });
 
-        Schema::table('comptes', function (Blueprint $table) {
+        Schema::table('agents', function (Blueprint $table) {
             $table->dropForeign(['agence_id']);
         });
     }
