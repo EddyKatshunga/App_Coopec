@@ -18,8 +18,7 @@ return new class extends Migration {
 
             // Lien avec journée comptable
             $table->foreignId('journee_comptable_id')
-                ->constrained('clotures_comptables')
-                ->nullOnDelete();
+                ->constrained('clotures_comptables');
             $table->timestamps();
 
             $table->index(['agence_id', 'date_operation']);
