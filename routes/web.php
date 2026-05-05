@@ -9,6 +9,7 @@ use App\Http\Controllers\Pdf\ReleveComptePdfController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
+use App\Livewire\Admin\PerformanceSuivi;
 use App\Livewire\Comptes\CompteList;
 use App\Livewire\Comptes\AddCompte;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,7 @@ use Livewire\Livewire;
 
 Route::prefix('admin')->group(function () {
     Route::get('/permissions-matrix', PermissionMatrix::class)->name('admin.permissions.matrix.index');
+    Route::get('/performance', PerformanceSuivi::class)->name('performance.index');
 });
 
 Route::get('/', [HomeController::class, 'index'])->name('public.home');
@@ -192,6 +194,7 @@ Route::get('/impressions/membre/{membre}', [ImpressionController::class, 'ficheM
     ->name('impressions.membre.fiche');
 Route::get('/impressions/periodique/{agenceId}/{debut}/{fin}', [ImpressionController::class, 'rapportPeriodique'])
     ->name('impressions.periodique');
+Route::get('/accounts/{account}/print', [ImpressionController::class, 'releveCompte'])->name('accounts.print');
 Route::get('/credits/{credit:uuid}/print', function (App\Models\Credit $credit) {
     return view('impressions.credit-dossier', compact('credit'));
 })->name('credit.print')->middleware(['auth']);

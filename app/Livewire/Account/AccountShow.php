@@ -4,6 +4,7 @@ namespace App\Livewire\Account;
 
 use App\Models\Account;
 use App\Models\Agence;
+use App\Models\CloturesComptable;
 use App\Models\JournalEntryLine;
 use App\Services\AccountDailyBalanceService;
 use Livewire\Component;
@@ -77,22 +78,18 @@ class AccountShow extends Component
             ->keyBy('monnaie');
 
         // Pour chaque devise, on calcule le solde initial (avant la période)
+        $cloture = null;
+        if (!empty($this->agence_id)) {
+            $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
+            $cloture = CloturesComptable::getPreviousCloture($dateAvant, $this->agence_id);
+        }
         foreach ($devises as $devise) {
             $periodDebit = (float) ($totalsPeriod->get($devise)?->total_debit ?? 0);
             $periodCredit = (float) ($totalsPeriod->get($devise)?->total_credit ?? 0);
 
             // Déterminer le solde initial selon qu'une agence est filtrée ou non
             $soldeInitial = null;
-            if (!empty($this->agence_id)) {
-                // Date de la veille du début de période (dernière clôture avant le début)
-                $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
-                $soldeInitial = $this->balanceService->getBalanceAtDate(
-                    $this->account->id,
-                    (int) $this->agence_id,
-                    $devise,
-                    $dateAvant
-                );
-            }
+            $soldeInitial = (float) ($cloture?->getAccountDailyBalance($this->account, $devise)->solde_fin ?? 0);
 
             // Application de la règle de calcul du solde selon le type de compte
             if($this->account->type === 'charge' || $this->account->type === 'produit'){
@@ -110,7 +107,6 @@ class AccountShow extends Component
                 'credit'        => $periodCredit,
                 'solde_initial' => $soldeInitial,
                 'solde_final'   => $soldeFinal,
-                'type_solde'    => ($soldeFinal && $soldeFinal >= 0) ? "Créditeur" : "Débiteur",
                 'has_balance'   => ($soldeInitial !== null), // indicateur pour l'affichage
             ];
         }

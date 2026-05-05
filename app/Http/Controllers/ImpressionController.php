@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\CloturesComptable;
 use App\Models\Compte;
 use App\Models\Membre;
+use App\Models\Agence;
+use App\Models\JournalEntryLine;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ImpressionController extends Controller
 {
@@ -21,7 +27,6 @@ class ImpressionController extends Controller
 
         $items = $query->get();
 
-        // 3. Retour vers une vue spécifique au relevé de compte (différente de la clôture)
         return view('impressions.releve_individuel_compte', [
             'compte' => $compte,
             'items' => $items,
@@ -40,8 +45,10 @@ class ImpressionController extends Controller
         
         switch ($type) {
             case 'epargne':
+                $compteEpargne = Account::where('numero', '41')->first();
+                $data['compte_epargne'] = $compteEpargne;
                 $data['titre'] = "RELEVÉ JOURNALIER DES ÉPARGNES";
-                $data['items'] = $cloture->transactionsEpargne()->with(['compte.user', 'agent_collecteur.user'])->oldest()->get();
+                $data['items'] = $cloture->transactions()->with(['compte.user', 'agent_collecteur.user'])->oldest()->get();
                 return view('impressions.releve_epargne', $data);
                 
             case 'remboursements':
@@ -66,16 +73,6 @@ class ImpressionController extends Controller
         $data = [
             'cloture' => $cloture,
             'titre' => "RAPPORT DE LA JOURNÉE COMPTABLE",
-            
-            'revenusGroupes' => $cloture->revenus()
-                ->with('typeRevenu')
-                ->get()
-                ->groupBy(['type_revenu_id', 'monnaie']),
-
-            'depensesGroupes' => $cloture->depenses()
-                ->with('typeDepense')
-                ->get()
-                ->groupBy(['type_depense_id', 'monnaie']),
 
             'depotsGroupes' => $cloture->depots()
                 ->with('agent_collecteur.user')
@@ -148,6 +145,84 @@ class ImpressionController extends Controller
                 'fin' => \Carbon\Carbon::parse($fin)->format('d/m/Y'),
             ]
         ]);
+    }
+
+    public function releveCompte(Account $account, Request $request)
+    {
+        // Récupération des filtres (identiques à ceux du Livewire)
+        $agenceId = $request->get('agence_id', Auth::user()->agence_id ?? Agence::first()->id);
+        $dateDebut = $request->get('date_debut', now()->startOfMonth()->format('Y-m-d'));
+        $dateFin   = $request->get('date_fin', now()->format('Y-m-d'));
+
+        $devises = ['USD', 'CDF'];
+        $stats = [];
+
+        // Requête de base pour les lignes d'écriture de la période
+        $baseQuery = JournalEntryLine::where('account_id', $account->id)
+            ->whereHas('journalEntry', function ($q) use ($agenceId, $dateDebut, $dateFin) {
+                if ($agenceId) {
+                    $q->where('agence_id', $agenceId);
+                }
+                $q->whereBetween('date_operation', [
+                    Carbon::parse($dateDebut)->startOfDay(),
+                    Carbon::parse($dateFin)->endOfDay()
+                ]);
+            });
+
+        // Totaux par devise sur la période
+        $totalsPeriod = $baseQuery->selectRaw('monnaie, SUM(debit) as total_debit, SUM(credit) as total_credit')
+            ->groupBy('monnaie')
+            ->get()
+            ->keyBy('monnaie');
+
+        // Clôture précédant la période (pour le report)
+        $cloture = null;
+        if ($agenceId) {
+            $dateAvant = Carbon::parse($dateDebut)->subDay()->toDateString();
+            $cloture = CloturesComptable::getPreviousCloture($dateAvant, $agenceId);
+        }
+
+        foreach ($devises as $devise) {
+            $periodDebit  = (float) ($totalsPeriod->get($devise)?->total_debit ?? 0);
+            $periodCredit = (float) ($totalsPeriod->get($devise)?->total_credit ?? 0);
+
+            // Solde initial = solde_fin de la dernière clôture avant la période
+            $soldeInitial = 0;
+            if ($cloture) {
+                $balance = $cloture->getAccountDailyBalance($account, $devise);
+                if ($balance) {
+                    $soldeInitial = (float) $balance->solde_fin;
+                }
+            }
+
+            // Variation selon le type de compte (règle identique)
+            if ($account->type === 'charge' || $account->type === 'produit') {
+                $variationPeriode = $periodCredit - $periodDebit;
+            } else {
+                $variationPeriode = $periodDebit - $periodCredit;
+            }
+
+            $soldeFinal = $soldeInitial + $variationPeriode;
+
+            $stats[$devise] = compact('periodDebit', 'periodCredit', 'soldeInitial', 'soldeFinal');
+        }
+
+        // Liste des mouvements (identique au Livewire)
+        $mouvements = JournalEntryLine::with(['journalEntry.agence'])
+            ->where('account_id', $account->id)
+            ->whereHas('journalEntry', function ($q) use ($agenceId, $dateDebut, $dateFin) {
+                if ($agenceId) $q->where('agence_id', $agenceId);
+                $q->whereBetween('date_operation', [
+                    Carbon::parse($dateDebut)->startOfDay(),
+                    Carbon::parse($dateFin)->endOfDay()
+                ]);
+            })
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $agence = $agenceId ? Agence::find($agenceId) : null;
+
+        return view('impressions.account_statement', compact('account', 'stats', 'mouvements', 'dateDebut', 'dateFin', 'agence'));
     }
 
 }

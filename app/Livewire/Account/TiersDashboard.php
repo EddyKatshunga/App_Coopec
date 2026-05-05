@@ -5,8 +5,8 @@ namespace App\Livewire\Account;
 use Livewire\Component;
 use App\Models\Account;
 use App\Models\Agence;
+use App\Models\CloturesComptable;
 use App\Models\JournalEntryLine;
-use App\Services\AccountDailyBalanceService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
@@ -20,13 +20,6 @@ class TiersDashboard extends Component
     public $agence_id;
 
     public $isSuperAdmin = false;
-
-    protected AccountDailyBalanceService $balanceService;
-
-    public function boot(AccountDailyBalanceService $balanceService)
-    {
-        $this->balanceService = $balanceService;
-    }
 
     public function mount()
     {
@@ -44,7 +37,7 @@ class TiersDashboard extends Component
     }
 
     /**
-     * Récupération des données avec reports (solde initial)
+     * Récupération des données avec reports via clôture comptable
      */
     public function getDonneesProperty()
     {
@@ -81,29 +74,35 @@ class TiersDashboard extends Component
         $periodDebitCreance = (float) ($totauxCreance->total_debit ?? 0);
         $periodCreditCreance = (float) ($totauxCreance->total_credit ?? 0);
 
-        // Solde initial (avant la période) via le service
-        $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
+        // Solde initial (avant la période) via la clôture précédente
         $soldeInitialDette = null;
         $soldeInitialCreance = null;
 
         if ($agenceId) {
-            $soldeInitialDette = $this->balanceService->getBalanceAtDate(
-                $compteDette->id, $agenceId, $this->monnaie, $dateAvant
-            );
-            $soldeInitialCreance = $this->balanceService->getBalanceAtDate(
-                $compteCreance->id, $agenceId, $this->monnaie, $dateAvant
-            );
+            $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
+            $cloture = CloturesComptable::getPreviousCloture($dateAvant, $agenceId);
+
+            if ($cloture) {
+                $balanceDette = $cloture->getAccountDailyBalance($compteDette, $this->monnaie);
+                $soldeInitialDette = $balanceDette ? (float) $balanceDette->solde_fin : 0;
+
+                $balanceCreance = $cloture->getAccountDailyBalance($compteCreance, $this->monnaie);
+                $soldeInitialCreance = $balanceCreance ? (float) $balanceCreance->solde_fin : 0;
+            }else{
+                $soldeInitialDette = 0;
+                $soldeInitialCreance = 0;
+            }
         }
 
         // Calcul des soldes finaux selon nature des comptes
         // Dette (passif) : solde final = solde_initial + (crédit - débit)
         // Créance (actif) : solde final = solde_initial + (débit - crédit)
         $soldeFinalDette = $soldeInitialDette !== null
-            ? $soldeInitialDette + ($periodCreditDette - $periodDebitDette)
+            ? $soldeInitialDette - $periodCreditDette + $periodDebitDette
             : null;
 
         $soldeFinalCreance = $soldeInitialCreance !== null
-            ? $soldeInitialCreance + ($periodDebitCreance - $periodCreditCreance)
+            ? $soldeInitialCreance + $periodDebitCreance - $periodCreditCreance
             : null;
 
         // Récupération des lignes détaillées pour les tableaux
@@ -134,7 +133,7 @@ class TiersDashboard extends Component
                 'solde_final' => $soldeFinalCreance,
                 'has_balance' => $soldeInitialCreance !== null,
             ],
-            'position_nette' => ($soldeFinalCreance ?? 0) - ($soldeFinalDette ?? 0),
+            'position_nette' => ($soldeFinalDette ?? 0) - ($soldeFinalCreance ?? 0),
         ];
     }
 

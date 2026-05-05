@@ -10,7 +10,11 @@
 
         <div class="mt-4 md:mt-0 flex gap-2">
             <!-- Boutons d'action rapides -->
-            <button class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50">Exporter PDF</button>
+            <a href="{{ route('accounts.print', ['account' => $account, 'agence_id' => $agence_id, 'date_debut' => $date_debut, 'date_fin' => $date_fin]) }}" 
+                target="_blank"
+                class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50">
+                Imprimer le PDF filtré
+            </a>
         </div>
     </div>
 
@@ -45,7 +49,6 @@
                         <div class="border-t border-white/20 pt-3">
                             <p class="text-xs uppercase opacity-70">Solde final au {{ \Carbon\Carbon::parse($date_fin)->format('d/m/Y') }}</p>
                             <p class="text-3xl font-bold">{{ number_format($stat['solde_final'], $devise == 'USD' ? 2 : 0, ',', ' ') }}</p>
-                            <p class="text-xs mt-1 italic">{{ $stat['type_solde'] }}</p>
                         </div>
                     </div>
                 @else
@@ -66,7 +69,6 @@
         <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Filtrer par Agence</label>
             <select wire:model.live="agence_id" class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500">
-                <option value="">Toutes les agences</option>
                 @foreach($agences as $agence)
                     <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                 @endforeach

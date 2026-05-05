@@ -28,14 +28,16 @@
                 <div class="flex items-center bg-gray-50 rounded-xl px-3 border border-transparent focus-within:border-indigo-500 transition-all">
                     <x-heroicon-o-building-office-2 class="w-5 h-5 text-gray-400" />
                     <select wire:model.live="agence_id" class="bg-transparent border-none text-sm focus:ring-0 py-2.5 pr-8">
-                        <option value="">-- Choisir une agence --</option>
                         @foreach($agences as $agence)
                             <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                         @endforeach
                     </select>
                 </div>
             
-
+            <a href="{{ route('performance.index') }}" class="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+                <x-heroicon-s-plus class="w-5 h-5 mr-2" />
+                Performences des Agents
+            </a>
             <a href="{{ route('membre.index') }}" class="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
                 <x-heroicon-s-plus class="w-5 h-5 mr-2" />
                 Nouveau

@@ -8,22 +8,61 @@
         <p class="text-sm text-gray-600 mt-2">Agence : <strong>{{ $cloture->agence->nom }}</strong> | Date : <strong>{{ $cloture->date_cloture->format('d/m/Y') }}</strong></p>
     </div>
 
+    @php
+        // Récupération du compte Épargne (numéro 41)
+        $compteEpargne = $compte_epargne ?? null;
+
+        // Initialisation des totaux par devise
+        $devises = ['USD', 'CDF'];
+        $stats = [];
+
+        foreach ($devises as $devise) {
+            // 1. Report (solde initial) = solde_fin de la clôture précédente pour ce compte
+            $cloturePrecedente = $cloture->getPreviousCloture($cloture->date_cloture->toDateString(), $cloture->agence_id);
+            $report = 0;
+            if ($cloturePrecedente && $compteEpargne) {
+                $balancePrec = $cloturePrecedente->getAccountDailyBalance($compteEpargne, $devise);
+                if ($balancePrec) {
+                    $report = (float) $balancePrec->solde_debut;
+                }
+            }
+
+            // 2. Totaux des dépôts et retraits du jour
+            $totalDepots = $items->where('monnaie', $devise)
+                                ->where('type_transaction', 'DEPOT')  // selon votre enum
+                                ->sum('montant');
+            $totalRetraits = $items->where('monnaie', $devise)
+                                 ->where('type_transaction', 'RETRAIT')
+                                 ->sum('montant');
+
+            // 3. Solde final
+            $soldeFinal = $report - $totalDepots + $totalRetraits;
+
+            $stats[$devise] = [
+                'report' => $report,
+                'total_depots' => $totalDepots,
+                'total_retraits' => $totalRetraits,
+                'solde_final' => $soldeFinal,
+            ];
+        }
+    @endphp
+
     {{-- Section des Totaux avant le tableau --}}
     <div class="grid grid-cols-2 gap-6 mb-6">
         <div class="border-2 border-gray-100 rounded-lg p-3 bg-gray-50/50">
             <h3 class="text-[11px] font-black uppercase text-blue-900 mb-2 border-b border-blue-200">Résumé USD</h3>
-            <div class="flex justify-between text-xs"><span>Report :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->report_epargne_usd) }}</span></div>
-            <div class="flex justify-between text-xs py-1"><span>Total Depots :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_depot_usd) }}</span></div>
-            <div class="flex justify-between text-xs py-1"><span>Total Retraits :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_retrait_usd) }}</span></div>
-            <div class="flex justify-between text-sm pt-1 border-t-2 border-white font-black text-blue-700"><span>Solde Final :</span> <span class="font-mono font-black">${{ number_format_fr($cloture->solde_epargne_usd) }}</span></div>
+            <div class="flex justify-between text-xs"><span>Report :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['USD']['report']) }}</span></div>
+            <div class="flex justify-between text-xs py-1"><span>Total Dépôts :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['USD']['total_depots']) }}</span></div>
+            <div class="flex justify-between text-xs py-1"><span>Total Retraits :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['USD']['total_retraits']) }}</span></div>
+            <div class="flex justify-between text-sm pt-1 border-t-2 border-white font-black text-blue-700"><span>Solde Final :</span> <span class="font-mono font-black">${{ number_format_fr($stats['USD']['solde_final']) }}</span></div>
         </div>
 
         <div class="border-2 border-gray-100 rounded-lg p-3 bg-gray-50/50">
             <h3 class="text-[11px] font-black uppercase text-green-900 mb-2 border-b border-green-200">Résumé CDF</h3>
-            <div class="flex justify-between text-xs"><span>Report :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->report_epargne_cdf) }}</span></div>
-            <div class="flex justify-between text-xs py-1"><span>Total Depots :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_depot_cdf) }}</span></div>
-            <div class="flex justify-between text-xs py-1"><span>Total Retraits :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_retrait_cdf) }}</span></div>
-            <div class="flex justify-between text-sm pt-1 border-t-2 border-white font-black text-green-700"><span>Solde Final :</span> <span class="font-mono font-black">{{ number_format_fr($cloture->solde_epargne_cdf) }} FC</span></div>
+            <div class="flex justify-between text-xs"><span>Report :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['CDF']['report']) }}</span></div>
+            <div class="flex justify-between text-xs py-1"><span>Total Dépôts :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['CDF']['total_depots']) }}</span></div>
+            <div class="flex justify-between text-xs py-1"><span>Total Retraits :</span> <span class="font-mono font-bold">{{ number_format_fr($stats['CDF']['total_retraits']) }}</span></div>
+            <div class="flex justify-between text-sm pt-1 border-t-2 border-white font-black text-green-700"><span>Solde Final :</span> <span class="font-mono font-black">{{ number_format_fr($stats['CDF']['solde_final']) }} FC</span></div>
         </div>
     </div>
 

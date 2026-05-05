@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto py-8">
     <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-slate-800">Suivi des Tiers (Comptes 40 & 45)</h2>
-            <p class="text-sm text-slate-500">Analyse des dettes fournisseurs et créances clients</p>
+            <h2 class="text-xl font-bold text-slate-800">Suivi des Dettes et Créances</h2>
+            <p class="text-sm text-slate-500">Analyse de toutes les dettes et créances par Agence et par Devise</p>
         </div>
         
         <div class="flex flex-wrap items-center gap-4">
@@ -110,10 +110,7 @@
     {{-- Position Nette (optionnel) --}}
     @if($data['dettes']['has_balance'] && $data['creances']['has_balance'])
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-        <h3 class="text-sm font-bold text-slate-500 uppercase mb-2">Position Nette (Créances - Dettes)</h3>
-        <div class="text-3xl font-black {{ $data['position_nette'] >= 0 ? 'text-indigo-600' : 'text-orange-600' }}">
-            {{ number_format($data['position_nette'], 2, ',', ' ') }} <span class="text-lg text-slate-500">{{ $monnaie }}</span>
-        </div>
+        <h3 class="text-sm font-bold text-slate-500 uppercase mb-2">Conclusion</h3>
         <p class="text-xs text-slate-500 mt-2">
             @if($data['position_nette'] > 0)
                 L'entreprise a plus de créances que de dettes.

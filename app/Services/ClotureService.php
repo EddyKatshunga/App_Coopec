@@ -43,7 +43,7 @@ class ClotureService
 
             $cloture = CloturesComptable::create([
                 'agence_id'    => $agence->id,
-                'date_cloture' => Carbon::create(2026, 4, 29),
+                'date_cloture' => Carbon::today(),
                 'statut'       => 'ouverte',
                 'created_by'   => $user->id,
                 'updated_by'   => $user->id,

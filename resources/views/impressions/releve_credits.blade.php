@@ -12,14 +12,14 @@
     <div class="grid grid-cols-2 gap-6 mb-6">
         <div class="border border-purple-100 rounded-lg p-3 bg-purple-50/30">
             <h3 class="text-[10px] font-black uppercase text-purple-900 mb-2 border-b border-purple-200">Cumul Crédits (USD)</h3>
-            <div class="flex justify-between text-xs"><span>Capital :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_credit_usd) }}</span></div>
+            <div class="flex justify-between text-xs"><span>Capital :</span> <span class="font-mono font-bold">{{ number_format_fr($items->where('monnaie', 'USD')->sum('capital')) }}</span></div>
             <div class="flex justify-between text-xs py-0.5 text-gray-500"><span>Intérêts prévus :</span> <span class="font-mono font-bold">{{ number_format_fr($items->where('monnaie', 'USD')->sum('interet')) }}</span></div>
             <div class="flex justify-between text-sm pt-1 border-t border-purple-200 font-black text-purple-700"><span>Total à Recouvrer :</span> <span class="font-mono">${{ number_format_fr($cloture->total_credit_usd + $items->where('monnaie', 'USD')->sum('interet')) }}</span></div>
         </div>
 
         <div class="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
             <h3 class="text-[10px] font-black uppercase text-gray-700 mb-2 border-b border-gray-200">Cumul Crédits (CDF)</h3>
-            <div class="flex justify-between text-xs"><span>Capital :</span> <span class="font-mono font-bold">{{ number_format_fr($cloture->total_credit_cdf) }}</span></div>
+            <div class="flex justify-between text-xs"><span>Capital :</span> <span class="font-mono font-bold">{{ number_format_fr($items->where('monnaie', 'CDF')->sum('capital')) }}</span></div>
             <div class="flex justify-between text-xs py-0.5 text-gray-500"><span>Intérêts prévus :</span> <span class="font-mono font-bold">{{ number_format_fr($items->where('monnaie', 'CDF')->sum('interet')) }}</span></div>
             <div class="flex justify-between text-sm pt-1 border-t border-gray-200 font-black"><span>Total à Recouvrer :</span> <span class="font-mono">{{ number_format_fr($cloture->total_credit_cdf + $items->where('monnaie', 'CDF')->sum('interet')) }} FC</span></div>
         </div>

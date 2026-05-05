@@ -87,34 +87,4 @@ class AccountDailyBalanceService
             }
         });
     }
-
-    /**
-     * Récupère le solde d'un compte à une date donnée (fin de journée).
-     *
-     * @param int $accountId
-     * @param int $agenceId
-     * @param string $devise
-     * @param string $date (Y-m-d)
-     * @return float
-     */
-    public function getBalanceAtDate(int $accountId, int $agenceId, string $devise, string $date): float
-    {
-        $cloture = CloturesComptable::where('agence_id', $agenceId)
-            ->where('statut', 'cloturee')
-            ->whereDate('date_cloture', '<=', $date)
-            ->orderBy('date_cloture', 'desc')
-            ->first();
-
-        if (!$cloture) {
-            return 0;
-        }
-
-        $balance = AccountDailyBalance::where('account_id', $accountId)
-            ->where('agence_id', $agenceId)
-            ->where('monnaie', $devise)
-            ->where('cloture_comptable_id', $cloture->id)
-            ->first();
-
-        return $balance ? (float) $balance->solde_fin : 0;
-    }
 }

@@ -23,9 +23,9 @@
         // Administration
         if ($user->can('can.level4')) {
             $adminItems = [
-                ['route' => 'agents.index', 'label' => 'Agents', 'can' => true],
+                ['route' => 'agents.index', 'label' => 'Gestion Agents', 'can' => true],
                 ['route' => 'agences.zones.index', 'label' => 'Zones de Crédits', 'can' => true],
-                ['route' => 'accounts.index', 'label' => 'Plan comptables', 'can' => true],
+                ['route' => 'accounts.index', 'label' => 'Gestion des Comptes', 'can' => true],
                 ['route' => 'compte.resultat.index', 'label' => 'Compte de Résultat', 'can' => true],
             ];
             
