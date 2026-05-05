@@ -55,8 +55,8 @@ return new class extends Migration
 
             // État APRÈS paiement (capital + intérêt + pénalités)
             $table->decimal('reste_du_apres', 15, 2);
-            $table->decimal('reste_penalite', 15, 2)->default(0)->after('montant_penalite_payee');
-            $table->decimal('reste_non_alloue', 15, 2)->default(0)->after('montant_capital_payee');
+            $table->decimal('reste_penalite', 15, 2)->default(0);
+            $table->decimal('reste_non_alloue', 15, 2)->default(0);
 
             /* ================= MÉTADONNÉES ================= */
             $table->enum('mode_paiement', [
