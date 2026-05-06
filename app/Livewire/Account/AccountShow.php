@@ -35,7 +35,7 @@ class AccountShow extends Component
     public function mount(Account $account)
     {
         $this->account = $account->load(['parent', 'children']);
-        $this->date_debut = now()->startOfMonth()->format('Y-m-d');
+        $this->date_debut = now()->format('Y-m-d');
         $this->date_fin = now()->format('Y-m-d');
         $this->agence_id = Auth::user()->agence_id ?? Agence::first()->id;
     }
@@ -129,7 +129,7 @@ class AccountShow extends Component
                 ]);
             })
             ->orderBy('id', 'desc') // ou 'date_operation' selon besoin
-            ->paginate(15);
+            ->paginate(100);
 
         $agences = Agence::all();
 
