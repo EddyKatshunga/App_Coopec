@@ -8,10 +8,13 @@ use App\Helpers\AccountingHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Models\Traits\HasAgenceContext;
 
 #[Layout('layouts.app')]
 class ReglementTiersComponent extends Component
 {
+    use HasAgenceContext;
+    
     public $type = 'dette'; // dette ou creance
     public $montant = '';
     public $monnaie = 'CDF';
@@ -25,6 +28,12 @@ class ReglementTiersComponent extends Component
             'monnaie'  => 'required|in:CDF,USD',
             'reference'=> 'nullable|string|max:255',
         ];
+    }
+
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
     }
 
     public function save(AccountingService $service)

@@ -8,10 +8,13 @@ use App\Helpers\AccountingHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Models\Traits\HasAgenceContext;
 
 #[Layout('layouts.app')]
 class TransfertComponent extends Component
 {
+    use HasAgenceContext;
+    
     public $sens = 'caisse_vers_banque'; // ou banque_vers_caisse
     public $montant = '';
     public $monnaie = 'CDF';
@@ -23,6 +26,12 @@ class TransfertComponent extends Component
             'montant' => 'required|numeric|min:0.01',
             'monnaie' => 'required|in:CDF,USD',
         ];
+    }
+
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
     }
 
     public function save(AccountingService $service)

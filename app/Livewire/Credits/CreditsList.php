@@ -19,7 +19,7 @@ class CreditsList extends Component
     // Filtres
     public string $search = '';
     public string $statut = 'en_cours';
-    public ?string $selected_agence_id = null;
+    public $selected_agence_id = null;
     public ?string $selected_zone_id = null;
     public string $monnaie = '';
 
@@ -28,9 +28,7 @@ class CreditsList extends Component
 
     public function mount()
     {
-        if (!Auth::user()->can('can.level6')) {
-            $this->selected_agence_id = (string) Auth::user()->agence_id;
-        }
+        $this->selected_agence_id = Auth::user()->agence_id ?? Agence::first()->id ?? null;
     }
 
     /**

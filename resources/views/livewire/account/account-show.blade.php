@@ -66,6 +66,8 @@
 
     <!-- Filters Section - Responsive -->
     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-stretch sm:items-end">
+        {{-- Filtre Agence (Level 6 uniquement) --}}
+        @can('can.level6')
         <div class="flex-1 min-w-[180px]">
             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Filtrer par Agence</label>
             <select wire:model.live="agence_id" class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500">
@@ -74,6 +76,7 @@
                 @endforeach
             </select>
         </div>
+        @endcan
         <div class="flex-1 min-w-[140px]">
             <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Du</label>
             <input type="date" wire:model.live="date_debut" class="w-full rounded-lg border-slate-300 text-sm">

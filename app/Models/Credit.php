@@ -49,7 +49,7 @@ class Credit extends Model
      */
     protected static function booted()
     {
-        static::created(function (Credit $credit) {
+        static::creating(function (Credit $credit) {
             $compteCaisseNumero    = '57';
             $compteCapitalNumero   = '46';
             $compteInteretsNumero  = '47';

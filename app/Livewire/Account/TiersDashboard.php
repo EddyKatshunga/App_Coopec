@@ -80,18 +80,21 @@ class TiersDashboard extends Component
 
         if ($agenceId) {
             $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
-            $cloture = CloturesComptable::getPreviousCloture($dateAvant, $agenceId);
+            $balanceDette = \App\Models\AccountDailyBalance::getAccountDailyBalanceForDate(
+                $agenceId,
+                $compteDette,
+                $this->monnaie,
+                $dateAvant
+            );
+            $balanceCreance = \App\Models\AccountDailyBalance::getAccountDailyBalanceForDate(
+                $agenceId,
+                $compteCreance,
+                $this->monnaie,
+                $dateAvant
+            );
+            $soldeInitialDette = (float) ($balanceDette?->solde_fin ?? 0);
+            $soldeInitialCreance = (float) ($balanceCreance?->solde_fin ?? 0);
 
-            if ($cloture) {
-                $balanceDette = $cloture->getAccountDailyBalance($compteDette, $this->monnaie);
-                $soldeInitialDette = $balanceDette ? (float) $balanceDette->solde_fin : 0;
-
-                $balanceCreance = $cloture->getAccountDailyBalance($compteCreance, $this->monnaie);
-                $soldeInitialCreance = $balanceCreance ? (float) $balanceCreance->solde_fin : 0;
-            }else{
-                $soldeInitialDette = 0;
-                $soldeInitialCreance = 0;
-            }
         }
 
         // Calcul des soldes finaux selon nature des comptes

@@ -61,22 +61,6 @@
                         @error('montant') <span class="text-rose-500 text-xs mt-1 italic">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Monnaie -->
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Devise</label>
-                        <div class="inline-flex p-1 bg-slate-100 rounded-xl w-full">
-                            <button type="button" wire:click="$set('monnaie', 'CDF')" 
-                                    class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {{ $monnaie === 'CDF' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700' }}">
-                                CDF
-                            </button>
-                            <button type="button" wire:click="$set('monnaie', 'USD')" 
-                                    class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {{ $monnaie === 'USD' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700' }}">
-                                USD
-                            </button>
-                        </div>
-                        @error('monnaie') <span class="text-rose-500 text-xs mt-1 italic">{{ $message }}</span> @enderror
-                    </div>
-
                     <!-- Mode de Paiement -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-slate-700 mb-2">Mode de règlement</label>

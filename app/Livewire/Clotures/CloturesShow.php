@@ -34,6 +34,34 @@ class CloturesShow extends Component
     }
 
     /**
+     * Rouvrir une journée verrouillée.
+     */
+    public function reopenJournee()
+    {
+        if ($this->cloture->statut !== 'verrouillee') {
+            return;
+        }
+        $this->cloture->update(['statut' => 'ouverte']);
+        // Recharger les données
+        $this->loadDashboardData();
+    }
+
+    /**
+     * Verrouiller la journée (passer de 'ouverte' à 'verrouillee')
+     */
+    public function verrouillerJournee()
+    {
+        if ($this->cloture->statut !== 'ouverte') {
+            return;
+        }
+
+        $this->cloture->update([
+            'statut' => 'verrouillee',
+        ]);
+        $this->loadDashboardData();
+    }
+
+    /**
      * Charger les données du tableau de bord
      */
     protected function loadDashboardData(): void

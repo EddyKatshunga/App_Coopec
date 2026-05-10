@@ -75,7 +75,7 @@ class AccountingService
             }
 
             if ($source) {
-                $source->update(['journal_entry_id' => $entry->id]);
+                $source->journal_entry_id = $entry->id;
             }
 
             return $entry;

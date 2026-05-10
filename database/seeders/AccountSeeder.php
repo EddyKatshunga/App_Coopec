@@ -29,6 +29,9 @@ class AccountSeeder extends Seeder
         $accounts = [
             // Classe 1
             ['numero' => '10', 'nom' => 'Capital social', 'type' => 'passif'],
+            // Classe 1 (capitaux)
+            ['numero' => '12', 'nom' => 'Résultat de l\'exercice', 'type' => 'passif'],
+            ['numero' => '13', 'nom' => 'Report à nouveau', 'type' => 'passif'],
             ['numero' => '16', 'nom' => 'Emprunt à long terme', 'type' => 'passif'],
             
             // Classe 2

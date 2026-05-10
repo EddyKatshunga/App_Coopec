@@ -3,6 +3,7 @@
 namespace App\Livewire\Account;
 
 use App\Models\Account;
+use App\Models\AccountDailyBalance;
 use App\Models\Agence;
 use App\Models\CloturesComptable;
 use App\Models\JournalEntryLine;
@@ -21,7 +22,7 @@ class AccountShow extends Component
     public Account $account;
     
     // Filtres
-    public $agence_id = '';
+    public $agence_id = null;
     public $date_debut;
     public $date_fin;
 
@@ -77,19 +78,20 @@ class AccountShow extends Component
             ->get()
             ->keyBy('monnaie');
 
-        // Pour chaque devise, on calcule le solde initial (avant la période)
-        $cloture = null;
-        if (!empty($this->agence_id)) {
-            $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
-            $cloture = CloturesComptable::getPreviousCloture($dateAvant, $this->agence_id);
-        }
         foreach ($devises as $devise) {
             $periodDebit = (float) ($totalsPeriod->get($devise)?->total_debit ?? 0);
             $periodCredit = (float) ($totalsPeriod->get($devise)?->total_credit ?? 0);
 
             // Déterminer le solde initial selon qu'une agence est filtrée ou non
             $soldeInitial = null;
-            $soldeInitial = (float) ($cloture?->getAccountDailyBalance($this->account, $devise)->solde_fin ?? 0);
+            $dateAvant = Carbon::parse($this->date_debut)->subDay()->toDateString();
+            $balance = AccountDailyBalance::getAccountDailyBalanceForDate(
+                $this->agence_id,
+                $this->account,
+                $devise,
+                $dateAvant
+            );
+            $soldeInitial = (float) ($balance?->solde_fin ?? 0);
 
             // Application de la règle de calcul du solde selon le type de compte
             if($this->account->type === 'charge' || $this->account->type === 'produit'){
@@ -116,6 +118,11 @@ class AccountShow extends Component
 
     public function render()
     {
+        // Sécurité : seul le level6 peut changer d'agence, sinon on force l'agence de l'user
+        $currentAgenceId = auth()->user()->can('can.level6') 
+            ? $this->agence_id 
+            : auth()->user()->agence_id;
+
         $lines = JournalEntryLine::query()
             ->with(['journalEntry.agence'])
             ->where('account_id', $this->account->id)
@@ -128,10 +135,12 @@ class AccountShow extends Component
                     Carbon::parse($this->date_fin)->endOfDay()
                 ]);
             })
-            ->orderBy('id', 'desc') // ou 'date_operation' selon besoin
+            ->orderBy('id', 'asc') // ou 'date_operation' selon besoin
             ->paginate(100);
 
-        $agences = Agence::all();
+        $agences = auth()->user()->can('can.level6') 
+            ? Agence::orderBy('nom')->get() 
+            : collect();
 
         return view('livewire.account.account-show', [
             'mouvements' => $lines,

@@ -29,7 +29,6 @@
 
             @can('can.level6')
             <select wire:model.live="selected_agence_id" class="border-gray-200 rounded-lg text-sm focus:ring-indigo-500">
-                <option value="">Toutes les agences</option>
                 @foreach($agences as $agence)
                     <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                 @endforeach

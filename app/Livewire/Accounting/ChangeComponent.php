@@ -9,10 +9,13 @@ use App\Helpers\AccountingHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Models\Traits\HasAgenceContext;
 
 #[Layout('layouts.app')]
 class ChangeComponent extends Component
 {
+    use HasAgenceContext;
+    
     public $devise_source = 'USD';
     public $devise_cible = 'CDF';
     public $montant_source = '';
@@ -20,6 +23,8 @@ class ChangeComponent extends Component
 
     public function mount()
     {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
         $tauxActif = TauxChange::actuel();
         $this->taux = $tauxActif?->taux_vente ?? 2500;
     }

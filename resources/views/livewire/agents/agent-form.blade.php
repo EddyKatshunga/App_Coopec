@@ -1,9 +1,9 @@
 <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow space-y-6">
     <div class="border-b pb-4">
         <h2 class="text-xl font-bold text-gray-800">
-            {{ $agent ? 'Modifier l\'agent' : 'Promouvoir en agent' }}
+            {{ $agent ? 'Modifier l\'agence ou le role d\'un agent' : 'Promouvoir en agent' }}
         </h2>
-        <p class="text-sm text-gray-600">Membre : <strong>{{ $membre->nom ?? 'N/A' }}</strong></p>
+        <p class="text-sm text-gray-600">Agent : <strong>{{ $membre->nom ?? 'N/A' }}</strong></p>
     </div>
 
     <form 
@@ -28,7 +28,7 @@
                 <input type="hidden" wire:model="agence_id">
             @else
                 <select wire:model="agence_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="">-- Choisir une agence --</option>
+                    <option value="">--- Choisir une Agence ---</option>
                     @foreach($agences as $agence)
                         <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                     @endforeach
@@ -40,7 +40,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Rôle attribué dans le système</label>
             <select wire:model.live="role_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">-- Sélectionner un rôle --</option>
+                <option value="">--- Choisir le rôle système de l'Agent ---</option>
                 @foreach($rolesDisponibles as $r)
                     <option value="{{ $r->name }}">{{ strtoupper($r->name) }}</option>
                 @endforeach

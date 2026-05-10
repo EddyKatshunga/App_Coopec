@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->date('date_operation');
             $table->string('libelle');
 
-            $table->foreignId('agence_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('agence_id')->constrained();
 
             // Lien avec journée comptable
             $table->foreignId('journee_comptable_id')

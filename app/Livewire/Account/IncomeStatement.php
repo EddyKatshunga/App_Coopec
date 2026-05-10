@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Account;
 
+use App\Models\Account;
+use App\Models\AccountDailyBalance;
 use App\Models\Agence;
 use App\Models\JournalEntryLine;
 use Illuminate\Support\Facades\Auth;
@@ -11,25 +13,46 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.app')]
 class IncomeStatement extends Component
 {
-    public $agence_id = '';
+    public $agence_id = null;
     public $date_debut;
     public $date_fin;
+    public $resultatAntérieur = 0;
 
     public function mount()
     {
-        //Initialisation des dates
-        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
-        $dateParDefaut = $derniereCloture 
-            ? $derniereCloture->date_cloture->format('Y-m-d') 
-            : now()->format('Y-m-d');
-
+        $dateParDefaut = now()->format('Y-m-d');
         $this->date_debut = $dateParDefaut;
         $this->date_fin = $dateParDefaut;
+        $this->agence_id = Auth::user()->agence_id ?? Agence::first()->id;
+        $this->calculerResultatAntérieur();
     }
 
     /**
-     * Récupère les données groupées par compte en utilisant UNIQUEMENT le montant_base (CDF)
+     * Surveille les changements des filtres pour recalculer le résultat antérieur.
      */
+    public function updated($property)
+    {
+        if (in_array($property, ['agence_id', 'date_debut', 'date_fin'])) {
+            $this->calculerResultatAntérieur();
+        }
+    }
+
+    protected function calculerResultatAntérieur()
+    {
+        $compteResultat = Account::where('numero', '12')->first();
+        if (!$compteResultat) return;
+
+        $dateAvant = \Carbon\Carbon::parse($this->date_debut)->subDay()->toDateString();
+
+        $lastBalance = AccountDailyBalance::getAccountDailyBalanceForDate(
+            $this->agence_id,
+            $compteResultat,
+            'CDF',
+            $dateAvant
+        );
+        $this->resultatAntérieur = (float) ($lastBalance?->solde_fin ?? 0);
+    }
+
     public function getRowsProperty()
     {
         $query = JournalEntryLine::query()
@@ -45,7 +68,6 @@ class IncomeStatement extends Component
                 ]);
             });
 
-        // On ventile le montant_base selon qu'il s'agissait d'un débit ou d'un crédit à l'origine
         return $query->selectRaw('
                 account_id, 
                 SUM(CASE WHEN debit > 0 THEN montant_base ELSE 0 END) as total_debit, 
@@ -55,28 +77,26 @@ class IncomeStatement extends Component
             ->get();
     }
 
-    /**
-     * Calcule le résultat global en CDF
-     */
     public function getResultatProperty()
     {
         $stats = [
-            'produits' => 0, 
-            'charges' => 0, 
-            'net' => 0
+            'produits' => 0,
+            'charges' => 0,
+            'net_periode' => 0,
+            'resultat_antérieur' => $this->resultatAntérieur,
+            'cumul' => 0,
         ];
 
         foreach ($this->rows as $row) {
             if ($row->account->type === 'produit') {
-                // Produit = Crédit - Débit
-                $stats['produits'] += ($row->total_credit - $row->total_debit);
+                $stats['produits'] += $row->total_credit;
             } else {
-                // Charge = Débit - Crédit
-                $stats['charges'] += ($row->total_debit - $row->total_credit);
+                $stats['charges'] += $row->total_debit;
             }
         }
 
-        $stats['net'] = $stats['produits'] - $stats['charges'];
+        $stats['net_periode'] = $stats['produits'] - $stats['charges'];
+        $stats['cumul'] = $stats['resultat_antérieur'] + $stats['net_periode'];
 
         return $stats;
     }
@@ -87,6 +107,7 @@ class IncomeStatement extends Component
             'agences' => Agence::all(),
             'comptesProduits' => $this->rows->filter(fn($r) => $r->account->type === 'produit'),
             'comptesCharges' => $this->rows->filter(fn($r) => $r->account->type === 'charge'),
+            'resultatAntérieur' => $this->resultatAntérieur,
         ]);
     }
 }

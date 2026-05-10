@@ -6,6 +6,7 @@ use App\Livewire\Traits\CanDeleteAccountingRecords;
 use App\Models\CloturesComptable;
 use App\Models\Transaction;
 use App\Models\Agence;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
@@ -22,27 +23,33 @@ class TransactionsList extends Component
     public $date_debut;
     public $date_fin;
     public $journee_ouverte;
-    
-    // Filtres de périmètre
-    public $all_agents = false;
-    public $selected_agence_id = null;
+
+    // Filtres
+    public $selected_agence_id = null;   // obligatoire pour can.level6
+    public $selected_creator_id = null;  // optionnel, pour can.level4
 
     public function mount()
     {
         $user = Auth::user();
         $this->journee_ouverte = $user->journee_ouverte;
-        
-        //Initialisation des dates
-        $derniereCloture = \App\Models\CloturesComptable::latest('date_cloture')->first();
-        $dateParDefaut = $derniereCloture 
-            ? $derniereCloture->date_cloture->format('Y-m-d') 
+
+        // Dates par défaut
+        $derniereCloture = CloturesComptable::where('agence_id', $user->agence_id)
+            ->latest('date_cloture')->first();
+        $dateParDefaut = $derniereCloture
+            ? $derniereCloture->date_cloture->format('Y-m-d')
             : now()->format('Y-m-d');
 
         $this->date_debut = $dateParDefaut;
         $this->date_fin = $dateParDefaut;
 
-        // Si l'utilisateur est restreint à son agence, on la fixe
-        if (!$user->can('can.level6')) {
+        // Agence obligatoire
+        if ($user->can('can.level6')) {
+            // Pour niveau 6 : on présélectionne l'agence de l'utilisateur si elle existe,
+            // sinon la première agence disponible.
+            $this->selected_agence_id = $user->agence_id ?? Agence::first()->id;
+        } else {
+            // Les autres n'ont pas le choix, on fixe l'agence.
             $this->selected_agence_id = $user->agence_id;
         }
     }
@@ -54,26 +61,27 @@ class TransactionsList extends Component
         $user = Auth::user();
         $query = Transaction::with(['compte.user', 'agence', 'creator']);
 
-        // --- NIVEAU 3 : Vue Globale (Toutes les agences) ---
+        // --- Périmètre d'agence ---
         if ($user->can('can.level6')) {
-            $query->when($this->selected_agence_id, fn($q) => $q->where('agence_id', $this->selected_agence_id));
-        } 
-        // --- NIVEAU 2 & 1 : Restriction à l'agence de l'utilisateur ---
-        else {
+            // Filtre obligatoire : $selected_agence_id garanti non null
+            $query->where('agence_id', $this->selected_agence_id);
+        } else {
             $query->where('agence_id', $user->agence_id);
         }
 
-        // --- GESTION DU FILTRE AGENT (NIVEAU 1 vs NIVEAU 2) ---
-        // Si l'utilisateur n'a pas la permission de voir toute l'agence 
-        // OU s'il a la permission mais qu'il n'a pas coché la case "Toute l'agence"
-        if (!$user->can('can.level4') || !$this->all_agents) {
-            // Sauf pour le niveau 3 qui voit tout par défaut s'il choisit une agence
-            if (!$user->can('can.level6')) {
-                $query->where('created_by', $user->id);
+        // --- Filtre par agent créateur ---
+        if (!$user->can('can.level4')) {
+            // Niveau 1-3 : ne voient que leurs propres transactions
+            $query->where('created_by', $user->id);
+        } else {
+            // Niveau 4+ : filtrage optionnel par créateur
+            if ($this->selected_creator_id) {
+                $query->where('created_by', $this->selected_creator_id);
             }
+            // sinon toutes les transactions de l’agence
         }
 
-        // --- FILTRES DYNAMIQUES ---
+        // --- Autres filtres dynamiques ---
         $query->when($this->search, function($q) {
             $q->where(function($sub) {
                 $sub->whereHas('compte.user', fn($sq) => $sq->where('name', 'like', '%'.$this->search.'%'))
@@ -85,9 +93,33 @@ class TransactionsList extends Component
         ->when($this->date_debut, fn($q) => $q->whereDate('date_transaction', '>=', $this->date_debut))
         ->when($this->date_fin, fn($q) => $q->whereDate('date_transaction', '<=', $this->date_fin));
 
+        // --- Liste des agents créateurs disponibles selon les filtres actuels (sauf agent) ---
+        $availableCreators = collect();
+        if ($user->can('can.level4')) {
+            $baseQuery = Transaction::query()
+                ->when($this->type, fn($q) => $q->where('type_transaction', $this->type))
+                ->when($this->monnaie, fn($q) => $q->where('monnaie', $this->monnaie))
+                ->when($this->date_debut, fn($q) => $q->whereDate('date_transaction', '>=', $this->date_debut))
+                ->when($this->date_fin, fn($q) => $q->whereDate('date_transaction', '<=', $this->date_fin));
+
+            if ($user->can('can.level6')) {
+                $baseQuery->where('agence_id', $this->selected_agence_id);
+            } else {
+                $baseQuery->where('agence_id', $user->agence_id);
+            }
+
+            $creatorIds = $baseQuery->distinct()->pluck('created_by');
+            $availableCreators = User::whereIn('id', $creatorIds)->orderBy('name')->get();
+        }
+
+        // --- Liste des monnaies disponibles ---
+        $monnaies = Transaction::select('monnaie')->distinct()->pluck('monnaie');
+
         return view('livewire.transactions.transactions-list', [
-            'transactions' => $query->oldest('date_transaction')->paginate(100),
-            'agences' => $user->can('can.level6') ? Agence::all() : []
+            'transactions'       => $query->oldest('date_transaction')->paginate(100),
+            'agences'            => $user->can('can.level6') ? Agence::all() : [],
+            'availableCreators'  => $availableCreators,
+            'monnaies'           => $monnaies,
         ]);
     }
 }

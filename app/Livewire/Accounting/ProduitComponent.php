@@ -8,10 +8,13 @@ use App\Helpers\AccountingHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Models\Traits\HasAgenceContext;
 
 #[Layout('layouts.app')]
 class ProduitComponent extends Component
 {
+    use HasAgenceContext;
+    
     public $account_id = '';
     public $montant = '';
     public $monnaie = 'CDF';
@@ -27,6 +30,12 @@ class ProduitComponent extends Component
             'mode'       => 'required|in:caisse,credit',
             'libelle'    => 'nullable|string|max:255',
         ];
+    }
+
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
     }
 
     public function save(AccountingService $service)

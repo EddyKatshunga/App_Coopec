@@ -25,7 +25,7 @@ return new class extends Migration
              * ========================= */
             // 'ouverte' : les opérations sont autorisées
             // 'cloturee' : plus aucune modification possible
-            $table->enum('statut', ['ouverte', 'cloturee', 'verouillee'])
+            $table->enum('statut', ['ouverte', 'cloturee', 'verrouillee'])
                 ->default('ouverte');
 
             // Note d'explication si un écart de caisse est constaté par exemple

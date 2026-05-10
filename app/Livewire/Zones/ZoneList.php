@@ -22,7 +22,9 @@ class ZoneList extends Component
         $user = auth()->user();
         // Si l'utilisateur n'est pas SuperAdmin (Level 6), on force son agence
         if (!$user->can('can.level6')) {
-            $this->selectedAgenceId = $user->agence_id;
+            $this->selectedAgenceId = $user->agence_id ?? null;
+        }else{
+            $this->selectedAgenceId = auth()->user()->agence_id ?? Agence::first()->id ?? null;
         }
     }
 

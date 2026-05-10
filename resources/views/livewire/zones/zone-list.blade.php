@@ -7,7 +7,6 @@
                 <div class="relative">
                     <select wire:model.live="selectedAgenceId" 
                         class="block w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 focus:border-blue-500 focus:ring-blue-500 sm:text-sm transition-colors">
-                        <option value="">Choisir une agence...</option>
                         @foreach($agences as $ag)
                             <option value="{{ $ag->id }}">{{ $ag->nom }} ({{ $ag->ville }})</option>
                         @endforeach

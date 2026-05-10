@@ -4,14 +4,13 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-slate-900">Compte de Résultat</h1>
-                <p class="text-sm text-slate-500">Consolidé en Francs Congolais (CDF)</p>
+                <p class="text-sm text-slate-500">Francs Congolais (CDF)</p>
             </div>
             
             <div class="flex flex-wrap items-end gap-3">
                 <div class="w-48">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Agence</label>
                     <select wire:model.live="agence_id" class="w-full rounded-lg border-slate-200 text-sm focus:ring-indigo-500">
-                        <option value="">Toutes les agences</option>
                         @foreach($agences as $agence)
                             <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                         @endforeach
@@ -36,7 +35,7 @@
             <span class="text-xs font-mono font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-600">CDF</span>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
             <!-- Total Produits -->
             <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
                 <p class="text-xs text-emerald-600 uppercase font-bold tracking-wider mb-1">Total Produits</p>
@@ -49,14 +48,24 @@
                 <p class="text-2xl font-bold text-rose-700">{{ number_format($this->resultat['charges'], 0, '.', ' ') }} FC</p>
             </div>
 
-            <!-- Résultat Net -->
+            <!-- Résultat Net de la période -->
             <div class="text-right border-l-2 border-slate-100 pl-6">
-                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Résultat Net</p>
-                <p class="text-4xl font-black {{ $this->resultat['net'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                    {{ number_format($this->resultat['net'], 0, '.', ' ') }}
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Résultat Net (période)</p>
+                <p class="text-4xl font-black {{ $this->resultat['net_periode'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                    {{ number_format($this->resultat['net_periode'], 0, '.', ' ') }}
                 </p>
-                <p class="text-sm mt-1 {{ $this->resultat['net'] >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
-                    {{ $this->resultat['net'] >= 0 ? 'EXCÉDENT' : 'DÉFICIT' }}
+                <p class="text-sm mt-1 {{ $this->resultat['net_periode'] >= 0 ? 'text-emerald-500' : 'text-rose-500' }} font-bold">
+                    {{ $this->resultat['net_periode'] >= 0 ? 'EXCÉDENT' : 'DÉFICIT' }}
+                </p>
+            </div>
+
+            <!-- Résultat antérieur + cumul -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Résultat antérieur</p>
+                <p class="text-lg font-bold text-slate-700">{{ number_format($this->resultat['resultat_antérieur'], 0, '.', ' ') }} FC</p>
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-2">Cumul (antérieur + période)</p>
+                <p class="text-xl font-black {{ $this->resultat['cumul'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                    {{ number_format($this->resultat['cumul'], 0, '.', ' ') }} FC
                 </p>
             </div>
         </div>
@@ -75,7 +84,7 @@
     <!-- Détails des Comptes -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        <!-- Colonne PRODUITS (7) -->
+        <!-- Colonne PRODUITS -->
         <div class="space-y-4">
             <div class="flex items-center gap-2 px-2">
                 <div class="w-2 h-6 bg-emerald-500 rounded-full"></div>
@@ -90,23 +99,27 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        @foreach($comptesProduits as $row)
+                        @forelse($comptesProduits as $row)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-4">
                                 <span class="block font-bold text-indigo-600">{{ $row->account->numero }}</span>
                                 <span class="text-xs text-slate-500">{{ $row->account->nom }}</span>
                             </td>
                             <td class="p-4 text-right font-mono font-medium text-slate-700">
-                                {{ number_format(($row->total_credit - $row->total_debit), 0, '.', ' ') }}
+                                {{ number_format(($row->total_credit), 0, '.', ' ') }}
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="2" class="p-4 text-center text-slate-400">Aucun produit sur la période</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Colonne CHARGES (6) -->
+        <!-- Colonne CHARGES -->
         <div class="space-y-4">
             <div class="flex items-center gap-2 px-2">
                 <div class="w-2 h-6 bg-rose-500 rounded-full"></div>
@@ -121,17 +134,21 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        @foreach($comptesCharges as $row)
+                        @forelse($comptesCharges as $row)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-4">
                                 <span class="block font-bold text-rose-600">{{ $row->account->numero }}</span>
                                 <span class="text-xs text-slate-500">{{ $row->account->nom }}</span>
                             </td>
                             <td class="p-4 text-right font-mono font-medium text-slate-700">
-                                {{ number_format(($row->total_debit - $row->total_credit), 0, '.', ' ') }}
+                                {{ number_format(($row->total_debit), 0, '.', ' ') }}
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="2" class="p-4 text-center text-slate-400">Aucune charge sur la période</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

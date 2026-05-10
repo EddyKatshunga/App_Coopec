@@ -10,7 +10,6 @@ class CreditObserver
     /**
      * Avant de créer le crédit, on vérifie :
      * 1. Si le membre n'a pas déjà un crédit actif
-     * 2. Si les fonds du coffre sont suffisants
      */
     public function creating(Credit $credit): void
     {
@@ -27,7 +26,16 @@ class CreditObserver
         $agence = $credit->agence ?? auth()->user()->agent?->agence; 
 
         if (!$agence) { 
-            throw new Exception("Aucune agence associée à l'opération."); 
+            throw new Exception("Aucune agence associée à l'opération.");
+        }
+    }
+
+    public function deleted(Credit $model): void
+    {
+        if ($model->journal_entry_id) {
+            // On supprime l'écriture ; les lignes seront effacées automatiquement
+            // grâce à cascadeOnDelete() sur journal_entry_lines
+            \App\Models\JournalEntry::where('id', $model->journal_entry_id)->delete();
         }
     }
     

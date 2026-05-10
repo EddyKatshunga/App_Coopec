@@ -51,4 +51,27 @@ class AccountDailyBalance extends Model
     {
         return $this->belongsTo(CloturesComptable::class, 'cloture_comptable_id');
     }
+
+    public static function getAccountDailyBalanceForDate(
+        int $agenceId,
+        Account $account,
+        string $monnaie,
+        ?string $date = null
+    ): ?AccountDailyBalance {
+        $date = $date ?? now()->toDateString();
+        
+        return AccountDailyBalance::where('account_id', $account->id)
+            ->where('monnaie', $monnaie)
+            ->whereHas('clotureComptable', function ($query) use ($date, $agenceId) {
+                $query->where('agence_id', $agenceId)
+                    ->whereDate('date_cloture', '<=', $date);
+            })
+            ->orderByDesc(
+                CloturesComptable::select('date_cloture')
+                    ->whereColumn('clotures_comptables.id', 'account_daily_balances.cloture_comptable_id')
+                    ->limit(1)
+            )
+            ->first();
+    }
+
 }

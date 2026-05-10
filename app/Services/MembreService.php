@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Agence;
 use App\Models\User;
 use App\Models\Membre;
 use App\Models\Agent;
@@ -9,6 +10,7 @@ use App\Models\Compte;
 use App\Models\HistoriqueRole;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
@@ -55,7 +57,7 @@ class MembreService
                 'telephone' => $data['telephone'] ?? null,
                 'activites' => $data['activites'] ?? 'Vente divers',
                 'adresse_activite' => $data['adresse_activite'] ?? 'Kikwit',
-                'agence_id' => $data['agence_id'] ?? 1,
+                'agence_id' => Auth::user()->agence_id ?? Agence::first()->id,
                 'date_adhesion' => $data['date_adhesion'] ?? now(),
             ]);
 
@@ -64,7 +66,7 @@ class MembreService
                 'membre_id' => $membre->id,
                 'user_id' => $membre->user->id,
                 'numero_compte' => $numero_compte,
-                'agence_id' => $data['agence_id'] ?? 1,
+                'agence_id' => Auth::user()->agence_id ?? Agence::first()->id,
                 'solde_cdf' => $data['solde_cdf'] ?? 0.00,
                 'solde_usd' => $data['solde_usd'] ?? 0.00,
             ]);

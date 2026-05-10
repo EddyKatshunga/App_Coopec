@@ -56,7 +56,7 @@ class CreditRemboursement extends Model
 
     protected static function booted()
     {
-        static::created(function (CreditRemboursement $remboursement) {
+        static::creating(function (CreditRemboursement $remboursement) {
             $compteCaisseNumero    = '57';
             $compteCapitalNumero   = '46';
             $compteInteretsNumero  = '47';

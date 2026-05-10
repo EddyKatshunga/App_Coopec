@@ -37,7 +37,7 @@ class CreditRemboursementObserver
         });
     }
 
-    public function deleting(CreditRemboursement $model): void
+    public function deleted(CreditRemboursement $model): void
     {
         $credit = $model->credit;
 
@@ -52,5 +52,12 @@ class CreditRemboursementObserver
                     ->decrement('total_remboursement', $partDette);
             }
         });
+
+        if ($model->journal_entry_id) {
+            // On supprime l'écriture ; les lignes seront effacées automatiquement
+            // grâce à cascadeOnDelete() sur journal_entry_lines
+            \App\Models\JournalEntry::where('id', $model->journal_entry_id)->delete();
+        }
     }
+
 }

@@ -48,39 +48,6 @@
         </table>
     </div>
 
-    {{-- Section 2 : Analyse Détaillée (Grille 2 colonnes) --}}
-    <div class="grid grid-cols-2 gap-8 mb-8">
-        {{-- Sous-section REVENUS --}}
-        <div>
-            <h3 class="text-[10px] font-black border-b-2 border-emerald-500 mb-2 uppercase text-emerald-700">Détails des Revenus (In)</h3>
-            <table class="w-full text-[9px]">
-                @foreach($revenusGroupes as $typeId => $monnaies)
-                    @foreach($monnaies as $monnaie => $items)
-                    <tr class="border-b border-gray-100">
-                        <td class="py-1">{{ $items->first()->typeRevenu->nom }}</td>
-                        <td class="py-1 text-right font-mono">{{ number_format_fr($items->sum('montant')) }} <span class="text-[7px]">{{ $monnaie }}</span></td>
-                    </tr>
-                    @endforeach
-                @endforeach
-            </table>
-        </div>
-
-        {{-- Sous-section DEPENSES --}}
-        <div>
-            <h3 class="text-[10px] font-black border-b-2 border-red-500 mb-2 uppercase text-red-700">Détails des Dépenses (Out)</h3>
-            <table class="w-full text-[9px]">
-                @foreach($depensesGroupes as $typeId => $monnaies)
-                    @foreach($monnaies as $monnaie => $items)
-                    <tr class="border-b border-gray-100">
-                        <td class="py-1">{{ $items->first()->typeDepense->nom }}</td>
-                        <td class="py-1 text-right font-mono text-red-600">{{ number_format_fr($items->sum('montant')) }} <span class="text-[7px]">{{ $monnaie }}</span></td>
-                    </tr>
-                    @endforeach
-                @endforeach
-            </table>
-        </div>
-    </div>
-
     {{-- Section 3 : Performance Crédit & Épargne --}}
     <div class="grid grid-cols-2 gap-8 mb-10">
         <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-100">

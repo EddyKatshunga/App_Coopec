@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Agence;
 use App\Models\CloturesComptable;
+use App\Services\ResultatTransferService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -13,13 +14,16 @@ class ClotureService
 {
     protected AccountDailyBalanceService $balanceService;
     protected ClotureVerificationService $verificationService;
+    protected ResultatTransferService $resultatTransferService;
 
     public function __construct(
         AccountDailyBalanceService $balanceService,
-        ClotureVerificationService $verificationService
+        ClotureVerificationService $verificationService,
+        ResultatTransferService $resultatTransferService
     ) {
         $this->balanceService = $balanceService;
         $this->verificationService = $verificationService;
+        $this->resultatTransferService = $resultatTransferService;
     }
 
     /**
@@ -43,6 +47,7 @@ class ClotureService
 
             $cloture = CloturesComptable::create([
                 'agence_id'    => $agence->id,
+                //'date_cloture' => Carbon::create(2026, 5, 7),
                 'date_cloture' => Carbon::today(),
                 'statut'       => 'ouverte',
                 'created_by'   => $user->id,
@@ -73,10 +78,13 @@ class ClotureService
         }
 
         return DB::transaction(function () use ($cloture, $donneesPhysiques) {
-            // 1. Geler les soldes de tous les comptes
+            // 1. Transférer les charges/produits vers le résultat net (cette écriture aura la même date de clôture)
+            $this->resultatTransferService->transfererResultatJournee($cloture);
+            
+            // 2. Geler les soldes de tous les comptes (y compris le compte résultat net)
             $this->balanceService->computeDailyBalances($cloture);
 
-            // 2. Marquer la journée comme clôturée
+            // 3. Marquer la journée comme clôturée
             $cloture->statut = 'cloturee';
             $cloture->observation_cloture = $donneesPhysiques['observation'] ?? null;
             $cloture->updated_by = Auth::id();

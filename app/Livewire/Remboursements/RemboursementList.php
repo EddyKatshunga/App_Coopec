@@ -49,7 +49,7 @@ class RemboursementList extends Component
     public function render()
     {
         $user = Auth::user();
-        $query = CreditRemboursement::with(['credit.user', 'agence', 'creator']);
+        $query = CreditRemboursement::with(['credit.user', 'agence', 'creator', 'zone']);
 
         // --- FILTRE PAR CRÉDIT SPÉCIFIQUE (Si passé en paramètre) ---
         if ($this->credit) {

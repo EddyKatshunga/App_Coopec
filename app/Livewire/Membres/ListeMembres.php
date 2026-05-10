@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Membres;
 
+use App\Models\Agence;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Membre;
@@ -17,6 +18,7 @@ class ListeMembres extends Component
     // Recherche & filtres
     public string $search = '';
     public string $sexe = '';
+    public $agence_id = null;
     public string $qualite = '';
     public ?string $dateFrom = null;
     public ?string $dateTo = null;
@@ -26,6 +28,12 @@ class ListeMembres extends Component
         'sexe' => ['except' => ''],
         'qualite' => ['except' => ''],
     ];
+
+    public function mount()
+    {
+        // Par défaut, l'agence de l'utilisateur connecté
+        $this->agence_id = auth()->user()->agence_id ?? Agence::first()->id ?? null;
+    }
 
     public function updatingSearch()
     {
@@ -39,8 +47,14 @@ class ListeMembres extends Component
 
     public function render()
     {
+        // Sécurité : seul le level6 peut changer d'agence, sinon on force l'agence de l'user
+        $currentAgenceId = auth()->user()->can('can.level6') 
+            ? $this->agence_id 
+            : auth()->user()->agence_id;
+
         $membres = Membre::query()
             ->with('user', 'agent', 'creditEnCours')
+            ->where('agence_id', $currentAgenceId)
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
@@ -54,7 +68,14 @@ class ListeMembres extends Component
             ->when($this->dateTo, fn ($q) => $q->whereDate('date_adhesion', '<=', $this->dateTo))
             ->orderByDesc('created_at')
             ->paginate(30);
+        
+        $agences = auth()->user()->can('can.level6') 
+            ? Agence::orderBy('nom')->get() 
+            : collect();
 
-        return view('livewire.membres.liste-membres', compact('membres'));
+        return view('livewire.membres.liste-membres', [
+            'membres' => $membres,
+            'agences' => $agences
+        ]);
     }
 }

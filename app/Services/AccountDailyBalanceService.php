@@ -68,21 +68,23 @@ class AccountDailyBalanceService
                         $soldeFin = $soldeDebut + $totalDebit - $totalCredit;
                     }
 
-                    // 4. Création ou mise à jour de la ligne
-                    AccountDailyBalance::updateOrCreate(
-                        [
-                            'account_id'           => $account->id,
-                            'agence_id'            => $agenceId,
-                            'monnaie'              => $devise,
-                            'cloture_comptable_id' => $cloture->id,
-                        ],
-                        [
-                            'solde_debut'        => $soldeDebut,
-                            'total_debit_jour'   => $totalDebit,
-                            'total_credit_jour'  => $totalCredit,
-                            'solde_fin'          => $soldeFin,
-                        ]
-                    );
+                    // 4. Création ou mise à jour de la ligne uniquement si mouvements
+                    if (($totalDebit != 0 || $totalCredit != 0) && ($totalDebit != $totalCredit)) {
+                        AccountDailyBalance::updateOrCreate(
+                            [
+                                'account_id'           => $account->id,
+                                'agence_id'            => $agenceId,
+                                'monnaie'              => $devise,
+                                'cloture_comptable_id' => $cloture->id,
+                            ],
+                            [
+                                'solde_debut'        => $soldeDebut,
+                                'total_debit_jour'   => $totalDebit,
+                                'total_credit_jour'  => $totalCredit,
+                                'solde_fin'          => $soldeFin,
+                            ]
+                        );
+                    }
                 }
             }
         });

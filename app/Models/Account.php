@@ -55,19 +55,15 @@ class Account extends Model
         return $this->hasMany(JournalEntryLine::class, 'account_id');
     }
 
-    /**
-     * Les types de dépenses liés à ce compte.
-     */
-    public function typesDepenses(): HasMany
+    public function getBalance(int $agenceId, string $monnaie, ?string $date = null): float
     {
-        return $this->hasMany(TypesDepense::class, 'account_id');
-    }
+        $dailyBalance = AccountDailyBalance::getAccountDailyBalanceForDate(
+            $agenceId, 
+            $this, 
+            $monnaie, 
+            $date
+        );
 
-    /**
-     * Les types de revenus liés à ce compte.
-     */
-    public function typesRevenus(): HasMany
-    {
-        return $this->hasMany(TypesRevenu::class, 'account_id');
+        return $dailyBalance ? (float) $dailyBalance->solde_fin : 0.0;
     }
 }

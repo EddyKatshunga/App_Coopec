@@ -8,10 +8,13 @@ use App\Helpers\AccountingHelper;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Models\Traits\HasAgenceContext;
 
 #[Layout('layouts.app')]
 class AvanceSalaireComponent extends Component
 {
+    use HasAgenceContext;
+    
     public $montant = '';
     public $monnaie = 'CDF';
     public $employe_nom = '';
@@ -25,6 +28,12 @@ class AvanceSalaireComponent extends Component
             'employe_nom'  => 'nullable|string|max:100',
             'libelle'      => 'nullable|string|max:255',
         ];
+    }
+
+    public function mount()
+    {
+        $this->secureAgenceContext();
+        $this->secureJourneeContext();
     }
 
     public function save(AccountingService $service)

@@ -39,7 +39,7 @@ class Transaction extends Model
     // --------------------------------------------------------------
     protected static function booted()
     {
-        static::created(function (Transaction $transaction) {
+        static::creating(function (Transaction $transaction) {
             $compteCaisseNumero = '57';
             $compteCaisse = Account::where('numero', $compteCaisseNumero)->firstOrFail();
             $compteEpargneNumero = '41';

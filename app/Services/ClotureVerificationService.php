@@ -79,9 +79,9 @@ class ClotureVerificationService
 
         // 1. Statut ouvert
         $checklist['statut_ouvert'] = [
-            'ok' => $cloture->statut === 'ouverte',
-            'message' => $cloture->statut === 'ouverte'
-                ? "✓ La journée est ouverte."
+            'ok' => $cloture->statut !== 'cloturee',
+            'message' => $cloture->statut !== 'cloturee'
+                ? "✓ La journée peut etre cloturee."
                 : "❌ La journée est déjà {$cloture->statut}."
         ];
 

@@ -20,10 +20,9 @@ return new class extends Migration
         foreach ($this->tables as $tableName) {
             Schema::table($tableName, function (Blueprint $table) {
                 $table->foreignId('journal_entry_id')
-                    ->nullable()
                     ->after('id')
                     ->constrained()
-                    ->nullOnDelete();
+                    ->cascadeOnDelete();
             });
         }
     }

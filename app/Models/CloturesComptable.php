@@ -55,6 +55,16 @@ class CloturesComptable extends Model
         return $this->hasMany(Transaction::class, 'journee_comptable_id');
     }
 
+    public function depots(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'journee_comptable_id')->where('type_transaction', 'DEPOT');
+    }
+
+    public function retraits(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'journee_comptable_id')->where('type_transaction', 'RETRAIT');;
+    }
+
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class, 'journee_comptable_id');
@@ -79,29 +89,5 @@ class CloturesComptable extends Model
     public function isVerrouillee(): bool
     {
         return $this->statut === 'verouillee';
-    }
-
-    public static function getPreviousCloture(string $date, int $agenceId)
-    {
-        return self::where('agence_id', $agenceId)
-            ->where('statut', 'cloturee')
-            ->whereDate('date_cloture', '<=', $date)
-            ->orderBy('date_cloture', 'desc')
-            ->first();
-    }
-
-    /**
-     * Récupère le solde d'un compte pour cette clôture, dans une monnaie donnée.
-     *
-     * @param Account $account
-     * @param string $monnaie
-     * @return AccountDailyBalance|null
-     */
-    public function getAccountDailyBalance(Account $account, string $monnaie): ?AccountDailyBalance
-    {
-        return $this->accountDailyBalances()
-            ->where('account_id', $account->id)
-            ->where('monnaie', $monnaie)
-            ->first();
     }
 }

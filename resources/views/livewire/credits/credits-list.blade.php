@@ -55,7 +55,6 @@
             <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Agence</label>
                 <select wire:model.live="selected_agence_id" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm">
-                    <option value="">Toutes les agences</option>
                     @foreach($agences as $agence)
                         <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
                     @endforeach
@@ -155,14 +154,26 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <a href="{{ route('credit.show', $credit->uuid) }}" 
-                                   class="inline-flex items-center justify-center h-8 w-8 bg-white border border-gray-200 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm"
-                                   title="Voir les détails">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </a>
+                                <div class="flex items-center justify-center gap-2">
+                                    <!-- Voir les détails (Icône Œil) -->
+                                    <a href="{{ route('credit.show', $credit->uuid) }}" 
+                                    class="inline-flex items-center justify-center h-8 w-8 bg-white border border-gray-200 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-sm"
+                                    title="Voir les détails">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </a>
+
+                                    <!-- Ajouter remboursement (Icône Plus/Ajouter) -->
+                                    <a href="{{ route('remboursement.create', $credit) }}" 
+                                    class="inline-flex items-center justify-center h-8 w-8 bg-white border border-gray-200 text-green-600 rounded-lg hover:bg-green-600 hover:text-white hover:border-green-600 transition-all shadow-sm"
+                                    title="Ajouter remboursement">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
