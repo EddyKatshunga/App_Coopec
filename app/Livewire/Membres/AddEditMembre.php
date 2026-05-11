@@ -18,13 +18,12 @@ class AddEditMembre extends Component
     // Infos utilisateur
     public ?string $nom_complet = '';
     public ?string $email = null;
-    public ?string $password = 'password123';
 
     // Infos membre
     public ?string $numero_identification = '';
     public ?string $sexe = 'M';
     public ?string $lieu_de_naissance = 'KIKWIT';
-    public ?string $date_de_naissance = '';
+    public ?string $date_de_naissance = null;
     public ?string $qualite = 'Auxiliaire';
     public ?string $adresse = 'RDC';
     public ?string $telephone = '9999999999';

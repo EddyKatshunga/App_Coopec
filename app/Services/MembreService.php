@@ -30,7 +30,7 @@ class MembreService
             $user = User::create([
                 'name' => $data['nom_complet'] ?? $data['name'],
                 'email' => $data['email'],
-                'password' => Hash::make($data['password']),
+                'password' => Hash::make($data['password'] ?? (string) rand(100000, 999999)),
             ]);
 
             $user->assignRole('niveau 0');
