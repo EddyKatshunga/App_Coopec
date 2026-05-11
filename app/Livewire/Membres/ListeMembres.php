@@ -48,7 +48,7 @@ class ListeMembres extends Component
     public function render()
     {
         // Sécurité : seul le level6 peut changer d'agence, sinon on force l'agence de l'user
-        $currentAgenceId = auth()->user()->can('can.level6') 
+        $currentAgenceId = auth()->user()->can('can.level4') 
             ? $this->agence_id 
             : auth()->user()->agence_id;
 
@@ -69,7 +69,7 @@ class ListeMembres extends Component
             ->orderByDesc('created_at')
             ->paginate(30);
         
-        $agences = auth()->user()->can('can.level6') 
+        $agences = auth()->user()->can('can.level4') 
             ? Agence::orderBy('nom')->get() 
             : collect();
 

@@ -62,7 +62,7 @@ class AccountDailyBalanceService
 
                     // 3. Solde final
                     
-                    if($account->type === 'charge' || $account->type === 'produit'){
+                    if($account->numero == '12'){
                         $soldeFin = $soldeDebut + $totalCredit - $totalDebit;
                     }else{
                         $soldeFin = $soldeDebut + $totalDebit - $totalCredit;

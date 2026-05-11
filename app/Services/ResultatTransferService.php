@@ -37,10 +37,10 @@ class ResultatTransferService
                 Log::error("Erreur Clôture : Le compte 'Résultat net' (n°12) est introuvable en base de données.");
                 throw new \Exception("Le compte 'Résultat net' (n°12) n'existe pas. Veuillez l'ajouter au plan comptable.");
             }
-
+            
             $lignesTransfert = [];
 
-            // 1. Comptes de charge
+            // 1. Recupère la somme des opérations pour chaque Compte de charge
             $charges = JournalEntryLine::whereHas('journalEntry', function ($q) use ($agenceId, $cloture) {
                     $q->where('agence_id', $agenceId)
                       ->where('journee_comptable_id', $cloture->id);
@@ -51,7 +51,7 @@ class ResultatTransferService
                 ->selectRaw('account_id, SUM(montant_base) as solde_cdf')
                 ->groupBy('account_id')
                 ->get();
-
+            
             foreach ($charges as $charge) {
                 $solde = (float) $charge->solde_cdf;
                 if (abs($solde) < 0.01) continue;
@@ -59,7 +59,7 @@ class ResultatTransferService
                 $lignesTransfert[] = AccountingHelper::credit($charge->account_id, $solde, 'CDF');
                 $lignesTransfert[] = AccountingHelper::debit($compteResultatNet->id, $solde, 'CDF');
             }
-
+            
             // 2. Comptes de produit
             $produits = JournalEntryLine::whereHas('journalEntry', function ($q) use ($agenceId, $cloture) {
                     $q->where('agence_id', $agenceId)
@@ -84,14 +84,14 @@ class ResultatTransferService
                 Log::warning("Transfert Résultat : Aucun mouvement de charge ou produit détecté pour cette journée.");
                 return;
             }
-
+            
             // Créer une seule écriture avec toutes les lignes
             $libelle = "Transfert des résultats de la journée du " . $dateCloture->format('d/m/Y');
             
-            $this->accountingService->record($lignesTransfert, $libelle);
-
+            $this->accountingService->record($lignesTransfert, $libelle, null, $cloture);
+            
             Log::info("Succès : Transfert de résultat effectué avec succès (" . count($lignesTransfert) . " lignes générées).");
-
+            
         } catch (\Exception $e) {
             // Log critique de l'erreur avec la stack trace pour le debug
             Log::error("ÉCHEC du transfert de résultat : " . $e->getMessage(), [

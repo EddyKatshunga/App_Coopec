@@ -2,7 +2,7 @@
     <div class="mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h2 class="text-xl font-bold text-slate-800">Suivi des Dettes et Créances</h2>
-            <p class="text-sm text-slate-500">Analyse de toutes les dettes et créances par Agence et par Devise</p>
+            <p class="text-sm text-slate-500">Analyse des autres dettes et créances en déhors des Crédits et Epargnes</p>
         </div>
         
         <div class="flex flex-wrap items-center gap-4">

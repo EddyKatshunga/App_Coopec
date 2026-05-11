@@ -8,6 +8,7 @@
             </div>
             
             <div class="flex flex-wrap items-end gap-3">
+                @can('can.level6')
                 <div class="w-48">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Agence</label>
                     <select wire:model.live="agence_id" class="w-full rounded-lg border-slate-200 text-sm focus:ring-indigo-500">
@@ -16,6 +17,7 @@
                         @endforeach
                     </select>
                 </div>
+                @endcan
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Du</label>
                     <input type="date" wire:model.live="date_debut" class="rounded-lg border-slate-200 text-sm">

@@ -136,7 +136,7 @@ class TiersDashboard extends Component
                 'solde_final' => $soldeFinalCreance,
                 'has_balance' => $soldeInitialCreance !== null,
             ],
-            'position_nette' => ($soldeFinalDette ?? 0) - ($soldeFinalCreance ?? 0),
+            'position_nette' => ($soldeFinalDette ?? 0) + ($soldeFinalCreance ?? 0),
         ];
     }
 

@@ -99,7 +99,7 @@ class CloturesForm extends Component
             $this->dispatch('notify', type: 'error', message: 'Veuillez résoudre toutes les vérifications avant de clôturer.');
             return;
         }
-
+        
         try {
             $success = $clotureService->cloturerJournee($this->cloture, $this->donneesPhysiques);
             if ($success) {

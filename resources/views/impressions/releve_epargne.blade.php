@@ -19,9 +19,9 @@
         foreach ($devises as $devise) {
             // 1. Report (solde initial) = solde_fin de la clôture précédente pour ce compte
             $report = 0;
-            $dateAvant = Carbon::parse($cloture->date_cloture)->subDay()->toDateString();
+            $dateAvant = \Illuminate\Support\Carbon::parse($cloture->date_cloture)->subDay()->toDateString();
             if ($compteEpargne) {
-                $balancePrec = \App\Models\AccountDailyBalance::getAccountDailyBalanceForDate($cloture->agence_id, $compteEpargne, $devise, $date_avant);
+                $balancePrec = \App\Models\AccountDailyBalance::getAccountDailyBalanceForDate($cloture->agence_id, $compteEpargne, $devise, $dateAvant);
                 if ($balancePrec) {
                     $report = (float) $balancePrec->solde_fin;
                 }

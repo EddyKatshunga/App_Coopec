@@ -5,7 +5,6 @@ namespace App\Livewire\Account;
 use App\Models\Account;
 use App\Models\AccountDailyBalance;
 use App\Models\Agence;
-use App\Models\CloturesComptable;
 use App\Models\JournalEntryLine;
 use App\Services\AccountDailyBalanceService;
 use Livewire\Component;

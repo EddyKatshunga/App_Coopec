@@ -104,7 +104,7 @@ class IncomeStatement extends Component
     public function render()
     {
         return view('livewire.account.income-statement', [
-            'agences' => Agence::all(),
+            $agences = auth()->user()->can('can.level6') ? Agence::orderBy('nom')->get() : collect(),
             'comptesProduits' => $this->rows->filter(fn($r) => $r->account->type === 'produit'),
             'comptesCharges' => $this->rows->filter(fn($r) => $r->account->type === 'charge'),
             'resultatAntérieur' => $this->resultatAntérieur,

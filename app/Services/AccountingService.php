@@ -12,9 +12,9 @@ use Illuminate\Support\Str;
 class AccountingService
 {
 
-    public function record(array $lines, string $libelle, $source = null)
+    public function record(array $lines, string $libelle, $source = null, $journee = null)
     {
-        return DB::transaction(function () use ($lines, $libelle, $source) {
+        return DB::transaction(function () use ($lines, $libelle, $source, $journee) {
             $tauxChangeActif = TauxChange::actuel();
             $tauxVente = $tauxChangeActif?->taux_vente;
 
@@ -24,7 +24,7 @@ class AccountingService
                 }
                 return $line;
             });
-
+            
             // Calcul des montants en devise de référence (CDF)
             $totalDebitBase = $linesEnrichies->sum(function ($line) {
                 $montant = $line['debit'] ?? 0;
@@ -32,30 +32,30 @@ class AccountingService
                 $taux = ($line['monnaie'] ?? 'CDF') === 'USD' ? ($line['taux_change'] ?? 1) : 1;
                 return $montant * $taux;
             });
-
+            
             $totalCreditBase = $linesEnrichies->sum(function ($line) {
                 $montant = $line['credit'] ?? 0;
                 if ($montant == 0) return 0;
                 $taux = ($line['monnaie'] ?? 'CDF') === 'USD' ? ($line['taux_change'] ?? 1) : 1;
                 return $montant * $taux;
             });
-
+            
             if (round($totalDebitBase, 2) !== round($totalCreditBase, 2)) {
                 throw new Exception("Écriture non équilibrée en CDF : DébitBase ($totalDebitBase) ≠ CréditBase ($totalCreditBase)");
             }
 
             $agenceId = Auth::user()->agence_id;
-            $journee = Auth::user()->journee_ouverte;
-            if (!$journee) {
+            $journeeActive = $journee ?? Auth::user()->journee_ouverte;
+            if (!$journeeActive) {
                 throw new Exception("Aucune journée comptable ouverte pour aujourd'hui.");
             }
 
             $entry = JournalEntry::create([
                 'uuid' => (string) Str::uuid(),
                 'libelle' => $libelle,
-                'date_operation' => $journee->date_cloture,
+                'date_operation' => $journeeActive->date_cloture,
                 'agence_id' => $agenceId,
-                'journee_comptable_id' => $journee->id,
+                'journee_comptable_id' => $journeeActive->id,
             ]);
 
             foreach ($linesEnrichies as $line) {

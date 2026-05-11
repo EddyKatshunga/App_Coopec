@@ -47,8 +47,8 @@ class ClotureService
 
             $cloture = CloturesComptable::create([
                 'agence_id'    => $agence->id,
-                //'date_cloture' => Carbon::create(2026, 5, 7),
-                'date_cloture' => Carbon::today(),
+                'date_cloture' => Carbon::create(2026, 5, 6),
+                //'date_cloture' => Carbon::today(),
                 'statut'       => 'ouverte',
                 'created_by'   => $user->id,
                 'updated_by'   => $user->id,
@@ -68,15 +68,15 @@ class ClotureService
      */
     public function cloturerJournee(CloturesComptable $cloture, array $donneesPhysiques): bool
     {
-        if ($cloture->statut !== 'ouverte') {
-            throw new Exception("Seule une journée ouverte peut être clôturée. Statut actuel : {$cloture->statut}");
+        if ($cloture->statut === 'cloturee') {
+            throw new Exception("Seule une journée ouverte ou verouillee peut être clôturée. Statut actuel : {$cloture->statut}");
         }
-
+        
         // Vérification critique (même si l'UI l'a déjà faite, on re-vérifie)
         if ($this->verificationService->hasEcrituresPosterieures($cloture)) {
             throw new Exception("Impossible de clôturer : des écritures existent avec une date postérieure à la date de clôture.");
         }
-
+        
         return DB::transaction(function () use ($cloture, $donneesPhysiques) {
             // 1. Transférer les charges/produits vers le résultat net (cette écriture aura la même date de clôture)
             $this->resultatTransferService->transfererResultatJournee($cloture);
