@@ -52,8 +52,8 @@ class InitializeAccountingSeeder extends Seeder
             ],
             // Épargne membres
             '41' => [
-                'CDF' => -\App\Models\Compte::sum('solde_cdf'),
-                'USD' => -\App\Models\Compte::sum('solde_usd'),
+                'CDF' => \App\Models\Compte::sum('solde_cdf') * -1,
+                'USD' => -\App\Models\Compte::sum('solde_usd') * -1,
             ],
         ];
 
