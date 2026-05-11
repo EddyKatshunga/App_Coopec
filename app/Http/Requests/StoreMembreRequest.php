@@ -25,7 +25,6 @@ class StoreMembreRequest extends FormRequest
         return [
             'nom_complet' => ['required', 'string', 'min:3'],
             'email' => ['nullable', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
 
             'numero_identification' => ['required', 'string', 'unique:membres,numero_identification'],
             'sexe' => ['required', Rule::in(['M', 'F'])],

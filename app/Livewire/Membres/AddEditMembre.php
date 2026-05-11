@@ -70,9 +70,6 @@ class AddEditMembre extends Component
 
             // Numéro d'identification : NON modifiable
             unset($rules['numero_identification']);
-
-            // Mot de passe facultatif en édition
-            $rules['password'] = ['nullable', 'string', 'min:6'];
         }
 
         return $rules;
