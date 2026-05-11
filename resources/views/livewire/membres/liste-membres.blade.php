@@ -19,43 +19,68 @@
         </a>
     </div>
 
-    {{-- Filtres --}}
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 bg-gray-50 p-4 rounded-xl">
-        {{-- Filtre Agence (Level 6 uniquement) --}}
-        @can('can.level4')
-        <div class="flex items-center bg-gray-50 rounded-xl px-3 border border-transparent focus-within:border-indigo-500 transition-all">
-            <x-heroicon-o-building-office-2 class="w-5 h-5 text-gray-400" />
-            <select wire:model.live="agence_id" class="bg-transparent border-none text-sm focus:ring-0 py-2.5 pr-8">
-                @foreach($agences as $agence)
-                    <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
-                @endforeach
-            </select>
-        </div>
-        @endcan
-        <div class="md:col-span-2">
-            <input type="text" wire:model.live.debounce.500ms="search" placeholder="🔍 Nom, email ou N° identification" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-        </div>
-        <div>
-            <select wire:model.live="sexe" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <option value="">Sexe</option>
-                <option value="M">Masculin</option>
-                <option value="F">Féminin</option>
-            </select>
-        </div>
-        <div>
-            <select wire:model.live="qualite" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <option value="">Qualité</option>
-                <option value="Auxiliaire">Auxiliaire</option>
-                <option value="Effectif">Effectif</option>
-            </select>
-        </div>
-        <div>
-            <input type="date" wire:model.live="dateFrom" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-        </div>
-        <div>
-            <button wire:click="resetFilters" class="w-full rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition py-2">
-                Réinitialiser
-            </button>
+    {{-- Section Filtres --}}
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+            
+            {{-- Filtre Agence --}}
+            @can('can.level4')
+            <div class="sm:col-span-2 lg:col-span-1">
+                <div class="flex items-center bg-gray-50 rounded-lg px-3 border border-gray-200 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                    <x-heroicon-o-building-office-2 class="w-5 h-5 text-gray-400 shrink-0" />
+                    <select wire:model.live="agence_id" class="w-full bg-transparent border-none text-sm focus:ring-0 py-2.5 pr-8">
+                        @foreach($agences as $agence)
+                            <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @endcan
+
+            {{-- Recherche --}}
+            <div class="@can('can.level4') lg:col-span-2 @else lg:col-span-3 @endcan">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
+                    </span>
+                    <input type="text" wire:model.live.debounce.500ms="search" 
+                        placeholder="Nom, email ou N°..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                </div>
+            </div>
+
+            {{-- Sexe --}}
+            <div>
+                <select wire:model.live="sexe" class="w-full bg-gray-50 border border-gray-200 rounded-lg text-sm py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    <option value="">Tous les sexes</option>
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                </select>
+            </div>
+
+            {{-- Qualité --}}
+            <div>
+                <select wire:model.live="qualite" class="w-full bg-gray-50 border border-gray-200 rounded-lg text-sm py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+                    <option value="">Toutes qualités</option>
+                    <option value="Auxiliaire">Auxiliaire</option>
+                    <option value="Effectif">Effectif</option>
+                </select>
+            </div>
+
+            {{-- Date --}}
+            <div>
+                <input type="date" wire:model.live="dateFrom" 
+                    class="w-full bg-gray-50 border border-gray-200 rounded-lg text-sm py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
+            </div>
+
+            {{-- Bouton Réinitialiser --}}
+            <div class="sm:col-span-2 lg:col-span-6 xl:col-span-1 xl:ml-auto">
+                <button wire:click="resetFilters" 
+                    class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                    <x-heroicon-o-arrow-path class="w-4 h-4 mr-2 text-gray-500" />
+                    Effacer
+                </button>
+            </div>
         </div>
     </div>
 

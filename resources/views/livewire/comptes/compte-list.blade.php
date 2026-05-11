@@ -15,12 +15,33 @@
         <x-stat-card label="Total USD" :value="number_format($stats['total_usd'], 2)" icon="💵" class="bg-white border-none shadow-sm text-blue-600" />
     </div>
 
-    {{-- Barre de recherche --}}
-    <div class="relative w-full">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </span>
-        <input type="text" wire:model.live.debounce.500ms="search" placeholder="Rechercher un compte..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none">
+    {{-- Section Filtres --}}
+    <div class="flex flex-col md:flex-row gap-4 w-full">
+        
+        @can('can.level1')
+        <div class="w-full md:w-1/3 lg:w-1/4">
+            <div class="flex items-center bg-gray-50 rounded-xl px-3 border border-gray-200 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all shadow-sm">
+                <x-heroicon-o-building-office-2 class="w-5 h-5 text-gray-400 shrink-0" />
+                <select wire:model.live="agence_id" class="w-full bg-transparent border-none text-sm focus:ring-0 py-2.5 pr-8">
+                    @foreach($agences as $agence)
+                        <option value="{{ $agence->id }}">{{ $agence->nom }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        @endcan
+
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </span>
+            <input type="text" 
+                wire:model.live.debounce.500ms="search" 
+                placeholder="Rechercher un compte..." 
+                class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-sm">
+        </div>
     </div>
 
     {{-- Grille de Cartes --}}
